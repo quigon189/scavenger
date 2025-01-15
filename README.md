@@ -1,10 +1,12 @@
-Сборщик практическх работ
+### Сборщик практическх работ
+
+Веб интерфес из одной страницы для отправки выполненых практических работ преподавателю
 
 Для установки:
 
-    python -m venv venv
-    pip install -r reqirements.txt
+> `python -m venv venv`
+> `pip install -r reqirements.txt`
 
-Для запуска
+Для запуска на порте 1234:
 
-    gunicorn -b 0.0.0.0:1234 wsgi:app
+> `gunicorn -b 0.0.0.0:1234 wsgi:app`
