@@ -1,0 +1,2 @@
+FLASK_APP=scavanger.py
+FLASK_DEBUG=1
