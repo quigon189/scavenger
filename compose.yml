@@ -3,6 +3,5 @@ services:
     build: scavenger
     ports:
       - "1234:1234"
-
     volumes:
-      - ./dump:/app/app/dump
+      - ./DUMP:/app/app/dump
