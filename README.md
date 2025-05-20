@@ -27,7 +27,9 @@ export DUMP=/home/user/DUMP #Linux
 set DUMP="C:\\DUMP" #Windows
 ```
 
-Для запуска (для примера используется порт 1234):
+Для запуска:
 ```bash
-uv run gunicorn --reload --log-level debug -b 0.0.0.0:1234 wsgi:app
+uv run flask --debug run #запуск flask для отладки
+
+uv run gunicorn --reload --log-level debug -b 0.0.0.0:1234 wsgi:app #запуск через gunicorn
 ```
