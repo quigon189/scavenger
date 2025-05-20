@@ -2,15 +2,32 @@
 
 Веб интерфес из одной страницы для отправки выполненых практических работ преподавателю
 
-Для установки:
+Установка:
 
+1. Клонируйте данный репозиторий:
 ```bash
-python -m venv venv
-pip install -r reqirements.txt
+git clone https://github.com/quigon189/scavenger.git
 ```
 
-Для запуска на порту 1234:
-
+2. Установите `python` и `uv` любым удобным спсобом:
 ```bash
-gunicorn -b 0.0.0.0:1234 wsgi:app
+pip install uv #один из варинатов установки uv
+```
+
+3. Выполните `uv sync` для установки всех необходимых зависимостей:
+```bash
+cd scavenger
+uv sync
+```
+
+4. Установите в переменную окружения DUMP абсолютный путь до каталога:
+```bash
+export DUMP=/home/user/DUMP #Linux
+
+set DUMP="C:\\DUMP" #Windows
+```
+
+Для запуска (для примера используется порт 1234):
+```bash
+uv run gunicorn --reload --log-level debug -b 0.0.0.0:1234 wsgi:app
 ```

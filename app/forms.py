@@ -1,12 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, FileField
+from wtforms import StringField, FileField, SelectField
 from wtforms.validators import DataRequired
 
 class SendForm(FlaskForm):
-    sender_name = StringField('ФИО', validators=[DataRequired()])
-    sender_group = StringField("Группа", validators=[DataRequired()])
+    sender_name = StringField('ФИО', validators=[DataRequired()], render_kw={'class': 'form-control', 'required': True})
+    sender_group = SelectField("Группа", validators=[DataRequired()], render_kw={'class': 'form-select', 'required': True})
+    number = StringField("Номер и название работы", validators=[DataRequired()], render_kw={'class': 'form-control', 'required': True})
 
-    number = StringField("Номер и название работы", validators=[DataRequired()])
-
-    send_file = FileField("Выберите файл", validators=[DataRequired()])
+    send_file = FileField("Выберите файл", validators=[DataRequired()], render_kw={'class': 'form-control', 'required': True})
 

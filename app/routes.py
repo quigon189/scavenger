@@ -1,20 +1,23 @@
 from flask import render_template, flash, redirect, url_for
 from werkzeug.utils import secure_filename
-
 import os
-
-base_dir = os.path.abspath(os.path.dirname(__file__))
-
-base_dir = os.path.join(base_dir, "dump")
-
 from app import app
 from app.forms import SendForm
+
+base_dir = app.config["DUMP"]
+
+groups = [
+        'СА-501',
+        'СА-502',
+        'СДМ-602',
+        ]
 
 @app.route('/', methods=["GET"])
 @app.route('/index', methods=["GET", "POST"])
 def index():
 
     form = SendForm()
+    form.sender_group.choices = [(g,g) for g in groups]
 
     if form.validate_on_submit():
 
