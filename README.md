@@ -2,11 +2,13 @@
 
 Веб интерфес из одной страницы для отправки выполненых практических работ преподавателю
 
-Для установки:
+Вариант для `Podman` или `Docker`
+Убедитесь что у вас установленны `podman-compose` или `docker-compose`
 
-> `python -m venv venv`
-> `pip install -r reqirements.txt`
+## Установка:
 
-Для запуска на порте 1234:
-
-> `gunicorn -b 0.0.0.0:1234 wsgi:app`
+```bash
+git clone --branch podman --single-branch https://github.com/quigon189/scavanger.git
+podman-compose up -d #для podman
+docker-compose up -d #для docker
+```
