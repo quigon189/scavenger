@@ -4,9 +4,13 @@
 
 Для установки:
 
-> `python -m venv venv`
-> `pip install -r reqirements.txt`
+```bash
+python -m venv venv
+pip install -r reqirements.txt
+```
 
-Для запуска на порте 1234:
+Для запуска на порту 1234:
 
-> `gunicorn -b 0.0.0.0:1234 wsgi:app`
+```bash
+gunicorn -b 0.0.0.0:1234 wsgi:app
+```
