@@ -1,6 +1,7 @@
 server:
   port: "8080"
   upload_path: "./uploads"
+  download_path: "./download"
 
 auth:
   session_secret: "123"
@@ -10,7 +11,7 @@ users:
     password: "ghjgecr123"
     role: "admin"
 
-  - username: "sa501-ivanov"
+  - username: "sa502-ivanov"
     password: "123"
     role: "student"
     group: "СА-502"
@@ -23,11 +24,15 @@ groups:
 
 disciplines:
   - name: "Основы алгоритмизации и программирования"
+    id: "1"
     labs:
       - name: "ЛР 1. Построение алгоритмов и блок-схем"
+        id: "1"
         path: "labs/prog/lab1.pdf"
 
   - name: "Основы проектирования баз данных"
+    id: "2"
     labs:
       - name: "ЛР 1. Построение ER-диаграмм"
+        id: "2"
         path: "labs/db/lab1.pdf"

@@ -22,23 +22,50 @@ func NewHandler(cfg *models.Config) *Handler {
 func (h *Handler) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !h.authService.IsAuthenticated(r) {
-			http.Redirect(w,r,"/login", http.StatusSeeOther)
+			h.Login(w,r)
+			return
 		}
-
 		next.ServeHTTP(w,r)
 	}
 }
 
-func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
-	role := h.authService.GetUserRole(r)
+func (h *Handler) AdminMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return h.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		role := h.authService.GetUserRole(r)
+		if role != "admin" {
+			http.Redirect(w,r,"/", http.StatusSeeOther)
+		}
+		next.ServeHTTP(w,r)
+	})
+}
 
+func (h *Handler) StudentMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return h.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		role := h.authService.GetUserRole(r)
+		if role != "student" {
+			http.Redirect(w,r,"/", http.StatusSeeOther)
+		}
+		next.ServeHTTP(w,r)
+	})
+}
+
+func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.Redirect(w,r,"/404", http.StatusSeeOther)
+	}
+	
+	h.Dashboard(w,r)
+}
+
+func (h *Handler) Dashboard(w http.ResponseWriter, r *http.Request) {
+	role := h.authService.GetUserRole(r)
 	switch role {
 	case "admin":
-		http.Redirect(w, r , "/admin/dashboard", http.StatusSeeOther)
+		h.AdminDashboard(w,r)
 	case "student":
-		http.Redirect(w, r, "/student/dashboard", http.StatusSeeOther)
+		h.StudentDashboard(w,r)
 	default:
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		h.Logout(w,r)
 	}
 }
 
@@ -51,9 +78,21 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w,r,"/", http.StatusSeeOther)
 			return
 		}
-
-
 	}
 
 	views.LoginPage().Render(r.Context(), w)
+}
+
+func (h *Handler) NotFound(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	views.NotFound().Render(r.Context(), w)
+}
+
+func (h *Handler) Logout(w http.ResponseWriter, r * http.Request) {
+	h.authService.Logout(w,r)
+	http.Redirect(w,r,"/",http.StatusSeeOther)
+}
+
+func (h *Handler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
+	views.AdminDashboard().Render(r.Context(), w)
 }

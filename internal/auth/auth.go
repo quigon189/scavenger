@@ -22,7 +22,7 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request, users []mode
 			session.Values["authenticated"] = true
 			session.Values["username"] = user.Username
 			session.Values["role"] = user.Role
-			session.Values["Group"] = user.Group
+			session.Values["group"] = user.Group
 			session.Save(r, w)
 			return true
 		}
@@ -44,7 +44,7 @@ func (s *AuthService) IsAuthenticated(r *http.Request) bool {
 
 func (s *AuthService) GetUserRole(r *http.Request) string {
 	session, _ := s.store.Get(r, "session")
-	group, _ := session.Values["group"].(string)
+	group, _ := session.Values["role"].(string)
 	return group
 }
 

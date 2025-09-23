@@ -1,0 +1,23 @@
+package views
+
+templ NotFound() {
+	@Base("Страница не найдена", notFoundContent())
+}
+
+templ notFoundContent() {
+	<div class="row justify-content-center">
+	  <div class="col-md-6 text-center">
+	    <div class="card">
+		  <div class="card-body">
+		    <h1 class="display-1 text-muted">404</h1>
+			<h2>Страница не найдена</h2>
+			<p class="lead">Запрашиваемая страница не существует или была перемещена.</p>
+			<div class="mt-4">
+			  <a href="/" class="btn btn-primary me-2">На главную</a>
+			  <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
+			</div>
+		  </div>
+	    </div>
+	  </div>
+	</div>
+}

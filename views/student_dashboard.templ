@@ -1,0 +1,89 @@
+package views
+
+import (
+	"scavenger/internal/models"
+)
+
+templ StudentDashboard(disciplines []models.Discipline, group string, reports []models.LabReport) {
+	@Base("Панель студента", studentDashboard(disciplines, group, reports))
+}
+
+templ studentDashboard(disciplines []models.Discipline, group string, reports []models.LabReport) {
+	<div class="row">
+      <div class="col-md-3">
+
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-user"></i> Профиль
+            </h5>
+          </div>
+          <div class="card-body">
+            <p><strong>Группа:</strong> { group }</p>
+            <p><strong>Дисциплины:</strong> { len(disciplines) }</p>
+          </div>
+        </div>
+                
+        <div class="card mt-3">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-clock"></i> Последние отчеты
+            </h5>
+          </div>
+          <div class="card-body">
+            if len(reports) > 0 {
+              <div class="list-group list-group-flush">
+                for _, report := range reports {
+                  <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      <small class="text-muted">{ report.Discipline }</small><br>
+                      <strong>{ report.LabName }</strong>
+                    </div>
+                    <span class="badge bg-success">
+                      { report.Status }
+                    </span>
+                  </div>
+                }
+              </div>
+	        } else {
+              <p class="text-muted">Нет загруженных отчетов</p>
+            }
+          </div>
+        </div>
+      </div>
+            
+      <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3>Мои дисциплины</h3>
+        </div>
+                
+        if len(disciplines) > 0 {
+          <div class="row">
+            for _, discipline := range disciplines {
+              <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <h5 class="card-title mb-0">{ discipline.Name }</h5>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">
+                      <i class="fas fa-flask"></i> Лабораторные: { len(discipline.Labs) }
+                    </p>
+                  </div>
+                  <div class="card-footer">
+                    <a href={ "/discipline/" + discipline.ID } class="btn btn-primary btn-sm">
+                      <i class="fas fa-folder-open"></i> Открыть
+                    </a>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        } else {
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Нет доступных дисциплин для вашей группы.
+          </div>
+        }
+      </div>
+    </div>
+}
