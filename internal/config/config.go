@@ -24,6 +24,15 @@ func LoadConfig(path string) (*models.Config, error) {
 }
 
 func SaveConfig(cfg *models.Config) error {
-	_, err := yaml.Marshal(cfg)
-	return err
+	data, err := yaml.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile("config/config.yaml", data, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

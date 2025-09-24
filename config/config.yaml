@@ -1,37 +1,42 @@
 server:
-  port: "8080"
-  upload_path: "./uploads"
-
+    port: "8080"
+    upload_path: ./uploads
 auth:
-  session_secret: "123"
-
+    session_secret: "123"
 users:
-  - username: "admin"
-    password: "ghjgecr123"
-    role: "admin"
-
-  - username: "sa502-ivanov"
-    password: "123"
-    role: "student"
-    group: "СА-502"
-
+    - username: admin
+      password: ghjgecr123
+      role: admin
+    - username: sa502-ivanov
+      password: "123"
+      role: student
+      group: СА-502
 groups:
-  - name: "СА-502"
-    disciplines:
-      - "Основы алгоритмизации и программирования"
-      - "Основы проектирования баз данных"
-
+    - name: СА-502
+      disciplines:
+        - Основы алгоритмизации и программирования
+        - Основы проектирования баз данных
 disciplines:
-  - name: "Основы алгоритмизации и программирования"
-    id: "1"
-    labs:
-      - name: "ЛР 1. Построение алгоритмов и блок-схем"
-        id: "1"
-        path: "labs/prog/lab1.pdf"
-
-  - name: "Основы проектирования баз данных"
-    id: "2"
-    labs:
-      - name: "ЛР 1. Построение ER-диаграмм"
-        id: "2"
-        path: "labs/db/lab1.pdf"
+    - id: "1"
+      name: Основы алгоритмизации и программирования
+      labs:
+        - id: "1"
+          name: ЛР 1. Построение алгоритмов и блок-схем
+          path: labs/prog/lab1.pdf
+    - id: "2"
+      name: Основы проектирования баз данных
+      labs:
+        - id: "2"
+          name: ЛР 1. Построение ER-диаграмм
+          path: labs/db/lab1.pdf
+lab_reports:
+    - id: 20250909-13250919
+      student: sa502-ivanov
+      group: СА-502
+      discipline: Основы алгоритмизации и программирования
+      lab_name: ЛР 1. Построение алгоритмов и блок-схем
+      path: uploads/reports/СА-502/sa502-ivanov/1/20250909-13250919..doc
+      comment: ""
+      uploadet_at: 2025-09-24T13:25:19.933565851+03:00
+      stastus: submitted
+      grade: 0

@@ -8,7 +8,13 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func LoginPage() templ.Component {
+import (
+	"context"
+
+	"scavenger/internal/alerts"
+)
+
+func LoginPage(ctx context.Context) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,7 +35,16 @@ func LoginPage() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"ru\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Вход в систему</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\"></head><body class=\"bg-light\"><div class=\"container vh-100 d-flex align-items-center justify-content-center\"><div class=\"card shadow\" style=\"width: 400px;\"><div class=\"card-body p-4\"><h3 class=\"card-title text-center mb-4\"><i class=\"fas fa-graduation-cap text-primary\"></i><br>Вход в систему</h3><form action=\"/login\" method=\"post\"><div class=\"mb-3\"><label class=\"form-label\">Логин</label> <input type=\"text\" class=\"form-control\" name=\"username\" required></div><div class=\"mb-3\"><label class=\"form-label\">Пароль</label> <input type=\"password\" class=\"form-control\" name=\"password\" required></div><button type=\"submit\" class=\"btn btn-primary w-100\">Войти</button></form></div></div></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"ru\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Вход в систему</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\"></head><body class=\"bg-light\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		als := alerts.GetAlertsFromContext(ctx)
+		templ_7745c5c3_Err = Alerts(als).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"container vh-100 d-flex align-items-center justify-content-center\"><div class=\"card shadow\" style=\"width: 400px;\"><div class=\"card-body p-4\"><h3 class=\"card-title text-center mb-4\"><i class=\"fas fa-graduation-cap text-primary\"></i><br>Вход в систему</h3><form action=\"/login\" method=\"post\"><div class=\"mb-3\"><label class=\"form-label\">Логин</label> <input type=\"text\" class=\"form-control\" name=\"username\" required></div><div class=\"mb-3\"><label class=\"form-label\">Пароль</label> <input type=\"password\" class=\"form-control\" name=\"password\" required></div><button type=\"submit\" class=\"btn btn-primary w-100\">Войти</button></form></div></div></div><script>\n\t\tvar toastElList = [].slice.call(document.querySelectorAll('.toast'))\n\n\t\tvar toastList = toastElList.map(function (toastEl) {\n\t\t\tvar toast = new bootstrap.Toast(toastEl)\n\t\t\ttoast.show()\n\t\t\treturn toast\n\t\t})\n\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

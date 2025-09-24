@@ -1,13 +1,14 @@
 package views
 
 import (
-"time"
+	"time"
+	"context"
 
-"scavenger/internal/models"
+	"scavenger/internal/models"
 )
 
-templ DisciplinePage(discipline models.Discipline, group string) {
-@Base(discipline.Name, disciplinePage(discipline, group))
+templ DisciplinePage(ctx context.Context, discipline models.Discipline, group string) {
+@Base(ctx, discipline.Name, disciplinePage(discipline, group))
 }
 
 templ disciplinePage(discipline models.Discipline, group string) {

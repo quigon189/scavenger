@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
+	"scavenger/internal/alerts"
 	"scavenger/internal/auth"
 	"scavenger/internal/models"
 	"scavenger/views"
@@ -19,41 +19,6 @@ func NewHandler(cfg *models.Config) *Handler {
 		cfg: cfg,
 	}
 }
-
-func (h *Handler) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user := h.authService.GetUsername(r)
-		log.Printf("auth user: %s", user)
-		if !h.authService.IsAuthenticated(r) {
-			h.Login(w,r)
-			log.Println("redirect to login")
-			return
-		}
-		log.Println("authenticated")
-		next.ServeHTTP(w,r)
-	}
-}
-
-func (h *Handler) AdminMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return h.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
-		role := h.authService.GetUserRole(r)
-		if role != "admin" {
-			http.Redirect(w,r,"/", http.StatusSeeOther)
-		}
-		next.ServeHTTP(w,r)
-	})
-}
-
-func (h *Handler) StudentMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return h.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
-		role := h.authService.GetUserRole(r)
-		if role != "student" {
-			http.Redirect(w,r,"/", http.StatusSeeOther)
-		}
-		next.ServeHTTP(w,r)
-	})
-}
-
 func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.Redirect(w,r,"/404", http.StatusSeeOther)
@@ -64,7 +29,6 @@ func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) Dashboard(w http.ResponseWriter, r *http.Request) {
 	role := h.authService.GetUserRole(r)
-	log.Printf("user role: %s", role)
 	switch role {
 	case "admin":
 		h.AdminDashboard(w,r)
@@ -81,18 +45,19 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		password := r.FormValue("password")
 
 		if h.authService.Login(w, r, h.cfg.Users, username, password) {
-			log.Println("redirect to /")
 			http.Redirect(w,r,"/", http.StatusSeeOther)
 			return
+		} else {
+			alerts.SetAlert(w,r,alerts.AlertError,"Логин или пароль указанны неверно")
 		}
 	}
 
-	views.LoginPage().Render(r.Context(), w)
+	views.LoginPage(r.Context()).Render(r.Context(), w)
 }
 
 func (h *Handler) NotFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-	views.NotFound().Render(r.Context(), w)
+	views.NotFound(r.Context()).Render(r.Context(), w)
 }
 
 func (h *Handler) Logout(w http.ResponseWriter, r * http.Request) {
@@ -101,5 +66,5 @@ func (h *Handler) Logout(w http.ResponseWriter, r * http.Request) {
 }
 
 func (h *Handler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
-	views.AdminDashboard().Render(r.Context(), w)
+	views.AdminDashboard(r.Context()).Render(r.Context(), w)
 }

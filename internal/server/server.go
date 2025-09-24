@@ -17,7 +17,7 @@ func New(cfg *models.Config) *Server {
 	return &Server{
 		httpServer: &http.Server{
 			Addr: ":"+cfg.Server.Port,
-			Handler: router,
+			Handler: *router,
 		},
 	}
 }

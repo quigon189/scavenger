@@ -9,10 +9,12 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"context"
+
 	"scavenger/internal/models"
 )
 
-func StudentDashboard(disciplines []models.Discipline, group string, reports []models.LabReport) templ.Component {
+func StudentDashboard(ctx context.Context, disciplines []models.Discipline, group string, reports []models.LabReport) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -33,7 +35,7 @@ func StudentDashboard(disciplines []models.Discipline, group string, reports []m
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Base("Панель студента", studentDashboard(disciplines, group, reports)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Base(ctx, "Панель студента", studentDashboard(disciplines, group, reports)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,7 +71,7 @@ func studentDashboard(disciplines []models.Discipline, group string, reports []m
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(group)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 22, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 24, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -82,7 +84,7 @@ func studentDashboard(disciplines []models.Discipline, group string, reports []m
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(len(disciplines))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 23, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 25, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -105,7 +107,7 @@ func studentDashboard(disciplines []models.Discipline, group string, reports []m
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(report.Discipline)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 39, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 41, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -118,7 +120,7 @@ func studentDashboard(disciplines []models.Discipline, group string, reports []m
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(report.LabName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 40, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 42, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -131,7 +133,7 @@ func studentDashboard(disciplines []models.Discipline, group string, reports []m
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(report.Status)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 43, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 45, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -169,7 +171,7 @@ func studentDashboard(disciplines []models.Discipline, group string, reports []m
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 66, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 68, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -182,7 +184,7 @@ func studentDashboard(disciplines []models.Discipline, group string, reports []m
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(len(discipline.Labs))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 70, Col: 99}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 72, Col: 99}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -195,7 +197,7 @@ func studentDashboard(disciplines []models.Discipline, group string, reports []m
 				var templ_7745c5c3_Var10 templ.SafeURL
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs("/discipline/" + discipline.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 74, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 76, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {

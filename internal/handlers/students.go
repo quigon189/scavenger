@@ -21,7 +21,7 @@ func (h *Handler) StudentDashboard(w http.ResponseWriter, r *http.Request) {
 	reports := h.cfg.GetStudentReports(username)
 
 	log.Printf("Render stud dashboard: group %s, disciplines %+v, reports %+v", group, disciplines, reports)
-	views.StudentDashboard(disciplines, group, reports).Render(r.Context(), w)
+	views.StudentDashboard(r.Context(), disciplines, group, reports).Render(r.Context(), w)
 }
 
 func (h *Handler) DisciplinePage(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +33,7 @@ func (h *Handler) DisciplinePage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/404", http.StatusSeeOther)
 	}
 
-	views.DisciplinePage(*disc, group).Render(r.Context(), w)
+	views.DisciplinePage(r.Context(), *disc, group).Render(r.Context(), w)
 }
 
 func (h *Handler) DownloadLabs(w http.ResponseWriter, r *http.Request) {
@@ -80,14 +80,12 @@ func (h *Handler) UploadReport(w http.ResponseWriter, r *http.Request) {
 
 	ext := filepath.Ext(header.Filename)
 	timestamp := time.Now().Format("20060101-154015")
-	newFilename := fmt.Sprintf("%s-lab_id_%s-%s.%s",
+	newFilename := fmt.Sprintf("%s.%s",
 		timestamp,
-		labID,
-		username,
 		ext,
 	)
 
-	uploadPath := filepath.Join(h.cfg.Server.UploadPath, "reports", newFilename)
+	uploadPath := filepath.Join(h.cfg.Server.UploadPath, "reports", group, username, labID, newFilename)
 
 	os.MkdirAll(filepath.Dir(uploadPath), 0755)
 
@@ -117,7 +115,10 @@ func (h *Handler) UploadReport(w http.ResponseWriter, r *http.Request) {
 
 	h.cfg.LabReports = append(h.cfg.LabReports, report)
 
-	config.SaveConfig(h.cfg)
+	err = config.SaveConfig(h.cfg)
+	if err != nil {
+		log.Printf("Error to save config: %v", err)
+	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

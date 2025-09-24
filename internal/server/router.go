@@ -6,7 +6,7 @@ import (
 	"scavenger/internal/models"
 )
 
-func setupRouter(cfg *models.Config) *http.ServeMux {
+func setupRouter(cfg *models.Config) *http.Handler {
 	mux := http.NewServeMux()
 
 	handler := handlers.NewHandler(cfg)
@@ -24,5 +24,7 @@ func setupRouter(cfg *models.Config) *http.ServeMux {
 	mux.HandleFunc("/download/{path...}", handler.AuthMiddleware(handler.DownloadLabs))
 	mux.HandleFunc("/upload-report", handler.AuthMiddleware(handler.UploadReport))
 
-	return mux
+	h := handler.AlertMiddleware(mux)
+
+	return &h
 }

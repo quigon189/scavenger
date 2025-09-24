@@ -1,11 +1,13 @@
 package views
 
 import (
+	"context"
+
 	"scavenger/internal/models"
 )
 
-templ StudentDashboard(disciplines []models.Discipline, group string, reports []models.LabReport) {
-	@Base("Панель студента", studentDashboard(disciplines, group, reports))
+templ StudentDashboard(ctx context.Context, disciplines []models.Discipline, group string, reports []models.LabReport) {
+	@Base(ctx, "Панель студента", studentDashboard(disciplines, group, reports))
 }
 
 templ studentDashboard(disciplines []models.Discipline, group string, reports []models.LabReport) {

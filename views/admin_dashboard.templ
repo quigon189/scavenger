@@ -1,7 +1,11 @@
 package views
 
-templ AdminDashboard() {
-	@Base("Панель администратора", adminDashboard())
+import (
+	"context"
+)
+
+templ AdminDashboard(ctx context.Context) {
+	@Base(ctx, "Панель администратора", adminDashboard())
 }
 
 templ adminDashboard() {
