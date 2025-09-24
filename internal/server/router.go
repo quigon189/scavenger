@@ -21,7 +21,8 @@ func setupRouter(cfg *models.Config) *http.ServeMux {
 	mux.HandleFunc("/logout", handler.AuthMiddleware(handler.Logout))
 	mux.HandleFunc("/discipline/{id}", handler.StudentMiddleware(handler.DisciplinePage))
 
-	mux.HandleFunc("/download/{path}", handler.AuthMiddleware(handler.DownloadLabs))
+	mux.HandleFunc("/download/{path...}", handler.AuthMiddleware(handler.DownloadLabs))
+	mux.HandleFunc("/upload-report", handler.AuthMiddleware(handler.UploadReport))
 
 	return mux
 }

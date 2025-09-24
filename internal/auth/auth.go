@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"log"
 	"net/http"
 	"scavenger/internal/models"
 
@@ -12,7 +13,15 @@ type AuthService struct {
 }
 
 func New(cfg models.AuthConfig) *AuthService {
-	return &AuthService{store: sessions.NewCookieStore([]byte(cfg.SessionSecret))}
+	store := sessions.NewCookieStore([]byte(cfg.SessionSecret))
+	store.Options = &sessions.Options{
+        Path:     "/",
+        MaxAge:   86400 * 30,
+        HttpOnly: true,
+        Secure:   false, // для localhost
+        SameSite: http.SameSiteLaxMode,
+    }
+	return &AuthService{store: store}
 }
 
 func (s *AuthService) Login(w http.ResponseWriter, r *http.Request, users []models.User, username, password string) bool {
@@ -23,7 +32,10 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request, users []mode
 			session.Values["username"] = user.Username
 			session.Values["role"] = user.Role
 			session.Values["group"] = user.Group
-			session.Save(r, w)
+			err := session.Save(r, w)
+			if err != nil {
+				log.Printf("Ошибка при сохранении кук: %v", err)
+			}
 			return true
 		}
 	}

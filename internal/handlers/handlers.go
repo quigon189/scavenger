@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"scavenger/internal/auth"
 	"scavenger/internal/models"
@@ -21,10 +22,14 @@ func NewHandler(cfg *models.Config) *Handler {
 
 func (h *Handler) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		user := h.authService.GetUsername(r)
+		log.Printf("auth user: %s", user)
 		if !h.authService.IsAuthenticated(r) {
 			h.Login(w,r)
+			log.Println("redirect to login")
 			return
 		}
+		log.Println("authenticated")
 		next.ServeHTTP(w,r)
 	}
 }
@@ -59,6 +64,7 @@ func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) Dashboard(w http.ResponseWriter, r *http.Request) {
 	role := h.authService.GetUserRole(r)
+	log.Printf("user role: %s", role)
 	switch role {
 	case "admin":
 		h.AdminDashboard(w,r)
@@ -75,6 +81,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		password := r.FormValue("password")
 
 		if h.authService.Login(w, r, h.cfg.Users, username, password) {
+			log.Println("redirect to /")
 			http.Redirect(w,r,"/", http.StatusSeeOther)
 			return
 		}

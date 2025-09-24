@@ -38,6 +38,8 @@ func (h *Handler) DisciplinePage(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) DownloadLabs(w http.ResponseWriter, r *http.Request) {
 	path := r.PathValue("path")
+	log.Printf("download path: %s", path)
+
 	filePath := filepath.Join(h.cfg.Server.UploadPath, path)
 
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {

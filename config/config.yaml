@@ -1,7 +1,6 @@
 server:
   port: "8080"
   upload_path: "./uploads"
-  download_path: "./download"
 
 auth:
   session_secret: "123"
