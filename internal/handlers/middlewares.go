@@ -6,10 +6,6 @@ import (
 	"scavenger/internal/alerts"
 )
 
-type contextKey string
-
-const AlertKey contextKey = "alerts"
-
 func (h *Handler) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !h.authService.IsAuthenticated(r) {
@@ -44,7 +40,7 @@ func (h *Handler) AlertMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
 		als := alerts.GetAlerts(w,r)
 
-		ctx := context.WithValue(r.Context(), AlertKey, als)
+		ctx := context.WithValue(r.Context(), alerts.AlertKey, als)
 
 		next.ServeHTTP(w,r.WithContext(ctx))
 	})

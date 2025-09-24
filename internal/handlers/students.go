@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"scavenger/internal/alerts"
 	"scavenger/internal/config"
 	"scavenger/internal/models"
 	"scavenger/views"
@@ -14,31 +15,40 @@ import (
 )
 
 func (h *Handler) StudentDashboard(w http.ResponseWriter, r *http.Request) {
-	username := h.authService.GetUsername(r)
-	group := h.authService.GetGroup(r)
+	user := h.authService.GetUser(r)
 
-	disciplines := h.cfg.GetGroupDisciplines(group)
-	reports := h.cfg.GetStudentReports(username)
+	disciplines := h.cfg.GetGroupDisciplines(user.Group)
+	reports := h.cfg.GetStudentReports(user.Username)
 
-	log.Printf("Render stud dashboard: group %s, disciplines %+v, reports %+v", group, disciplines, reports)
-	views.StudentDashboard(r.Context(), disciplines, group, reports).Render(r.Context(), w)
+	views.StudentDashboard(disciplines, user, reports).Render(r.Context(), w)
 }
 
 func (h *Handler) DisciplinePage(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	group := h.authService.GetGroup(r)
+
+	user := h.authService.GetUser(r)
 	disc := h.cfg.GetDiscepline(id)
+	reports := h.cfg.GetStudentReports(user.Username)
 
 	if disc.Name == "" {
 		http.Redirect(w, r, "/404", http.StatusSeeOther)
 	}
 
-	views.DisciplinePage(r.Context(), *disc, group).Render(r.Context(), w)
+	repMap := map[string][]models.LabReport{}
+
+	for _, lab := range disc.Labs {
+		for _, r := range reports {
+			if r.LabName == lab.Name {
+				repMap[lab.ID] = append(repMap[lab.ID], r)
+			}
+		}
+	}
+
+	views.DisciplinePage(disc, repMap, user).Render(r.Context(), w)
 }
 
 func (h *Handler) DownloadLabs(w http.ResponseWriter, r *http.Request) {
 	path := r.PathValue("path")
-	log.Printf("download path: %s", path)
 
 	filePath := filepath.Join(h.cfg.Server.UploadPath, path)
 
@@ -117,8 +127,11 @@ func (h *Handler) UploadReport(w http.ResponseWriter, r *http.Request) {
 
 	err = config.SaveConfig(h.cfg)
 	if err != nil {
+		alerts.FlashError(w, r, "Ошибка при сохранении")
 		log.Printf("Error to save config: %v", err)
+		return
 	}
 
+	alerts.FlashSuccess(w, r, "Отчет загружен")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

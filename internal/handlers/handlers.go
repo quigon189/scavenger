@@ -48,16 +48,17 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w,r,"/", http.StatusSeeOther)
 			return
 		} else {
-			alerts.SetAlert(w,r,alerts.AlertError,"Логин или пароль указанны неверно")
+			alerts.FlashError(w,r,"Логин или пароль указанны неверно")
+			http.Redirect(w,r,"/login", http.StatusSeeOther)
 		}
 	}
 
-	views.LoginPage(r.Context()).Render(r.Context(), w)
+	views.LoginPage().Render(r.Context(), w)
 }
 
 func (h *Handler) NotFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-	views.NotFound(r.Context()).Render(r.Context(), w)
+	views.NotFound().Render(r.Context(), w)
 }
 
 func (h *Handler) Logout(w http.ResponseWriter, r * http.Request) {
@@ -66,5 +67,5 @@ func (h *Handler) Logout(w http.ResponseWriter, r * http.Request) {
 }
 
 func (h *Handler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
-	views.AdminDashboard(r.Context()).Render(r.Context(), w)
+	views.AdminDashboard().Render(r.Context(), w)
 }

@@ -1,12 +1,6 @@
 package views
 
-import (
-	"context"
-
-	"scavenger/internal/alerts"
-)
-
-templ LoginPage(ctx context.Context) {
+templ LoginPage() {
 	<!DOCTYPE html>
     <html lang="ru">
     <head>
@@ -16,8 +10,7 @@ templ LoginPage(ctx context.Context) {
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     </head>
     <body class="bg-light">
-		{{ als := alerts.GetAlertsFromContext(ctx) }}
-		@Alerts(als)
+		@Alerts()
         <div class="container vh-100 d-flex align-items-center justify-content-center">
             <div class="card shadow" style="width: 400px;">
                 <div class="card-body p-4">
@@ -40,15 +33,23 @@ templ LoginPage(ctx context.Context) {
             </div>
         </div>
 
-		<script>
-		var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		var toastElList = [].slice.call(document.querySelectorAll('.toast[autoshow]'))
 
 		var toastList = toastElList.map(function (toastEl) {
+			toastEl.removeAttribute('autoshow');
 			var toast = new bootstrap.Toast(toastEl)
 			toast.show()
 			return toast
 		})
+
+		toastElList.forEach(function(toastEl) {
+			toastEl.addEventListener('hidden.bs.toast', function() {
+				this.remove()
+			})
+		})
 	</script>
-    </body>
+	</body>
     </html>	
 }

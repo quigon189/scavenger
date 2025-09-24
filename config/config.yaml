@@ -5,9 +5,11 @@ auth:
     session_secret: "123"
 users:
     - username: admin
+      name: "Админ"
       password: ghjgecr123
       role: admin
     - username: sa502-ivanov
+      name: "Иванов Иван Иванович"
       password: "123"
       role: student
       group: СА-502
@@ -38,5 +40,25 @@ lab_reports:
       path: uploads/reports/СА-502/sa502-ivanov/1/20250909-13250919..doc
       comment: ""
       uploadet_at: 2025-09-24T13:25:19.933565851+03:00
+      stastus: submitted
+      grade: 0
+    - id: 20250909-00280941
+      student: sa502-ivanov
+      group: СА-502
+      discipline: Основы алгоритмизации и программирования
+      lab_name: ЛР 1. Построение алгоритмов и блок-схем
+      path: uploads/reports/СА-502/sa502-ivanov/1/20250909-00280941..docx
+      comment: ""
+      uploadet_at: 2025-09-25T00:28:41.669082486+03:00
+      stastus: submitted
+      grade: 0
+    - id: 20250909-0029097
+      student: sa502-ivanov
+      group: СА-502
+      discipline: Основы проектирования баз данных
+      lab_name: ЛР 1. Построение ER-диаграмм
+      path: uploads/reports/СА-502/sa502-ivanov/2/20250909-0029097..docx
+      comment: ""
+      uploadet_at: 2025-09-25T00:29:07.970155486+03:00
       stastus: submitted
       grade: 0

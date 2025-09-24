@@ -4,6 +4,7 @@ import "time"
 
 type User struct {
 	Username string `yaml:"username"`
+	Name     string `yaml:"name"`
 	Password string `yaml:"password"`
 	Role     string `yaml:"role"`
 	Group    string `yaml:"group,omitempty"`

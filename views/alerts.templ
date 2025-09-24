@@ -4,15 +4,15 @@ import (
 	"scavenger/internal/alerts"
 )
 
-templ Alerts(alertToasts []alerts.Alert) {
+templ Alerts() {
+{{ alertToasts := alerts.GetAlertsFromContext(ctx) }}
 if len(alertToasts) > 0 {
   <div aria-live="polite" aria-atomic="true" class="position-relative">
 	<div class="toast-container position-absolute top-0 start-50 translate-middle-x p-3">
 
 	  for _, alert := range alertToasts {
-		<div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true"
-	      data-bs-delay="10000">
-			<div class="toast-header text-white bg-{ alert.Type }">
+		<div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="10000" autoshow>
+		  <div class={"toast-header text-white bg-"+string(alert.Type)}>
 			  switch alert.Type {
 			  case alerts.AlertSuccess:
 			    <strong class="me-auto">Успех</strong>

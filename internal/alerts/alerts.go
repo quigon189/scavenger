@@ -10,16 +10,20 @@ import (
 
 type AlertType string
 
+type contextKey string
+
+const AlertKey contextKey = "alerts"
+
 const (
 	AlertSuccess AlertType = "success"
-	AlertError AlertType = "danger"
+	AlertError   AlertType = "danger"
 	AlertWarning AlertType = "warning"
-	AlertInfo AlertType = "info"
+	AlertInfo    AlertType = "info"
 )
 
 type Alert struct {
-	Type AlertType `json:"type"`
-	Message string `json:"message"`
+	Type    AlertType `json:"type"`
+	Message string    `json:"message"`
 }
 
 func SetAlert(w http.ResponseWriter, r *http.Request, alertType AlertType, message string) {
@@ -31,12 +35,12 @@ func SetAlert(w http.ResponseWriter, r *http.Request, alertType AlertType, messa
 	encoded := url.QueryEscape(string(jsonData))
 
 	http.SetCookie(w, &http.Cookie{
-		Name: "alerts",
-		Value: string(encoded),
-		Path: "/",
-		Expires: time.Now().Add(5 * time.Minute),
+		Name:     "alerts",
+		Value:    string(encoded),
+		Path:     "/",
+		Expires:  time.Now().Add(5 * time.Minute),
 		HttpOnly: true,
-		Secure: false,
+		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	})
 }
@@ -45,12 +49,12 @@ func GetAlerts(w http.ResponseWriter, r *http.Request) []Alert {
 	alerts := GetAlertsFromRequest(r)
 
 	http.SetCookie(w, &http.Cookie{
-		Name: "alerts",
-		Value: "",
-		Path: "/",
-		Expires: time.Now().Add(-1 * time.Minute),
+		Name:     "alerts",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Now().Add(-1 * time.Minute),
 		HttpOnly: true,
-		Secure: false,
+		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -75,8 +79,24 @@ func GetAlertsFromRequest(r *http.Request) []Alert {
 }
 
 func GetAlertsFromContext(ctx context.Context) []Alert {
-	if alerts, ok := ctx.Value("alerts").([]Alert); ok {
+	if alerts, ok := ctx.Value(AlertKey).([]Alert); ok {
 		return alerts
 	}
 	return []Alert{}
+}
+
+func FlashError(w http.ResponseWriter, r *http.Request, message string) {
+	SetAlert(w, r, AlertError, message)
+}
+
+func FlashInfo(w http.ResponseWriter, r *http.Request, message string) {
+	SetAlert(w, r, AlertInfo, message)
+}
+
+func FlashWarning(w http.ResponseWriter, r *http.Request, message string) {
+	SetAlert(w, r, AlertWarning, message)
+}
+
+func FlashSuccess(w http.ResponseWriter, r *http.Request, message string) {
+	SetAlert(w, r, AlertSuccess, message)
 }

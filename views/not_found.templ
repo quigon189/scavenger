@@ -1,11 +1,7 @@
 package views
 
-import (
-	"context"
-)
-
-templ NotFound(ctx context.Context) {
-	@Base(ctx, "Страница не найдена", notFoundContent())
+templ NotFound() {
+	@Base("Страница не найдена", notFoundContent())
 }
 
 templ notFoundContent() {

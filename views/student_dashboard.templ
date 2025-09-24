@@ -1,16 +1,14 @@
 package views
 
 import (
-	"context"
-
 	"scavenger/internal/models"
 )
 
-templ StudentDashboard(ctx context.Context, disciplines []models.Discipline, group string, reports []models.LabReport) {
-	@Base(ctx, "Панель студента", studentDashboard(disciplines, group, reports))
+templ StudentDashboard(disciplines []models.Discipline, user *models.User, reports []models.LabReport) {
+	@Base("Панель студента", studentDashboard(disciplines, user, reports))
 }
 
-templ studentDashboard(disciplines []models.Discipline, group string, reports []models.LabReport) {
+templ studentDashboard(disciplines []models.Discipline, user *models.User, reports []models.LabReport) {
 	<div class="row">
       <div class="col-md-3">
 
@@ -21,15 +19,15 @@ templ studentDashboard(disciplines []models.Discipline, group string, reports []
             </h5>
           </div>
           <div class="card-body">
-            <p><strong>Группа:</strong> { group }</p>
-            <p><strong>Дисциплины:</strong> { len(disciplines) }</p>
+            <p><strong>ФИО:</strong> { user.Name }</p>
+            <p><strong>Группа:</strong> { user.Group }</p>
           </div>
         </div>
                 
         <div class="card mt-3">
           <div class="card-header">
             <h5 class="card-title mb-0">
-              <i class="fas fa-clock"></i> Последние отчеты
+              <i class="fas fa-clock"></i> Недавние отчеты
             </h5>
           </div>
           <div class="card-body">
@@ -41,9 +39,11 @@ templ studentDashboard(disciplines []models.Discipline, group string, reports []
                       <small class="text-muted">{ report.Discipline }</small><br>
                       <strong>{ report.LabName }</strong>
                     </div>
+					<!--
                     <span class="badge bg-success">
                       { report.Status }
                     </span>
+					-->
                   </div>
                 }
               </div>

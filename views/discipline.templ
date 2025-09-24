@@ -2,21 +2,20 @@ package views
 
 import (
 	"time"
-	"context"
 
 	"scavenger/internal/models"
 )
 
-templ DisciplinePage(ctx context.Context, discipline models.Discipline, group string) {
-@Base(ctx, discipline.Name, disciplinePage(discipline, group))
+templ DisciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport, user *models.User) {
+@Base(discipline.Name, disciplinePage(discipline, reports, user))
 }
 
-templ disciplinePage(discipline models.Discipline, group string) {
+templ disciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport,  user *models.User) {
 
 <div class="d-flex justify-content-between align-items-center mb-4">
 	<div>
 		<h3>{ discipline.Name }</h3>
-		<p class="text-muted">Группа: { group }</p>
+		<p class="text-muted">Группа: { user.Group }</p>
 	</div>
 	<a href="/dashboard" class="btn btn-outline-secondary">
 		<i class="fas fa-arrow-left"></i> Назад
@@ -59,6 +58,17 @@ templ disciplinePage(discipline models.Discipline, group string) {
 						</small>
 						}
 				</div>
+				if len(reports[lab.ID]) > 0 {
+				<hr>
+				<div class="d-flex justify-content-between mt-2">
+				<div>
+					<h5>Загруженные ранее отчеты</h5>
+					for _, rep := range reports[lab.ID] {
+						<small class="text-muted">{ rep.Path }</small><br>
+					}
+				</div>
+				</div>
+				}
 			</div>
 
 			@UploadModal(lab, discipline.Name)
