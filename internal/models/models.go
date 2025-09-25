@@ -3,11 +3,15 @@ package models
 import "time"
 
 type User struct {
-	Username string `yaml:"username"`
-	Name     string `yaml:"name"`
-	Password string `yaml:"password"`
-	Role     string `yaml:"role"`
-	Group    string `yaml:"group,omitempty"`
+	ID           int
+	Username     string `yaml:"username"`
+	Name         string `yaml:"name"`
+	PasswordHash string `yaml:"password"`
+	Role         string `yaml:"role"`
+	Group        string `yaml:"group,omitempty"`
+
+	RoleName  string
+	GroupName string
 }
 
 type Group struct {

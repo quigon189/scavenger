@@ -4,7 +4,7 @@ CREATE TABLE users (
 	username TEXT NOT NULL UNIQUE,
 	name TEXT NOT NULL,
 	password_hash TEXT NOT NULL,
-	role_id INTEGER REFERENCES roles(id)
+	role_id INTEGER REFERENCES roles(id),
 	group_id INTEGER REFERENCES groups(id)
 );
 
