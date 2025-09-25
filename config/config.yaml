@@ -3,13 +3,16 @@ server:
     upload_path: ./uploads
 auth:
     session_secret: "123"
+database:
+    data_source: "scavanger.db"
+    migrations_path: "./migrations"
 users:
     - username: admin
-      name: "Админ"
+      name: Админ
       password: ghjgecr123
       role: admin
     - username: sa502-ivanov
-      name: "Иванов Иван Иванович"
+      name: Иванов Иван Иванович
       password: "123"
       role: student
       group: СА-502
@@ -60,5 +63,15 @@ lab_reports:
       path: uploads/reports/СА-502/sa502-ivanov/2/20250909-0029097..docx
       comment: ""
       uploadet_at: 2025-09-25T00:29:07.970155486+03:00
+      stastus: submitted
+      grade: 0
+    - id: 20250909-12200946
+      student: sa502-ivanov
+      group: СА-502
+      discipline: Основы алгоритмизации и программирования
+      lab_name: ЛР 1. Построение алгоритмов и блок-схем
+      path: uploads/reports/СА-502/sa502-ivanov/1/20250909-12200946..docx
+      comment: ""
+      uploadet_at: 2025-09-25T12:20:46.850052991+03:00
       stastus: submitted
       grade: 0

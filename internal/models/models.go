@@ -41,6 +41,11 @@ type LabReport struct {
 	Grade      int       `yaml:"grade"`
 }
 
+type DatebaseConfig struct {
+	DataSource     string `yaml:"data_source"`
+	MigrationsPath string `yaml:"migrations_path"`
+}
+
 type ServerConfig struct {
 	Port       string `yaml:"port"`
 	UploadPath string `yaml:"upload_path"`
@@ -51,10 +56,11 @@ type AuthConfig struct {
 }
 
 type Config struct {
-	Server      ServerConfig `yaml:"server"`
-	Auth        AuthConfig   `yaml:"auth"`
-	Users       []User       `yaml:"users"`
-	Groups      []Group      `yaml:"groups"`
-	Disciplines []Discipline `yaml:"disciplines"`
-	LabReports  []LabReport  `yaml:"lab_reports,omitempty"`
+	Server      ServerConfig   `yaml:"server"`
+	Auth        AuthConfig     `yaml:"auth"`
+	DB          DatebaseConfig `yaml:"database"`
+	Users       []User         `yaml:"users"`
+	Groups      []Group        `yaml:"groups"`
+	Disciplines []Discipline   `yaml:"disciplines"`
+	LabReports  []LabReport    `yaml:"lab_reports,omitempty"`
 }
