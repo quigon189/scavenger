@@ -6,6 +6,17 @@ auth:
 database:
     data_source: "scavanger.db"
     migrations_path: "./migrations"
+
+test_data:
+  roles:
+    - "admin"
+    - "student"
+  users:
+    - username: admin
+      name: Админ
+      password: ghjgecr123
+      role: admin
+
 users:
     - username: admin
       name: Админ

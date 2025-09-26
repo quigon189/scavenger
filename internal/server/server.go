@@ -4,21 +4,25 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"scavenger/internal/database"
 	"scavenger/internal/models"
 )
 
 type Server struct {
 	httpServer *http.Server
 	config *models.Config
+	db *database.Database
 }
 
-func New(cfg *models.Config) *Server {
-	router := setupRouter(cfg)
+func New(cfg *models.Config, db *database.Database) *Server {
+	router := setupRouter(cfg, db)
 	return &Server{
 		httpServer: &http.Server{
 			Addr: ":"+cfg.Server.Port,
 			Handler: *router,
 		},
+		config: cfg,
+		db: db,
 	}
 }
 

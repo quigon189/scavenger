@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"scavenger/internal/alerts"
 	"scavenger/internal/auth"
+	"scavenger/internal/database"
 	"scavenger/internal/models"
 	"scavenger/views"
 )
@@ -11,12 +12,14 @@ import (
 type Handler struct {
 	authService *auth.AuthService
 	cfg *models.Config
+	db *database.Database
 }
 
-func NewHandler(cfg *models.Config) *Handler {
+func NewHandler(cfg *models.Config, db *database.Database) *Handler {
 	return &Handler{
 		authService: auth.New(cfg.Auth),
 		cfg: cfg,
+		db: db,
 	}
 }
 func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +47,13 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 
-		if h.authService.Login(w, r, h.cfg.Users, username, password) {
+		user, err := h.db.GetUserByUsername(username)
+		if err != nil {
+			alerts.FlashError(w,r,"Логин или пароль указанны неверно")
+			http.Redirect(w,r,"/login", http.StatusSeeOther)
+		}
+
+		if h.authService.Login(w, r, user, password) {
 			http.Redirect(w,r,"/", http.StatusSeeOther)
 			return
 		} else {

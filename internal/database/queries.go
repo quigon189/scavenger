@@ -2,7 +2,9 @@ package database
 
 const (
 	// Roles
+	CreateRoleQuery = `INSERT INTO roles (name, description) VALUES (?, ?)`
 	GetRoleByName = `SELECT id, name, description FROM roles WHERE name = ?`
+
 	// Groups
 	GetAllGroupsQuery = `SELECT id, name FROM groups`
 

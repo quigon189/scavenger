@@ -2,6 +2,13 @@ package models
 
 import "time"
 
+type UserRole string
+
+const (
+	StudentRole UserRole = "student"
+	AdminRole   UserRole = "admin"
+)
+
 type User struct {
 	ID           int
 	Username     string `yaml:"username"`
@@ -59,6 +66,11 @@ type AuthConfig struct {
 	SessionSecret string `yaml:"session_secret"`
 }
 
+type TestDataConfig struct {
+	Roles []string `yaml:"roles"`
+	Users []User `yaml:"users"`
+}
+
 type Config struct {
 	Server      ServerConfig   `yaml:"server"`
 	Auth        AuthConfig     `yaml:"auth"`
@@ -67,4 +79,5 @@ type Config struct {
 	Groups      []Group        `yaml:"groups"`
 	Disciplines []Discipline   `yaml:"disciplines"`
 	LabReports  []LabReport    `yaml:"lab_reports,omitempty"`
+	TestData    TestDataConfig `yaml:"test_data"`
 }

@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"scavenger/internal/auth"
 	"scavenger/internal/config"
+	"scavenger/internal/database"
 	"scavenger/internal/server"
 	"syscall"
 	"time"
@@ -18,7 +20,44 @@ func main() {
 		log.Fatalf("Failed load config: %v", err)
 	}
 
-	srv := server.New(cfg)
+	db, err := database.NewDB(cfg)
+	if err != nil {
+		log.Fatalf("Failed connect to db: %v", err)
+	}
+
+	err = db.Migrate()
+	if err != nil {
+		log.Fatalf("Failed apply migrations: %v", err)
+	}
+
+	for _, role := range cfg.TestData.Roles {
+		if err := db.CreateRole(role, ""); err != nil {
+			log.Printf("Failed to create role %s: %v", role, err)
+			continue
+		}
+		log.Printf("Role %s created", role)
+	}
+
+	for _, user := range cfg.TestData.Users {
+		u, err := auth.RegisterUser(
+			user.Username,
+			user.Name,
+			user.PasswordHash,
+			user.Role,
+			user.Group,
+		)
+		if err != nil {
+			log.Printf("User %+v not registred with error: %v", user, err)
+			continue
+		}
+		if err := db.CreateUserWithRole(u); err != nil {
+			log.Printf("Failed to create user %+v error: %v", user, err)
+			continue
+		}
+		log.Printf("User created: %+v", u)
+	}
+
+	srv := server.New(cfg, db)
 
 	go func() {
 		if err := srv.Start(); err != nil && err != http.ErrServerClosed {

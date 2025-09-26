@@ -7,20 +7,25 @@ import (
 	"scavenger/internal/models"
 )
 
-func (d *Database) CreateUserWithRole(user *models.User, roleName string) error {
+func (d *Database) CreateRole(roleName, roleDescription string) error {
+	_, err := d.db.Exec(CreateRoleQuery, roleName, roleDescription)
+	return err
+}
+
+func (d *Database) CreateUserWithRole(user *models.User) error {
 	role := struct{
 		ID int
 		Name string
 		Description string
 	}{}
 
-	err := d.db.QueryRow(GetRoleByName, roleName).Scan(
+	err := d.db.QueryRow(GetRoleByName, user.Role).Scan(
 		&role.ID,
 		&role.Name,
 		&role.Description,
 	)	
 	if errors.Is(err, sql.ErrNoRows) {
-		return fmt.Errorf("роль %s не найдена", roleName)
+		return fmt.Errorf("роль %s не найдена", user.Role)
 	}
 	
 	result, err := d.db.Exec(CreateUserWithRoleQuery, user.Username, user.Name, user.PasswordHash, role.ID)

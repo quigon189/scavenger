@@ -2,14 +2,15 @@ package server
 
 import (
 	"net/http"
+	"scavenger/internal/database"
 	"scavenger/internal/handlers"
 	"scavenger/internal/models"
 )
 
-func setupRouter(cfg *models.Config) *http.Handler {
+func setupRouter(cfg *models.Config, db *database.Database) *http.Handler {
 	mux := http.NewServeMux()
 
-	handler := handlers.NewHandler(cfg)
+	handler := handlers.NewHandler(cfg, db)
 
 	fs := http.FileServer(http.Dir("static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))

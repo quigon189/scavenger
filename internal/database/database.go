@@ -13,8 +13,8 @@ type Database struct {
 	cfg models.DatebaseConfig
 }
 
-func NewDB(cfg *models.Config, dataSource string) (*Database, error) {
-	db, err := sql.Open("sqlite3", dataSource)
+func NewDB(cfg *models.Config) (*Database, error) {
+	db, err := sql.Open("sqlite3", cfg.DB.DataSource)
 	if err != nil {
 		return nil, err
 	}
