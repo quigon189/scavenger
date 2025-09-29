@@ -7,15 +7,31 @@ const (
 
 	// Groups
 	GetAllGroupsQuery = `SELECT id, name FROM groups`
+	GetGroupByName = `SELECT id, name FROM groups WHERE name = ?`
+	GetStudentGroupQuery = `
+		SELECT g.name
+		FROM students s
+		LEFT JOIN groups g ON s.group_id = g.id
+		WHERE s.id = ?
+	`
+	CreateGroupQuery = `INSERT INTO groups (number, name) VALUES (?, ?)`
 
 	// Users
-	CreateUserWithRoleQuery = `INSERT INTO users (username, name, password_hash, role_id) VALUES (?, ?, ?, ?)`
-	CreateUserWithRoleAndGroupQuery = `INSERT INTO users (username, name, password_hash, role_id, group_id) VALUES (?, ?, ?, ?, ?)`
+	CreateUserQuery = `INSERT INTO users (username, name, password_hash, role_id) VALUES (?, ?, ?, ?)`
+	CreateStudentQuery = `INSERT INTO students (user_id, group_id) VALUES (?, ?)`
+
+	GetStudentQuery = `
+		SELECT u.id, u.username, u.name, g.name
+		FROM students s
+		LEFT JOIN users u ON s.user_id = u.id
+		LEFT JOIN groups g ON s.group_id = g.id
+		WHERE s.user_id = ?
+	`
+
 	GetUserByUsernameQuery = `
-		SELECT u.id, u.username, u.name, u.password_hash, r.name AS role_name, g.name AS group_name
+		SELECT u.id, u.username, u.name, u.password_hash, r.name AS role_name
 		FROM users u
 		LEFT JOIN roles r ON u.role_id = r.id
-		LEFT JOIN groups g ON u.group_id = g.id
 		WHERE u.username = ?
 	`
 )

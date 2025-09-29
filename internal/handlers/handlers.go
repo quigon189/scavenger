@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"scavenger/internal/alerts"
 	"scavenger/internal/auth"
@@ -51,14 +52,18 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			alerts.FlashError(w,r,"Логин или пароль указанны неверно")
 			http.Redirect(w,r,"/login", http.StatusSeeOther)
+			return
 		}
+		log.Printf("Get user %+v from db", user)
 
 		if h.authService.Login(w, r, user, password) {
+			log.Printf("Success login user :%v", user)
 			http.Redirect(w,r,"/", http.StatusSeeOther)
 			return
 		} else {
 			alerts.FlashError(w,r,"Логин или пароль указанны неверно")
 			http.Redirect(w,r,"/login", http.StatusSeeOther)
+			return
 		}
 	}
 

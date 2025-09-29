@@ -2,12 +2,17 @@ package handlers
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"scavenger/internal/alerts"
 )
 
 func (h *Handler) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		user := h.authService.GetUser(r)
+
+		log.Printf("Login user: %+v", user)
+
 		if !h.authService.IsAuthenticated(r) {
 			h.Login(w,r)
 			return

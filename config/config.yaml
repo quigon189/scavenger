@@ -9,24 +9,27 @@ database:
 
 test_data:
   roles:
-    - "admin"
-    - "student"
-  users:
-    - username: admin
-      name: Админ
-      password: ghjgecr123
-      role: admin
+    admin:
+      - username: admin
+        name: Admin
+        password: ghjgecr123
+    student:
+      group:
+        СА-502:
+          - username: sa502-ivanov
+            name: Ivanov I. I.
+            password: 123
 
-users:
-    - username: admin
-      name: Админ
-      password: ghjgecr123
-      role: admin
-    - username: sa502-ivanov
-      name: Иванов Иван Иванович
-      password: "123"
-      role: student
-      group: СА-502
+# users:
+#     - username: admin
+#       name: Админ
+#       password: ghjgecr123
+#       role: admin
+#     - username: sa502-ivanov
+#       name: Иванов Иван Иванович
+#       password: "123"
+#       role: student
+#       group: СА-502
 groups:
     - name: СА-502
       disciplines:

@@ -12,23 +12,25 @@ func (d *Database) CreateRole(roleName, roleDescription string) error {
 	return err
 }
 
-func (d *Database) CreateUserWithRole(user *models.User) error {
-	role := struct{
-		ID int
-		Name string
+func (d *Database) CreateUser(user *models.User) error {
+	role := struct {
+		ID          int
+		Name        string
 		Description string
 	}{}
 
-	err := d.db.QueryRow(GetRoleByName, user.Role).Scan(
+	err := d.db.QueryRow(GetRoleByName, user.RoleName).Scan(
 		&role.ID,
 		&role.Name,
 		&role.Description,
-	)	
+	)
 	if errors.Is(err, sql.ErrNoRows) {
-		return fmt.Errorf("роль %s не найдена", user.Role)
+		return fmt.Errorf("роль %s не найдена", user.RoleName)
 	}
-	
-	result, err := d.db.Exec(CreateUserWithRoleQuery, user.Username, user.Name, user.PasswordHash, role.ID)
+
+	user.RoleID = role.ID
+
+	result, err := d.db.Exec(CreateUserQuery, user.Username, user.Name, user.PasswordHash, user.RoleID)
 	if err != nil {
 		return err
 	}
@@ -42,6 +44,37 @@ func (d *Database) CreateUserWithRole(user *models.User) error {
 	return nil
 }
 
+func (d *Database) CreateGroup(group *models.Group) error {
+	result, err := d.db.Exec(CreateGroupQuery, group.Name)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	group.ID = int(id)
+	return nil
+}
+
+func (d *Database) CreateStudent(student *models.Student) error {
+	group := &models.Group{}
+
+	err := d.db.QueryRow(GetGroupByName, student.GroupName).Scan(
+		&group.ID,
+		&group.Name,
+	)
+	if err != nil {
+		return err
+	}
+
+	student.GroupID = group.ID
+	_, err = d.db.Exec(CreateStudentQuery, student.UserID, student.GroupID)
+	return err
+}
+
 func (d *Database) GetUserByUsername(username string) (*models.User, error) {
 	user := &models.User{}
 	err := d.db.QueryRow(GetUserByUsernameQuery, username).Scan(
@@ -50,10 +83,9 @@ func (d *Database) GetUserByUsername(username string) (*models.User, error) {
 		&user.Name,
 		&user.PasswordHash,
 		&user.RoleName,
-		&user.GroupName,
 	)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("пользователь с username: %s не найден", username)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user %s: %v", username, err)
 	}
 	return user, nil
 }

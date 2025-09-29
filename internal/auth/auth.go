@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"log"
 	"net/http"
 	"scavenger/internal/models"
 
@@ -27,6 +28,7 @@ func New(cfg models.AuthConfig) *AuthService {
 func (s *AuthService) Login(w http.ResponseWriter, r *http.Request, user *models.User, password string) bool {
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+		log.Printf("Failed to compare hash and password: %v", err)
 		return false
 	}
 
@@ -34,9 +36,12 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request, user *models
 	session.Values["authenticated"] = true
 	session.Values["username"] = user.Username
 	session.Values["name"] = user.Name
-	session.Values["role"] = user.Role
-	session.Values["group"] = user.Group
-	session.Save(r, w)
+	session.Values["role"] = user.RoleName
+	session.Values["group"] = user.GroupName
+	err := session.Save(r, w)
+	if err != nil {
+		log.Printf("Failed to save session: %v", err)
+	}
 	return true
 }
 

@@ -11,19 +11,26 @@ const (
 
 type User struct {
 	ID           int
-	Username     string `yaml:"username"`
-	Name         string `yaml:"name"`
-	PasswordHash string `yaml:"password"`
-	Role         string `yaml:"role"`
-	Group        string `yaml:"group,omitempty"`
+	Username     string
+	Name         string
+	PasswordHash string
+	RoleID       int
 
-	RoleName  string
+	RoleName string
+}
+
+type Student struct {
+	UserID  int
+	GroupID int
+
+	User      *User
 	GroupName string
 }
 
 type Group struct {
-	Name        string   `yaml:"name"`
-	Disciplines []string `yaml:"disciplines"`
+	ID          int
+	Name        string  
+	Disciplines []string 
 }
 
 type Discipline struct {
@@ -67,16 +74,19 @@ type AuthConfig struct {
 }
 
 type TestDataConfig struct {
-	Roles []string `yaml:"roles"`
-	Users []User `yaml:"users"`
+	Roles struct {
+		Admin []User `yaml:"admin"`
+		Student map[string][]	
+	} `yaml:"roles"`
+	Users []User   `yaml:"users"`
 }
 
 type Config struct {
 	Server      ServerConfig   `yaml:"server"`
 	Auth        AuthConfig     `yaml:"auth"`
 	DB          DatebaseConfig `yaml:"database"`
-	Users       []User         `yaml:"users"`
-	Groups      []Group        `yaml:"groups"`
+	Users       []User         
+	Groups      []Group        
 	Disciplines []Discipline   `yaml:"disciplines"`
 	LabReports  []LabReport    `yaml:"lab_reports,omitempty"`
 	TestData    TestDataConfig `yaml:"test_data"`

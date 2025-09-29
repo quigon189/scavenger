@@ -1,7 +1,7 @@
 -- +goose Up
 CREATE TABLE groups (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	number INTEGER NOT NULL,
+	number INTEGER,
 	name TEXT NOT NULL
 );
 
