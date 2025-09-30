@@ -6,7 +6,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func RegisterUser(username, name, password, role, group string) (*models.User, error) {
+func RegisterUser(username, name, password, role string) (*models.User, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -14,8 +14,7 @@ func RegisterUser(username, name, password, role, group string) (*models.User, e
 	return &models.User{
 		Username: username,
 		Name: name,
-		Role: role,
-		Group: group,
+		RoleName: role,
 		PasswordHash: string(passwordHash),
 	}, nil
 }

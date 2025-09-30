@@ -10,21 +10,17 @@ const (
 )
 
 type User struct {
-	ID           int
-	Username     string
-	Name         string
-	PasswordHash string
-	RoleID       int
+	ID           int `yaml:"id"`
+	Username     string `yaml:"username"`
+	Name         string `yaml:"name"`
+	PasswordHash string `yaml:"password"`
 
-	RoleName string
-}
+	RoleID       int `yaml:"role_id"`
+	RoleName string `yaml:"role"`
 
-type Student struct {
-	UserID  int
 	GroupID int
-
-	User      *User
 	GroupName string
+
 }
 
 type Group struct {
@@ -76,9 +72,8 @@ type AuthConfig struct {
 type TestDataConfig struct {
 	Roles struct {
 		Admin []User `yaml:"admin"`
-		Student map[string][]	
+		Student map[string][]User `yaml:"student"`
 	} `yaml:"roles"`
-	Users []User   `yaml:"users"`
 }
 
 type Config struct {

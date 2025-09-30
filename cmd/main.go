@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"scavenger/internal/auth"
 	"scavenger/internal/config"
 	"scavenger/internal/database"
 	"scavenger/internal/server"
@@ -30,42 +29,17 @@ func main() {
 		log.Fatalf("Failed apply migrations: %v", err)
 	}
 
-	for _, role := range cfg.TestData.Roles {
-		if err := db.CreateRole(role, ""); err != nil {
-			log.Printf("Failed to create role %s: %v", role, err)
-			continue
-		}
-		log.Printf("Role %s created", role)
-	}
-
-	for _, user := range cfg.TestData.Users {
-		u, err := auth.RegisterUser(
-			user.Username,
-			user.Name,
-			user.PasswordHash,
-			user.Role,
-			user.Group,
-		)
-		if err != nil {
-			log.Printf("User %+v not registred with error: %v", user, err)
-			continue
-		}
-		if err := db.CreateUserWithRole(u); err != nil {
-			log.Printf("Failed to create user %+v error: %v", user, err)
-			continue
-		}
-		log.Printf("User created: %+v", u)
-	}
+	db.SetTestData(cfg)
 
 	srv := server.New(cfg, db)
 
 	go func() {
 		if err := srv.Start(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server failed: %v", err)	
+			log.Fatalf("Server failed: %v", err)
 		}
 	}()
 
-	quit :=make(chan os.Signal, 1)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 

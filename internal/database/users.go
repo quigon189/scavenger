@@ -45,7 +45,7 @@ func (d *Database) CreateUser(user *models.User) error {
 }
 
 func (d *Database) CreateGroup(group *models.Group) error {
-	result, err := d.db.Exec(CreateGroupQuery, group.Name)
+	result, err := d.db.Exec(CreateGroupQuery, 0, group.Name)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (d *Database) CreateGroup(group *models.Group) error {
 	return nil
 }
 
-func (d *Database) CreateStudent(student *models.Student) error {
+func (d *Database) CreateStudent(student *models.User) error {
 	group := &models.Group{}
 
 	err := d.db.QueryRow(GetGroupByName, student.GroupName).Scan(
@@ -71,7 +71,7 @@ func (d *Database) CreateStudent(student *models.Student) error {
 	}
 
 	student.GroupID = group.ID
-	_, err = d.db.Exec(CreateStudentQuery, student.UserID, student.GroupID)
+	_, err = d.db.Exec(CreateStudentQuery, student.ID, student.GroupID)
 	return err
 }
 

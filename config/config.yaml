@@ -14,11 +14,18 @@ test_data:
         name: Admin
         password: ghjgecr123
     student:
-      group:
-        СА-502:
-          - username: sa502-ivanov
-            name: Ivanov I. I.
-            password: 123
+      СА-502:
+        - username: "sa502-ivanov"
+          name: Ivanov I.I.
+          password: 123
+      Ш-208:
+        - username: "sh208-petrov"
+          name: Petrov P.P.
+          password: 321
+
+        - username: "sh280-sidorova"
+          name: Sidorova S.S.
+          password: 123321
 
 # users:
 #     - username: admin

@@ -2,7 +2,7 @@
 CREATE TABLE groups (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	number INTEGER,
-	name TEXT NOT NULL
+	name TEXT NOT NULL UNIQUE
 );
 
 -- +goose Down

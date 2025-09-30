@@ -17,7 +17,7 @@ import (
 func (h *Handler) StudentDashboard(w http.ResponseWriter, r *http.Request) {
 	user := h.authService.GetUser(r)
 
-	disciplines := h.cfg.GetGroupDisciplines(user.Group)
+	disciplines := h.cfg.GetGroupDisciplines("СА-502")
 	reports := h.cfg.GetStudentReports(user.Username)
 
 	views.StudentDashboard(disciplines, user, reports).Render(r.Context(), w)
