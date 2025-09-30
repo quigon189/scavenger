@@ -14,11 +14,8 @@ func (h *Handler) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		user := h.authService.GetUser(r)
-
-		ctx := context.WithValue(r.Context(), "user", user)
-
+		ctx := context.WithValue(r.Context(), "user", *user)
 		log.Printf("Login user: %+v", user)
-
 		next.ServeHTTP(w,r.WithContext(ctx))
 	}
 }

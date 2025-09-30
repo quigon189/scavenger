@@ -90,6 +90,4 @@ func (h *Handler) Logout(w http.ResponseWriter, r * http.Request) {
 	http.Redirect(w,r,"/",http.StatusSeeOther)
 }
 
-func (h *Handler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
-	views.AdminDashboard().Render(r.Context(), w)
-}
+

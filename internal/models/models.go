@@ -10,23 +10,22 @@ const (
 )
 
 type User struct {
-	ID           int `yaml:"id"`
+	ID           int    `yaml:"id"`
 	Username     string `yaml:"username"`
 	Name         string `yaml:"name"`
 	PasswordHash string `yaml:"password"`
 
-	RoleID       int `yaml:"role_id"`
+	RoleID   int    `yaml:"role_id"`
 	RoleName string `yaml:"role"`
 
-	GroupID int
+	GroupID   int
 	GroupName string
-
 }
 
 type Group struct {
 	ID          int
-	Name        string  
-	Disciplines []string 
+	Name        string
+	Disciplines []string
 }
 
 type Discipline struct {
@@ -50,7 +49,7 @@ type LabReport struct {
 	LabName    string    `yaml:"lab_name"`
 	Path       string    `yaml:"path"`
 	Comment    string    `yaml:"comment"`
-	UploadetAt time.Time `yaml:"uploadet_at"`
+	UploadedAt time.Time `yaml:"uploadet_at"`
 	Status     string    `yaml:"stastus"`
 	Grade      int       `yaml:"grade"`
 }
@@ -71,17 +70,24 @@ type AuthConfig struct {
 
 type TestDataConfig struct {
 	Roles struct {
-		Admin []User `yaml:"admin"`
+		Admin   []User            `yaml:"admin"`
 		Student map[string][]User `yaml:"student"`
 	} `yaml:"roles"`
+}
+
+type AdminStats struct {
+	TotalReports   int
+	PendingReports int
+	GradedReports  int
+	TotalStudents  int
 }
 
 type Config struct {
 	Server      ServerConfig   `yaml:"server"`
 	Auth        AuthConfig     `yaml:"auth"`
 	DB          DatebaseConfig `yaml:"database"`
-	Users       []User         
-	Groups      []Group        
+	Users       []User
+	Groups      []Group
 	Disciplines []Discipline   `yaml:"disciplines"`
 	LabReports  []LabReport    `yaml:"lab_reports,omitempty"`
 	TestData    TestDataConfig `yaml:"test_data"`

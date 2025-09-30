@@ -119,7 +119,7 @@ func (h *Handler) UploadReport(w http.ResponseWriter, r *http.Request) {
 		LabName:    h.cfg.GetLab(labID).Name,
 		Path:       uploadPath,
 		Comment:    comment,
-		UploadetAt: time.Now(),
+		UploadedAt: time.Now(),
 		Status:     "submitted",
 	}
 
