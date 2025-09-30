@@ -4,6 +4,7 @@ const (
 	// Roles
 	CreateRoleQuery = `INSERT INTO roles (name, description) VALUES (?, ?)`
 	GetRoleByName = `SELECT id, name, description FROM roles WHERE name = ?`
+	GetAllRolesQuery = `SELECT name FROM roles`
 
 	// Groups
 	GetAllGroupsQuery = `SELECT id, name FROM groups`
@@ -12,7 +13,7 @@ const (
 		SELECT g.name
 		FROM students s
 		LEFT JOIN groups g ON s.group_id = g.id
-		WHERE s.id = ?
+		WHERE s.user_id = ?
 	`
 	CreateGroupQuery = `INSERT INTO groups (number, name) VALUES (?, ?)`
 

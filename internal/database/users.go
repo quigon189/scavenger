@@ -89,3 +89,44 @@ func (d *Database) GetUserByUsername(username string) (*models.User, error) {
 	}
 	return user, nil
 }
+
+func (d *Database) GetRoles() ([]string, error) {
+	var roles []string
+
+	row, err := d.db.Query(GetAllRolesQuery)
+	if err != nil {
+		return roles, err
+	}
+
+	for row.Next() {
+		var role string
+		err := row.Scan(&role)
+		if err == nil {
+			roles = append(roles, role)
+		}
+	}
+
+	return roles, nil
+}
+
+func (d *Database) GetAllGroups() ([]models.Group, error) {
+	groups := []models.Group{}
+	row, err := d.db.Query(GetAllGroupsQuery)
+	if err != nil {
+		return groups, err
+	}
+
+	for row.Next() {
+		var group models.Group
+		err := row.Scan(&group.ID, &group.Name)
+		if err == nil {
+			groups = append(groups, group)
+		}
+	}
+
+	return groups, nil
+}
+
+func (d *Database) GetStudentGroup(student *models.User) error {
+	return d.db.QueryRow(GetStudentGroupQuery, student.ID).Scan(&student.GroupName)
+}

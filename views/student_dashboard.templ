@@ -8,7 +8,8 @@ templ StudentDashboard(disciplines []models.Discipline, user *models.User, repor
 	@Base("Панель студента", studentDashboard(disciplines, user, reports))
 }
 
-templ studentDashboard(disciplines []models.Discipline, user *models.User, reports []models.LabReport) {
+templ studentDashboard(disciplines []models.Discipline, user2 *models.User, reports []models.LabReport) {
+	{{ user := models.GetUserFromContext(ctx) }}
 	<div class="row">
       <div class="col-md-3">
 
@@ -20,7 +21,7 @@ templ studentDashboard(disciplines []models.Discipline, user *models.User, repor
           </div>
           <div class="card-body">
             <p><strong>ФИО:</strong> { user.Name }</p>
-            <p><strong>Группа:</strong> </p>
+            <p><strong>Группа:</strong> { user.GroupName }</p>
           </div>
         </div>
                 

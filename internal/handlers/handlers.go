@@ -54,6 +54,16 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w,r,"/login", http.StatusSeeOther)
 			return
 		}
+
+		if user.RoleName == string(models.StudentRole) {
+			err := h.db.GetStudentGroup(user)
+			if err != nil{
+				alerts.FlashError(w,r,"Ошибка при получении группы пользователя")
+				log.Printf("Failed to det student group: %v", err)
+				return
+			}
+		}
+
 		log.Printf("Get user %+v from db", user)
 
 		if h.authService.Login(w, r, user, password) {

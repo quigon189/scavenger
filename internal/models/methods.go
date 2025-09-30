@@ -1,5 +1,7 @@
 package models
 
+import "context"
+
 func (cfg *Config) GetGroupDisciplines(groupName string) []Discipline {
 	var groupDisciplnes []Discipline
 
@@ -60,4 +62,12 @@ func (cfg *Config) GetLab(id string) *Lab {
 	}
 
 	return lab
+}
+
+func GetUserFromContext(ctx context.Context) *User {
+	if user, ok := ctx.Value("user").(User); ok {
+		return &user
+	}
+	return &User{}
+
 }

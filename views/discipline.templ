@@ -10,7 +10,9 @@ templ DisciplinePage(discipline *models.Discipline, reports map[string][]models.
 @Base(discipline.Name, disciplinePage(discipline, reports, user))
 }
 
-templ disciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport,  user *models.User) {
+templ disciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport,  user2 *models.User) {
+
+{{ user := models.GetUserFromContext(ctx) }}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
 	<div>
@@ -19,7 +21,7 @@ templ disciplinePage(discipline *models.Discipline, reports map[string][]models.
 		<hr>
 	</div>
 	<a href="/dashboard" class="btn btn-outline-secondary">
-		<i class="fas fa-arrow-left"></i> Назад
+		<i class="fas fa-arrow-left"> { user.GroupName }</i> Назад
 	</a>
 </div>
 

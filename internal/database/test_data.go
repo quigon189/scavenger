@@ -4,32 +4,45 @@ import (
 	"log"
 	"scavenger/internal/auth"
 	"scavenger/internal/models"
+	"slices"
 )
 
 func (db *Database) SetTestData(cfg *models.Config) {
-	log.Printf("Test data: %+v", cfg.TestData)
-	if err := db.CreateRole("admin", "Admin role"); err != nil {
-		log.Printf("Failed to create admin role")
-	} else {
-		log.Printf("Role admin created")
+
+	roles, err := db.GetRoles()
+	if err != nil {
+		log.Fatalf("Failed to get roles: %v", err)
 	}
 
-	if err := db.CreateRole("student", "Student role"); err != nil {
-		log.Printf("Failed to create student role")
-	} else {
-		log.Printf("Role student created")
+	if !slices.Contains(roles, string(models.AdminRole)) {
+		if err := db.CreateRole(string(models.AdminRole), "Admin role"); err != nil {
+			log.Fatalf("Failed to create admin role")
+		} else {
+			log.Printf("Role admin created")
+		}
+	}
+
+	if !slices.Contains(roles, string(models.StudentRole)) {
+		if err := db.CreateRole(string(models.StudentRole), "Student role"); err != nil {
+			log.Fatalf("Failed to create student role")
+		} else {
+			log.Printf("Role student created")
+		}
 	}
 
 	for _, admin := range cfg.TestData.Roles.Admin {
-		admin, err := auth.RegisterUser(admin.Username, admin.Name, admin.PasswordHash, "admin")
+		_, err := db.GetUserByUsername(admin.Username)
 		if err != nil {
-			log.Printf("Failed to register admin: %v", err)
-			continue
-		}
-		if err := db.CreateUser(admin); err != nil {
-			log.Printf("Failed to create admin %s: %v", admin.Name, err)
-		} else {
-			log.Printf("User %s created", admin.Name)
+			admin, err := auth.RegisterUser(admin.Username, admin.Name, admin.PasswordHash, string(models.AdminRole))
+			if err != nil {
+				log.Printf("Failed to register admin: %v", err)
+				continue
+			}
+			if err := db.CreateUser(admin); err != nil {
+				log.Printf("Failed to create admin %s: %v", admin.Name, err)
+			} else {
+				log.Printf("User %s created", admin.Name)
+			}
 		}
 	}
 
@@ -50,7 +63,7 @@ func (db *Database) SetTestData(cfg *models.Config) {
 				log.Printf("Failed to create user(student) %v: %v", student, err)
 			}
 			student.GroupName = groupName
-			
+
 			if err := db.CreateStudent(student); err != nil {
 				log.Printf("Failed to create student %+v: %v", student, err)
 			} else {
