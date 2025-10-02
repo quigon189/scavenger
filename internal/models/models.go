@@ -25,33 +25,34 @@ type User struct {
 type Group struct {
 	ID          int
 	Name        string
-	Disciplines []string
+	Disciplines []Discipline
+	Students    []User
 }
 
 type Discipline struct {
-	ID   string `yaml:"id"`
-	Name string `yaml:"name"`
-	Labs []Lab  `yaml:"labs"`
+	ID   int
+	Name string
+	Labs []Lab
 }
 
 type Lab struct {
-	ID       string    `yaml:"id"`
-	Name     string    `yaml:"name"`
-	Path     string    `yaml:"path"`
-	Deadline time.Time `yaml:"deadline,omitempty"`
+	ID       string
+	Name     string
+	Path     string
+	Deadline time.Time
 }
 
 type LabReport struct {
-	ID         string    `yaml:"id"`
-	Student    string    `yaml:"student"`
-	Group      string    `yaml:"group"`
-	Discipline string    `yaml:"discipline"`
-	LabName    string    `yaml:"lab_name"`
-	Path       string    `yaml:"path"`
-	Comment    string    `yaml:"comment"`
-	UploadedAt time.Time `yaml:"uploadet_at"`
-	Status     string    `yaml:"stastus"`
-	Grade      int       `yaml:"grade"`
+	ID         string
+	Student    string
+	Group      string
+	Discipline string
+	LabName    string
+	Path       string
+	Comment    string
+	UploadedAt time.Time
+	Status     string
+	Grade      int
 }
 
 type DatebaseConfig struct {
@@ -86,9 +87,5 @@ type Config struct {
 	Server      ServerConfig   `yaml:"server"`
 	Auth        AuthConfig     `yaml:"auth"`
 	DB          DatebaseConfig `yaml:"database"`
-	Users       []User
-	Groups      []Group
-	Disciplines []Discipline   `yaml:"disciplines"`
-	LabReports  []LabReport    `yaml:"lab_reports,omitempty"`
 	TestData    TestDataConfig `yaml:"test_data"`
 }

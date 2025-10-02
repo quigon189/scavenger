@@ -181,9 +181,9 @@ func studentDashboard(disciplines []models.Discipline, user2 *models.User, repor
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var9 templ.SafeURL
-				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs("/discipline/" + discipline.ID)
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs("/discipline/" + discipline.IDtoStr())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 77, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/student_dashboard.templ`, Line: 77, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"scavenger/internal/alerts"
 )
@@ -15,7 +14,6 @@ func (h *Handler) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 		user := h.authService.GetUser(r)
 		ctx := context.WithValue(r.Context(), "user", *user)
-		log.Printf("Login user: %+v", user)
 		next.ServeHTTP(w,r.WithContext(ctx))
 	}
 }

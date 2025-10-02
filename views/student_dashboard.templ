@@ -74,7 +74,7 @@ templ studentDashboard(disciplines []models.Discipline, user2 *models.User, repo
                     </p>
                   </div>
                   <div class="card-footer">
-                    <a href={ "/discipline/" + discipline.ID } class="btn btn-primary btn-sm">
+                    <a href={ "/discipline/" + discipline.IDtoStr() } class="btn btn-primary btn-sm">
                       <i class="fas fa-folder-open"></i> Открыть
                     </a>
                   </div>

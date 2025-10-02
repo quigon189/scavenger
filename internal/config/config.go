@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 	"scavenger/internal/models"
 
@@ -19,7 +18,6 @@ func LoadConfig(path string) (*models.Config, error) {
 		return nil, err
 	}
 	
-	log.Printf("Config loadet: %+v", &cfg)
 	return &cfg, nil
 }
 

@@ -1,0 +1,339 @@
+package views
+
+import (
+	"scavenger/internal/models"
+)
+
+templ GroupsManager(groups []models.Group, disciplines []models.Discipline) {
+	@Base("Управление группами", groupsManager(groups, disciplines))
+}
+
+templ groupsManager(groups []models.Group, disciplines []models.Discipline) {
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h3>Управление группами</h3>
+		<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+			<i class="fas fa-plus"></i> Добавить группу
+		</button>
+	</div>
+
+	<div class="row">
+		for _, group := range groups {
+			<div class="col-md-6 mb-4">
+				<div class="card h-100">
+					<div class="card-header d-flex justify-content-between align-items-center">
+						<h5 class="card-title mb-0">
+							<i class="fas fa-users me-2"></i>{ group.Name }
+						</h5>
+						<div class="btn-group btn-group-sm">
+							<button type="button" 
+									class="btn btn-outline-primary"
+									data-bs-toggle="modal" 
+									data-bs-target={ "#editGroupModal-" + group.IDtoStr() }>
+								<i class="fas fa-edit"></i> Изменить
+							</button>
+							<button type="button" 
+									class="btn btn-outline-danger"
+									data-bs-toggle="modal" 
+									data-bs-target={ "#deleteGroupModal-" + group.IDtoStr() }>
+								<i class="fas fa-trash"></i> Удалить
+							</button>
+						</div>
+					</div>
+					<div class="card-body">
+						<div class="row text-center mb-3">
+							<div class="col-6">
+								<div class="border-end">
+									<h4>{ len(group.Disciplines) }</h4>
+									<small class="text-muted">Дисциплин</small>
+								</div>
+							</div>
+							<div class="col-6">
+								<div>
+									<h4>{ len(group.Students) }</h4>
+									<small class="text-muted">Студентов</small>
+								</div>
+							</div>
+						</div>
+						
+						<h6>Дисциплины группы:</h6>
+						<div class="mb-3">
+							for _, disc := range group.Disciplines {
+								<span class="badge bg-info me-1 mb-1">
+									{ disc.Name }
+									<button type="button" 
+											class="btn-close btn-close-white ms-1"
+											style="font-size: 0.7em;"
+											data-bs-toggle="modal" 
+											data-bs-target={ "#removeDisciplineModal-" + group.IDtoStr() + "-" + disc.IDtoStr() }>
+									</button>
+								</span>
+								@RemoveDisciplineModal(group, disc)
+							}
+							if len(group.Disciplines) == 0 {
+								<span class="text-muted">Нет дисциплин</span>
+							}
+						</div>
+						
+						<button type="button" 
+								class="btn btn-sm btn-outline-primary w-100"
+								data-bs-toggle="modal" 
+								data-bs-target={ "#addDisciplineToGroupModal-" + group.IDtoStr() }>
+							<i class="fas fa-plus"></i> Добавить дисциплину
+						</button>
+					</div>
+					
+					<!-- Модальные окна для этой группы -->
+					@EditGroupModal(group, disciplines)
+					@DeleteGroupModal(group)
+					@AddDisciplineToGroupModal(group, disciplines)
+				</div>
+			</div>
+		}
+	</div>
+
+	if len(groups) == 0 {
+		<div class="text-center py-5">
+			<i class="fas fa-layer-group fa-3x text-muted mb-3"></i>
+			<h4 class="text-muted">Группы не добавлены</h4>
+			<p class="text-muted">Создайте первую группу для организации учебного процесса</p>
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+				<i class="fas fa-plus"></i> Создать группу
+			</button>
+		</div>
+	}
+
+	@AddGroupModal(disciplines)
+}
+
+templ AddGroupModal(ungroupedDisciplines []models.Discipline) {
+    <div class="modal fade" id="addGroupModal" tabindex="-1" aria-labelledby="addGroupModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGroupModalLabel">Добавить новую группу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/admin/groups" method="post" id="addGroupForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="groupName" class="form-label">Название группы</label>
+                            <input type="text" class="form-control" id="groupName" name="name" required 
+                                   placeholder="Например: ИВТ-101">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Добавить дисциплины в группу</label>
+                            <div class="card">
+                                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                    if len(ungroupedDisciplines) > 0 {
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Существующие дисциплины без группы:</label>
+                                            for _, disc := range ungroupedDisciplines {
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" 
+                                                           name="existing_disciplines" value={ disc.Name }
+                                                           id={ "add-existing-" + disc.Name }>
+                                                    <label class="form-check-label" for={ "add-existing-" + disc.Name }>
+                                                        { disc.Name }
+                                                    </label>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Создать новые дисциплины:</label>
+                                        <div id="newDisciplinesContainer">
+                                            <div class="input-group mb-2">
+                                                <input type="text" class="form-control" name="new_disciplines[]" 
+                                                       placeholder="Название новой дисциплины">
+                                                <button type="button" class="btn btn-outline-danger" onclick="removeNewDisciplineField(this)">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addNewDisciplineField()">
+                                            <i class="fas fa-plus"></i> Добавить поле для дисциплины
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Создать группу</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+
+templ EditGroupModal(group models.Group, allDisciplines []models.Discipline) {
+    <div class="modal fade" id={ "editGroupModal-" + group.IDtoStr() } tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать группу: { group.Name }</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action={ "/admin/groups/" + group.IDtoStr() } method="post">
+                    <input type="hidden" name="old_name" value={ group.Name }>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Название группы</label>
+                            <input type="text" class="form-control" name="name" value={ group.Name } required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Управление дисциплинами</label>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Текущие дисциплины группы</h6>
+                                </div>
+                                <div class="card-body">
+                                    if len(group.Disciplines) > 0 {
+                                        <div class="mb-3">
+                                            for _, disc := range group.Disciplines {
+                                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                                                    <span>{ disc.Name }</span>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target={ "#removeDisciplineModal-" + group.IDtoStr() + "-" + disc.IDtoStr() }>
+                                                        <i class="fas fa-times"></i> Удалить
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
+                                    } else {
+                                        <p class="text-muted mb-3">В группе нет дисциплин</p>
+                                    }
+                                    
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-primary w-100"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target={ "#addDisciplineToGroupModal-" + group.IDtoStr() }>
+                                        <i class="fas fa-plus"></i> Добавить дисциплины
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+templ DeleteGroupModal(group models.Group) {
+    <div class="modal fade" id={ "deleteGroupModal-" + group.IDtoStr() } tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Удаление группы</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Внимание!</strong> Это действие нельзя отменить.
+                    </div>
+                    
+                    <p>Вы уверены, что хотите удалить группу <strong>{ group.Name }</strong>?</p>
+                    
+                    <div class="card border-danger">
+                        <div class="card-body">
+                            <h6 class="card-title">Последствия удаления:</h6>
+                            <ul class="small">
+                                <li>Все студенты этой группы будут перемещены в "Без группы"</li>
+                                <li>Дисциплины останутся в системе, но будут отвязаны от группы</li>
+                                <li>Все отчеты студентов сохранятся в системе</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <form action={ "/admin/groups/" + group.IDtoStr() + "/delete" } method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Удалить группу
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+templ AddDisciplineToGroupModal(group models.Group, ungroupedDisciplines []models.Discipline) {
+    <div class="modal fade" id={ "addDisciplineToGroupModal-" + group.IDtoStr() } tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить дисциплины в группу { group.Name }</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action={ "/admin/groups/" + group.IDtoStr() + "/disciplines" } method="post">
+                    <div class="modal-body">
+                        if len(ungroupedDisciplines) > 0 {
+                            <div class="mb-3">
+                                <label class="form-label">Выберите существующие дисциплины:</label>
+                                <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                    for _, disc := range ungroupedDisciplines {
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   name="existing_disciplines" value={ disc.Name }
+                                                   id={ "add-to-group-" + group.IDtoStr() + "-" + disc.IDtoStr() }>
+                                            <label class="form-check-label" for={ "add-to-group-" + group.IDtoStr() + "-" + disc.IDtoStr() }>
+                                                { disc.Name }
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Добавить дисциплины</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+templ RemoveDisciplineModal(group models.Group, discipline models.Discipline) {
+    <div class="modal fade" id={ "removeDisciplineModal-" + group.IDtoStr() + "-" + discipline.IDtoStr() } tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Удаление дисциплины из группы</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить дисциплину <strong>{ discipline.Name }</strong> из группы <strong>{ group.Name }</strong>?</p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Дисциплина останется в системе, но будет отвязана от группы.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <form action={ "/admin/groups/" + group.IDtoStr() + "/disciplines/" + discipline.IDtoStr() + "/remove" } method="post" class="d-inline">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-unlink"></i> Отвязать дисциплину
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -123,7 +123,7 @@ func (h *Handler) UploadReport(w http.ResponseWriter, r *http.Request) {
 		Status:     "submitted",
 	}
 
-	h.cfg.LabReports = append(h.cfg.LabReports, report)
+	log.Printf("report: %v", report)
 
 	err = config.SaveConfig(h.cfg)
 	if err != nil {

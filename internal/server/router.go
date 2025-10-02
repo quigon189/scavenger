@@ -22,6 +22,8 @@ func setupRouter(cfg *models.Config, db *database.Database) *http.Handler {
 	mux.HandleFunc("/logout", handler.AuthMiddleware(handler.Logout))
 	mux.HandleFunc("/discipline/{id}", handler.StudentMiddleware(handler.DisciplinePage))
 
+	mux.HandleFunc("/admin/groups", handler.AdminMiddleware(handler.GroupManager))
+
 	mux.HandleFunc("/download/{path...}", handler.AuthMiddleware(handler.DownloadLabs))
 	mux.HandleFunc("/upload-report", handler.AuthMiddleware(handler.UploadReport))
 

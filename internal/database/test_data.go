@@ -46,29 +46,42 @@ func (db *Database) SetTestData(cfg *models.Config) {
 		}
 	}
 
-	for groupName, students := range cfg.TestData.Roles.Student {
-		group := models.Group{Name: groupName}
-		if err := db.CreateGroup(&group); err != nil {
-			log.Printf("Failed to create group %s: %v", groupName, err)
-		} else {
-			log.Printf("Group %s created", groupName)
-		}
-		for _, student := range students {
-			student, err := auth.RegisterUser(student.Username, student.Name, student.PasswordHash, "student")
-			if err != nil {
-				log.Printf("Failed to register student %v: %v", student, err)
-				continue
-			}
-			if err := db.CreateUser(student); err != nil {
-				log.Printf("Failed to create user(student) %v: %v", student, err)
-			}
-			student.GroupName = groupName
+	groups, err := db.GetAllGroups()
+	if err != nil {
+		log.Fatalf("Failed to get groups: %v", err)
+	}
+	groupsNames := make([]string, 1)
+	for _, g := range groups {
+		groupsNames = append(groupsNames, g.Name)
+	}
 
-			if err := db.CreateStudent(student); err != nil {
-				log.Printf("Failed to create student %+v: %v", student, err)
+	for groupName, students := range cfg.TestData.Roles.Student {
+		if !slices.Contains(groupsNames, groupName) {
+			group := models.Group{Name: groupName}
+			if err := db.CreateGroup(&group); err != nil {
+				log.Printf("Failed to create group %s: %v", groupName, err)
+				continue
 			} else {
-				log.Printf("Student %+v created", student)
+				log.Printf("Group %s created", groupName)
+			}
+			for _, student := range students {
+				student, err := auth.RegisterUser(student.Username, student.Name, student.PasswordHash, "student")
+				if err != nil {
+					log.Printf("Failed to register student %v: %v", student, err)
+					continue
+				}
+				if err := db.CreateUser(student); err != nil {
+					log.Printf("Failed to create user(student) %v: %v", student, err)
+				}
+				student.GroupName = groupName
+
+				if err := db.CreateStudent(student); err != nil {
+					log.Printf("Failed to create student %+v: %v", student, err)
+				} else {
+					log.Printf("Student %+v created", student)
+				}
 			}
 		}
+
 	}
 }
