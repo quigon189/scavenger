@@ -29,3 +29,28 @@ func (h *Handler) GroupManager(w http.ResponseWriter, r *http.Request) {
 
 	views.GroupsManager(groups, disciplines).Render(r.Context(), w)
 }
+
+func (h *Handler) DisciplinesManager(w http.ResponseWriter, r *http.Request) {
+	groups, err := h.db.GetAllGroups()
+	if err != nil {
+		alerts.FlashError(w,r,"Ошибка при получении групп")
+	}
+
+	disciplines := []models.Discipline{}
+
+	views.DisciplinesManager(disciplines, groups).Render(r.Context(), w)
+}
+
+func (h *Handler) StudentsManager(w http.ResponseWriter, r *http.Request) {
+	groups, err := h.db.GetAllGroups()
+	if err != nil {
+		alerts.FlashError(w,r,"Ошибка при получении групп")
+	}
+
+	students, err := h.db.GetAllStudents()
+	if err != nil {
+		alerts.FlashError(w,r,"Ошибка при получении студентов")
+	}
+
+	views.StudentsManager(students, groups).Render(r.Context(), w)
+}

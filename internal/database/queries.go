@@ -21,6 +21,13 @@ const (
 	CreateUserQuery = `INSERT INTO users (username, name, password_hash, role_id) VALUES (?, ?, ?, ?)`
 	CreateStudentQuery = `INSERT INTO students (user_id, group_id) VALUES (?, ?)`
 
+	GetAllStudentsQuery = `
+		SELECT u.id, u.username, u.name, g.id, g.name
+		FROM students s
+		LEFT JOIN users u ON s.user_id = u.id
+		LEFT JOIN groups g ON s.group_id = g.id
+	`
+
 	GetStudentQuery = `
 		SELECT u.id, u.username, u.name, g.name
 		FROM students s

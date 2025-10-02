@@ -127,6 +127,25 @@ func (d *Database) GetAllGroups() ([]models.Group, error) {
 	return groups, nil
 }
 
+func (d *Database) GetAllStudents() ([]models.User, error) {
+	students := []models.User{}
+	row, err := d.db.Query(GetAllStudentsQuery)
+	if err != nil {
+		return students, err
+	}
+
+	for row.Next() {
+		var stud models.User
+		err := row.Scan(&stud.ID, &stud.Username, &stud.Name, &stud.GroupID, &stud.GroupName)
+		if err == nil {
+			stud.RoleName = string(models.StudentRole)
+			students = append(students, stud)
+		}
+	}
+
+	return students, nil
+}
+
 func (d *Database) GetStudentGroup(student *models.User) error {
 	return d.db.QueryRow(GetStudentGroupQuery, student.ID).Scan(&student.GroupName)
 }

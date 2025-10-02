@@ -83,7 +83,7 @@ templ groupsManager(groups []models.Group, disciplines []models.Discipline) {
 					</div>
 					
 					<!-- Модальные окна для этой группы -->
-					@EditGroupModal(group, disciplines)
+					@EditGroupModal(group)
 					@DeleteGroupModal(group)
 					@AddDisciplineToGroupModal(group, disciplines)
 				</div>
@@ -141,21 +141,6 @@ templ AddGroupModal(ungroupedDisciplines []models.Discipline) {
                                         </div>
                                     }
                                     
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Создать новые дисциплины:</label>
-                                        <div id="newDisciplinesContainer">
-                                            <div class="input-group mb-2">
-                                                <input type="text" class="form-control" name="new_disciplines[]" 
-                                                       placeholder="Название новой дисциплины">
-                                                <button type="button" class="btn btn-outline-danger" onclick="removeNewDisciplineField(this)">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addNewDisciplineField()">
-                                            <i class="fas fa-plus"></i> Добавить поле для дисциплины
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -171,7 +156,7 @@ templ AddGroupModal(ungroupedDisciplines []models.Discipline) {
 }
 
 
-templ EditGroupModal(group models.Group, allDisciplines []models.Discipline) {
+templ EditGroupModal(group models.Group) {
     <div class="modal fade" id={ "editGroupModal-" + group.IDtoStr() } tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -185,41 +170,6 @@ templ EditGroupModal(group models.Group, allDisciplines []models.Discipline) {
                         <div class="mb-3">
                             <label class="form-label">Название группы</label>
                             <input type="text" class="form-control" name="name" value={ group.Name } required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Управление дисциплинами</label>
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6 class="mb-0">Текущие дисциплины группы</h6>
-                                </div>
-                                <div class="card-body">
-                                    if len(group.Disciplines) > 0 {
-                                        <div class="mb-3">
-                                            for _, disc := range group.Disciplines {
-                                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-                                                    <span>{ disc.Name }</span>
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-outline-danger"
-                                                            data-bs-toggle="modal" 
-                                                            data-bs-target={ "#removeDisciplineModal-" + group.IDtoStr() + "-" + disc.IDtoStr() }>
-                                                        <i class="fas fa-times"></i> Удалить
-                                                    </button>
-                                                </div>
-                                            }
-                                        </div>
-                                    } else {
-                                        <p class="text-muted mb-3">В группе нет дисциплин</p>
-                                    }
-                                    
-                                    <button type="button" 
-                                            class="btn btn-sm btn-outline-primary w-100"
-                                            data-bs-toggle="modal" 
-                                            data-bs-target={ "#addDisciplineToGroupModal-" + group.IDtoStr() }>
-                                        <i class="fas fa-plus"></i> Добавить дисциплины
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">

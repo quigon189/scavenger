@@ -58,7 +58,7 @@ func Base(title string, content templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js\"></script><script>\n\t\tvar toastElList = [].slice.call(document.querySelectorAll('.toast[autoshow]'))\n\n\t\tvar toastList = toastElList.map(function (toastEl) {\n\t\t\ttoastEl.removeAttribute('autoshow');\n\t\t\tvar toast = new bootstrap.Toast(toastEl)\n\t\t\ttoast.show()\n\t\t\treturn toast\n\t\t})\n\n\t\ttoastElList.forEach(function(toastEl) {\n\t\t\ttoastEl.addEventListener('hidden.bs.toast', function() {\n\t\t\t\tthis.remove()\n\t\t\t})\n\t\t})\n\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js\"></script><script src=\"static/js/toast.js\"></script><script src=\"static/js/managment.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
