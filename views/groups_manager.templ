@@ -118,7 +118,7 @@ templ AddGroupModal(ungroupedDisciplines []models.Discipline) {
                         <div class="mb-3">
                             <label for="groupName" class="form-label">Название группы</label>
                             <input type="text" class="form-control" id="groupName" name="name" required 
-                                   placeholder="Например: ИВТ-101">
+                                   placeholder="Например: СА-501">
                         </div>
                         
                         <div class="mb-3">
@@ -131,9 +131,9 @@ templ AddGroupModal(ungroupedDisciplines []models.Discipline) {
                                             for _, disc := range ungroupedDisciplines {
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox" 
-                                                           name="existing_disciplines" value={ disc.Name }
-                                                           id={ "add-existing-" + disc.Name }>
-                                                    <label class="form-check-label" for={ "add-existing-" + disc.Name }>
+                                                           name="existing_disciplines" value={ disc.IDtoStr() }
+                                                           id={ "add-existing-" + disc.IDtoStr() }>
+                                                    <label class="form-check-label" for={ "add-existing-" + disc.IDtoStr() }>
                                                         { disc.Name }
                                                     </label>
                                                 </div>
@@ -210,12 +210,15 @@ templ DeleteGroupModal(group models.Group) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <form action={ "/admin/groups/" + group.IDtoStr() + "/delete" } method="post" class="d-inline">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Удалить группу
-                        </button>
+                    <form action={ "/admin/groups/" + group.IDtoStr() + "/delete" } method="post">
+						<div class="input-group">
+							<input type="text" class="form-control" name="name" placeholder="Название группы" required>
+							<button type="submit" class="btn btn-danger">
+								<i class="fas fa-trash"></i> Удалить группу
+							</button>
+						</div>
                     </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                 </div>
             </div>
         </div>

@@ -10,9 +10,9 @@ CREATE TABLE users (
 
 CREATE TABLE students (
 	user_id INTEGER PRIMARY KEY,
-	group_id INTEGER NOT NULL,
-	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-	FOREIGN KEY (group_id) REFERENCES groups(id)
+	group_id INTEGER,
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+	FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE SET NULL
 );
 
 -- +goose Down

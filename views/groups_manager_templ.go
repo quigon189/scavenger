@@ -251,7 +251,7 @@ func AddGroupModal(ungroupedDisciplines []models.Discipline) templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"modal fade\" id=\"addGroupModal\" tabindex=\"-1\" aria-labelledby=\"addGroupModalLabel\" aria-hidden=\"true\"><div class=\"modal-dialog modal-lg\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\" id=\"addGroupModalLabel\">Добавить новую группу</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button></div><form action=\"/admin/groups\" method=\"post\" id=\"addGroupForm\"><div class=\"modal-body\"><div class=\"mb-3\"><label for=\"groupName\" class=\"form-label\">Название группы</label> <input type=\"text\" class=\"form-control\" id=\"groupName\" name=\"name\" required placeholder=\"Например: ИВТ-101\"></div><div class=\"mb-3\"><label class=\"form-label\">Добавить дисциплины в группу</label><div class=\"card\"><div class=\"card-body\" style=\"max-height: 300px; overflow-y: auto;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"modal fade\" id=\"addGroupModal\" tabindex=\"-1\" aria-labelledby=\"addGroupModalLabel\" aria-hidden=\"true\"><div class=\"modal-dialog modal-lg\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\" id=\"addGroupModalLabel\">Добавить новую группу</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button></div><form action=\"/admin/groups\" method=\"post\" id=\"addGroupForm\"><div class=\"modal-body\"><div class=\"mb-3\"><label for=\"groupName\" class=\"form-label\">Название группы</label> <input type=\"text\" class=\"form-control\" id=\"groupName\" name=\"name\" required placeholder=\"Например: СА-501\"></div><div class=\"mb-3\"><label class=\"form-label\">Добавить дисциплины в группу</label><div class=\"card\"><div class=\"card-body\" style=\"max-height: 300px; overflow-y: auto;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -266,9 +266,9 @@ func AddGroupModal(ungroupedDisciplines []models.Discipline) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var12 string
-				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(disc.Name)
+				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(disc.IDtoStr())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 134, Col: 104}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 134, Col: 109}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -279,9 +279,9 @@ func AddGroupModal(ungroupedDisciplines []models.Discipline) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var13 string
-				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("add-existing-" + disc.Name)
+				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("add-existing-" + disc.IDtoStr())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 135, Col: 91}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 135, Col: 96}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -292,9 +292,9 @@ func AddGroupModal(ungroupedDisciplines []models.Discipline) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var14 string
-				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("add-existing-" + disc.Name)
+				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("add-existing-" + disc.IDtoStr())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 136, Col: 117}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 136, Col: 122}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -472,20 +472,20 @@ func DeleteGroupModal(group models.Group) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</strong>?</p><div class=\"card border-danger\"><div class=\"card-body\"><h6 class=\"card-title\">Последствия удаления:</h6><ul class=\"small\"><li>Все студенты этой группы будут перемещены в \"Без группы\"</li><li>Дисциплины останутся в системе, но будут отвязаны от группы</li><li>Все отчеты студентов сохранятся в системе</li></ul></div></div></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button><form action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</strong>?</p><div class=\"card border-danger\"><div class=\"card-body\"><h6 class=\"card-title\">Последствия удаления:</h6><ul class=\"small\"><li>Все студенты этой группы будут перемещены в \"Без группы\"</li><li>Дисциплины останутся в системе, но будут отвязаны от группы</li><li>Все отчеты студентов сохранятся в системе</li></ul></div></div></div><div class=\"modal-footer\"><form action=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var25 templ.SafeURL
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/groups/" + group.IDtoStr() + "/delete")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 214, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 213, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" method=\"post\" class=\"d-inline\"><button type=\"submit\" class=\"btn btn-danger\"><i class=\"fas fa-trash\"></i> Удалить группу</button></form></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" method=\"post\"><div class=\"input-group\"><input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"Название группы\" required> <button type=\"submit\" class=\"btn btn-danger\"><i class=\"fas fa-trash\"></i> Удалить группу</button></div></form><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -521,7 +521,7 @@ func AddDisciplineToGroupModal(group models.Group, ungroupedDisciplines []models
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs("addDisciplineToGroupModal-" + group.IDtoStr())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 226, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 229, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -534,7 +534,7 @@ func AddDisciplineToGroupModal(group models.Group, ungroupedDisciplines []models
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 230, Col: 110}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 233, Col: 110}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
@@ -547,7 +547,7 @@ func AddDisciplineToGroupModal(group models.Group, ungroupedDisciplines []models
 		var templ_7745c5c3_Var29 templ.SafeURL
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/groups/" + group.IDtoStr() + "/disciplines")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 233, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 236, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
@@ -570,7 +570,7 @@ func AddDisciplineToGroupModal(group models.Group, ungroupedDisciplines []models
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(disc.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 242, Col: 96}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 245, Col: 96}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 				if templ_7745c5c3_Err != nil {
@@ -583,7 +583,7 @@ func AddDisciplineToGroupModal(group models.Group, ungroupedDisciplines []models
 				var templ_7745c5c3_Var31 string
 				templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs("add-to-group-" + group.IDtoStr() + "-" + disc.IDtoStr())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 243, Col: 112}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 246, Col: 112}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 				if templ_7745c5c3_Err != nil {
@@ -596,7 +596,7 @@ func AddDisciplineToGroupModal(group models.Group, ungroupedDisciplines []models
 				var templ_7745c5c3_Var32 string
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs("add-to-group-" + group.IDtoStr() + "-" + disc.IDtoStr())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 244, Col: 138}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 247, Col: 138}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
@@ -609,7 +609,7 @@ func AddDisciplineToGroupModal(group models.Group, ungroupedDisciplines []models
 				var templ_7745c5c3_Var33 string
 				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(disc.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 245, Col: 59}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 248, Col: 59}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 				if templ_7745c5c3_Err != nil {
@@ -661,7 +661,7 @@ func RemoveDisciplineModal(group models.Group, discipline models.Discipline) tem
 		var templ_7745c5c3_Var35 string
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs("removeDisciplineModal-" + group.IDtoStr() + "-" + discipline.IDtoStr())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 264, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 267, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -674,7 +674,7 @@ func RemoveDisciplineModal(group models.Group, discipline models.Discipline) tem
 		var templ_7745c5c3_Var36 string
 		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 272, Col: 125}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 275, Col: 125}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
@@ -687,7 +687,7 @@ func RemoveDisciplineModal(group models.Group, discipline models.Discipline) tem
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 272, Col: 175}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 275, Col: 175}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
@@ -700,7 +700,7 @@ func RemoveDisciplineModal(group models.Group, discipline models.Discipline) tem
 		var templ_7745c5c3_Var38 templ.SafeURL
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/groups/" + group.IDtoStr() + "/disciplines/" + discipline.IDtoStr() + "/remove")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 280, Col: 122}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/groups_manager.templ`, Line: 283, Col: 122}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {

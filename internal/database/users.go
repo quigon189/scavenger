@@ -44,21 +44,6 @@ func (d *Database) CreateUser(user *models.User) error {
 	return nil
 }
 
-func (d *Database) CreateGroup(group *models.Group) error {
-	result, err := d.db.Exec(CreateGroupQuery, 0, group.Name)
-	if err != nil {
-		return err
-	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	group.ID = int(id)
-	return nil
-}
-
 func (d *Database) CreateStudent(student *models.User) error {
 	group := &models.Group{}
 
@@ -109,27 +94,29 @@ func (d *Database) GetRoles() ([]string, error) {
 	return roles, nil
 }
 
-func (d *Database) GetAllGroups() ([]models.Group, error) {
-	groups := []models.Group{}
-	row, err := d.db.Query(GetAllGroupsQuery)
-	if err != nil {
-		return groups, err
-	}
-
-	for row.Next() {
-		var group models.Group
-		err := row.Scan(&group.ID, &group.Name)
-		if err == nil {
-			groups = append(groups, group)
-		}
-	}
-
-	return groups, nil
-}
-
 func (d *Database) GetAllStudents() ([]models.User, error) {
 	students := []models.User{}
 	row, err := d.db.Query(GetAllStudentsQuery)
+	if err != nil {
+		return students, err
+	}
+
+	for row.Next() {
+		var stud models.User
+		err := row.Scan(&stud.ID, &stud.Username, &stud.Name, &stud.GroupID, &stud.GroupName)
+		if err == nil {
+			stud.RoleName = string(models.StudentRole)
+			students = append(students, stud)
+		}
+	}
+
+	return students, nil
+}
+
+func (d *Database) GetStudentByGroupID(gID int) ([]models.User, error) {
+	students := []models.User{}
+
+	row, err := d.db.Query(GetStudentsByGroupIDQuery, gID)
 	if err != nil {
 		return students, err
 	}

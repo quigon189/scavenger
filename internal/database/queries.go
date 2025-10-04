@@ -8,6 +8,7 @@ const (
 
 	// Groups
 	GetAllGroupsQuery = `SELECT id, name FROM groups`
+	GetGroupByIDQuery = `SELECT id, name FROM groups WHERE id = ?`
 	GetGroupByName = `SELECT id, name FROM groups WHERE name = ?`
 	GetStudentGroupQuery = `
 		SELECT g.name
@@ -16,10 +17,19 @@ const (
 		WHERE s.user_id = ?
 	`
 	CreateGroupQuery = `INSERT INTO groups (number, name) VALUES (?, ?)`
+	DeleteGroupByIDQuery = `DELETE FROM groups WHERE id = ?`
 
 	// Users
 	CreateUserQuery = `INSERT INTO users (username, name, password_hash, role_id) VALUES (?, ?, ?, ?)`
 	CreateStudentQuery = `INSERT INTO students (user_id, group_id) VALUES (?, ?)`
+
+	GetStudentsByGroupIDQuery = `
+		SELECT u.id, u.username, u.name, g.id, g.name
+		FROM students s
+		LEFT JOIN users u ON s.user_id = u.id
+		LEFT JOIN groups g ON s.group_id = g.id
+		WHERE s.group_id = ?
+	`
 
 	GetAllStudentsQuery = `
 		SELECT u.id, u.username, u.name, g.id, g.name
