@@ -26,8 +26,13 @@ func setupRouter(cfg *models.Config, db *database.Database) *http.Handler {
 	mux.HandleFunc("POST /admin/groups", handler.AdminMiddleware(handler.AddGroup))
 	mux.HandleFunc("POST /admin/groups/{groupID}/delete", handler.AdminMiddleware(handler.DeleteGroup))
 
-	mux.HandleFunc("/admin/disciplines", handler.AdminMiddleware(handler.DisciplinesManager))
-	mux.HandleFunc("/admin/students", handler.AdminMiddleware(handler.StudentsManager))
+	mux.HandleFunc("GET /admin/disciplines", handler.AdminMiddleware(handler.DisciplinesManager))
+	mux.HandleFunc("POST /admin/disciplines", handler.AdminMiddleware(handler.AddDiscipline))
+
+	mux.HandleFunc("GET /admin/students", handler.AdminMiddleware(handler.StudentsManager))
+	mux.HandleFunc("POST /admin/students", handler.AdminMiddleware(handler.AddStudents))
+	mux.HandleFunc("POST /admin/students/{username}", handler.AdminMiddleware(handler.EditStudent))
+	mux.HandleFunc("POST /admin/students/{username}/delete", handler.AdminMiddleware(handler.DeleteStudent))
 
 	mux.HandleFunc("/download/{path...}", handler.AuthMiddleware(handler.DownloadLabs))
 	mux.HandleFunc("/upload-report", handler.AuthMiddleware(handler.UploadReport))

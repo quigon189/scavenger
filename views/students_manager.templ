@@ -103,7 +103,6 @@ templ AddStudentModal(groups []models.Group) {
                         <div class="mb-3">
                             <label class="form-label">Группа</label>
                             <select class="form-select" name="group">
-                                <option value="">Выберите группу</option>
                                 for _, group := range groups {
                                     <option value={ group.IDtoStr() }>{ group.Name }</option>
                                 }
@@ -146,14 +145,13 @@ templ EditStudentModal(user models.User, groups []models.Group) {
                         <div class="mb-3">
                             <label class="form-label">Группа</label>
                             <select class="form-select" name="group">
-                                <option value="">Выберите группу</option>
                                 for _, group := range groups {
 									if user.GroupName == group.Name {
 										<option value={ group.IDtoStr() } selected>
 											{ group.Name }
 										</option>
 									}
-                                    <option value={ group.Name }>
+                                    <option value={ group.IDtoStr() }>
                                         { group.Name }
                                     </option>
                                 }
@@ -196,12 +194,15 @@ templ DeleteStudentModal(student models.User) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                     <form action={ "/admin/students/" + student.Username + "/delete" } method="post" class="d-inline">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Удалить группу
-                        </button>
+						<div class="input-group">
+							<input type="text" class="form-control" name="username" placeholder="Логин" required>
+							<button type="submit" class="btn btn-danger">
+								<i class="fas fa-trash"></i> Удалить студента
+							</button>
+						</div>
                     </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                 </div>
             </div>
         </div>

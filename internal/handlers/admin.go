@@ -3,21 +3,36 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"strconv"
+
 	"scavenger/internal/alerts"
 	"scavenger/internal/models"
 	"scavenger/views"
-	"strconv"
 )
 
 func (h *Handler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
+	groups, err := h.db.GetAllGroupsWithDisciplines()
+	if err != nil {
+		alerts.FlashWarning(w,r,"Группы не загруженны")
+		log.Printf("Failed to get groups: %v", err)
+		groups = []models.Group{}
+	}
+
 	stats := models.AdminStats{
 		TotalReports:   10,
 		PendingReports: 3,
 		GradedReports:  7,
-		TotalStudents:  3,
+		TotalGroups:  len(groups),
 	}
 	reports := []models.LabReport{}
-	disciplines := []models.Discipline{}
+
+	disciplines, err := h.db.GetDisciplines()
+	if err != nil {
+		alerts.FlashWarning(w,r,"Дисциплины не загруженны")
+		log.Printf("Failed to get disciplines: %v", err)
+		disciplines = []models.Discipline{}
+	}
+
 	views.AdminDashboard(&stats, reports, disciplines).Render(r.Context(), w)
 }
 
@@ -32,37 +47,6 @@ func (h *Handler) GroupManager(w http.ResponseWriter, r *http.Request) {
 	disciplines := []models.Discipline{}
 
 	views.GroupsManager(groups, disciplines).Render(r.Context(), w)
-}
-
-func (h *Handler) DisciplinesManager(w http.ResponseWriter, r *http.Request) {
-	groups, err := h.db.GetAllGroups()
-	if err != nil {
-		alerts.FlashError(w, r, "Ошибка при получении групп")
-		log.Printf("Failed to get groups: %v", err)
-		groups = []models.Group{}
-	}
-
-	disciplines := []models.Discipline{}
-
-	views.DisciplinesManager(disciplines, groups).Render(r.Context(), w)
-}
-
-func (h *Handler) StudentsManager(w http.ResponseWriter, r *http.Request) {
-	groups, err := h.db.GetAllGroups()
-	if err != nil {
-		alerts.FlashError(w, r, "Ошибка при получении групп")
-		log.Printf("Failed to get groups: %v", err)
-		groups = []models.Group{}
-	}
-
-	students, err := h.db.GetAllStudents()
-	if err != nil {
-		alerts.FlashError(w, r, "Ошибка при получении студентов")
-		log.Printf("Failed to get users: %v", err)
-		students = []models.User{}
-	}
-
-	views.StudentsManager(students, groups).Render(r.Context(), w)
 }
 
 func (h *Handler) AddGroup(w http.ResponseWriter, r *http.Request) {

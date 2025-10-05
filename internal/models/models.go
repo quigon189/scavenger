@@ -30,9 +30,12 @@ type Group struct {
 }
 
 type Discipline struct {
-	ID   int
-	Name string
-	Labs []Lab
+	ID      int
+	Name    string
+	GroupID *int
+
+	Group Group
+	Labs  []Lab
 }
 
 type Lab struct {
@@ -80,12 +83,12 @@ type AdminStats struct {
 	TotalReports   int
 	PendingReports int
 	GradedReports  int
-	TotalStudents  int
+	TotalGroups    int
 }
 
 type Config struct {
-	Server      ServerConfig   `yaml:"server"`
-	Auth        AuthConfig     `yaml:"auth"`
-	DB          DatebaseConfig `yaml:"database"`
-	TestData    TestDataConfig `yaml:"test_data"`
+	Server   ServerConfig   `yaml:"server"`
+	Auth     AuthConfig     `yaml:"auth"`
+	DB       DatebaseConfig `yaml:"database"`
+	TestData TestDataConfig `yaml:"test_data"`
 }

@@ -106,15 +106,15 @@ func adminDashboard(stats *models.AdminStats, reports []models.LabReport, discip
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(stats.TotalStudents)
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(stats.TotalGroups)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_dashboard.templ`, Line: 57, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_dashboard.templ`, Line: 57, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</h4><p class=\"mb-0\">Студентов</p></div><i class=\"fas fa-users fa-2x\"></i></div></div></div></div></div><div class=\"row\"><div class=\"col-md-4\"><div class=\"card\"><div class=\"card-header d-flex justify-content-between align-items-center\"><h5 class=\"card-title mb-0\">Быстрые действия</h5></div><div class=\"card-body\"><div class=\"d-grid gap-2\"><a href=\"/admin/reports\" class=\"btn btn-outline-primary btn-sm\"><i class=\"fas fa-list-check\"></i> Все отчеты</a> <a href=\"/admin/students\" class=\"btn btn-outline-secondary btn-sm\"><i class=\"fas fa-users\"></i> Управление студентами</a> <a href=\"/admin/disciplines\" class=\"btn btn-outline-info btn-sm\"><i class=\"fas fa-book\"></i> Управление дисциплинами</a> <a href=\"/admin/groups\" class=\"btn btn-outline-success btn-sm\"><i class=\"fas fa-layer-group\"></i> Управление группами</a></div></div></div><div class=\"card mt-3\"><div class=\"card-header\"><h5 class=\"card-title mb-0\">Последние отчеты</h5></div><div class=\"card-body\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</h4><p class=\"mb-0\">Группы</p></div><i class=\"fas fa-users fa-2x\"></i></div></div></div></div></div><div class=\"row\"><div class=\"col-md-4\"><div class=\"card\"><div class=\"card-header d-flex justify-content-between align-items-center\"><h5 class=\"card-title mb-0\">Действия</h5></div><div class=\"card-body\"><div class=\"d-grid gap-2\"><a href=\"/admin/reports\" class=\"btn btn-outline-primary btn-sm\"><i class=\"fas fa-list-check\"></i> Все отчеты</a> <a href=\"/admin/students\" class=\"btn btn-outline-secondary btn-sm\"><i class=\"fas fa-users\"></i> Управление студентами</a> <a href=\"/admin/disciplines\" class=\"btn btn-outline-info btn-sm\"><i class=\"fas fa-book\"></i> Управление дисциплинами</a> <a href=\"/admin/groups\" class=\"btn btn-outline-success btn-sm\"><i class=\"fas fa-layer-group\"></i> Управление группами</a></div></div></div><div class=\"card mt-3\"><div class=\"card-header\"><h5 class=\"card-title mb-0\">Последние отчеты</h5></div><div class=\"card-body\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

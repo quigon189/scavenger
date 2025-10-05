@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"scavenger/internal/models"
 )
 
@@ -45,17 +46,25 @@ func (d *Database) CreateUser(user *models.User) error {
 }
 
 func (d *Database) CreateStudent(student *models.User) error {
-	group := &models.Group{}
-
-	err := d.db.QueryRow(GetGroupByName, student.GroupName).Scan(
-		&group.ID,
-		&group.Name,
-	)
+	err := d.CreateUser(student)
 	if err != nil {
 		return err
 	}
 
-	student.GroupID = group.ID
+	if student.GroupID == 0 {
+		group := &models.Group{}
+
+		err = d.db.QueryRow(GetGroupByName, student.GroupName).Scan(
+			&group.ID,
+			&group.Name,
+		)
+		if err != nil {
+			return err
+		}
+
+		student.GroupID = group.ID
+	}
+
 	_, err = d.db.Exec(CreateStudentQuery, student.ID, student.GroupID)
 	return err
 }
@@ -107,6 +116,8 @@ func (d *Database) GetAllStudents() ([]models.User, error) {
 		if err == nil {
 			stud.RoleName = string(models.StudentRole)
 			students = append(students, stud)
+		} else {
+			log.Printf("Failed get stud from db: %v", err)
 		}
 	}
 
@@ -133,6 +144,65 @@ func (d *Database) GetStudentByGroupID(gID int) ([]models.User, error) {
 	return students, nil
 }
 
+func (d *Database) DeleteStudent(student *models.User) error {
+	tx, err := d.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(DeleteStudentQuery, student.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err =tx.Exec(DeleteUserQuery, student.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+	return nil
+}
+
+func (d *Database) GetStudentByUsername(username string) (*models.User, error) {
+	student := &models.User{}
+	err := d.db.QueryRow(GetStudentByUsernameQuery, username).Scan(
+		&student.ID,
+		&student.Username,
+		&student.Name,
+		&student.GroupID,
+		&student.GroupName,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get student %s: %v", username, err)
+	}
+	return student, nil
+
+}
+
 func (d *Database) GetStudentGroup(student *models.User) error {
 	return d.db.QueryRow(GetStudentGroupQuery, student.ID).Scan(&student.GroupName)
+}
+
+func (d *Database) UpadateStudent(student *models.User) error {
+	tx, err := d.db.Begin()
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(UpdateUserQuery, student.Username, student.Name, student.PasswordHash, student.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(UpdateStudentQuery, student.GroupID, student.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+	return nil
 }

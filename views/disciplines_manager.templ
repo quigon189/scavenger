@@ -96,13 +96,13 @@ templ disciplinesManager(disciplines []models.Discipline, groups []models.Group)
 												<button type="button" 
 														class="btn btn-outline-primary"
 														data-bs-toggle="modal" 
-														data-bs-target={ "#editDisciplineModal-" + discipline.Name }>
+														data-bs-target={ "#editDisciplineModal-" + discipline.IDtoStr() }>
 													<i class="fas fa-edit"></i>
 												</button>
 												<button type="button" 
 														class="btn btn-outline-danger"
 														data-bs-toggle="modal" 
-														data-bs-target={ "#deleteDisciplineModal-" + discipline.Name }>
+														data-bs-target={ "#deleteDisciplineModal-" + discipline.IDtoStr() }>
 													<i class="fas fa-trash"></i>
 												</button>
 											</div>
@@ -161,7 +161,7 @@ templ AddDisciplineModal(groups []models.Group) {
                             <select class="form-select" name="group">
                                 <option value="">Без группы (назначить позже)</option>
                                 for _, group := range groups {
-                                    <option value={ group.Name }>{ group.Name }</option>
+                                    <option value={ group.IDtoStr() }>{ group.Name }</option>
                                 }
                             </select>
                             <div class="form-text">
@@ -203,7 +203,7 @@ templ EditDisciplineModal(discipline models.Discipline, groups []models.Group) {
                                     <select class="form-select" name="group">
                                         <option value="">Без группы</option>
                                         for _, group := range groups {
-                                            <option value={ group.Name }>
+                                            <option value={ group.IDtoStr() }>
                                                 { group.Name }
                                             </option>
                                         }

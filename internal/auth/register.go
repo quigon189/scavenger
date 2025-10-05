@@ -18,3 +18,11 @@ func RegisterUser(username, name, password, role string) (*models.User, error) {
 		PasswordHash: string(passwordHash),
 	}, nil
 }
+
+func GeneratePassHash(password string) (string, error) {
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(passwordHash), nil
+}

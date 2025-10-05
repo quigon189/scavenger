@@ -217,9 +217,9 @@ func disciplinesManager(disciplines []models.Discipline, groups []models.Group) 
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("#editDisciplineModal-" + discipline.Name)
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("#editDisciplineModal-" + discipline.IDtoStr())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/disciplines_manager.templ`, Line: 99, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/disciplines_manager.templ`, Line: 99, Col: 77}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -230,9 +230,9 @@ func disciplinesManager(disciplines []models.Discipline, groups []models.Group) 
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var12 string
-				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("#deleteDisciplineModal-" + discipline.Name)
+				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("#deleteDisciplineModal-" + discipline.IDtoStr())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/disciplines_manager.templ`, Line: 105, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/disciplines_manager.templ`, Line: 105, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -309,9 +309,9 @@ func AddDisciplineModal(groups []models.Group) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(group.IDtoStr())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/disciplines_manager.templ`, Line: 164, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/disciplines_manager.templ`, Line: 164, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -324,7 +324,7 @@ func AddDisciplineModal(groups []models.Group) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/disciplines_manager.templ`, Line: 164, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/disciplines_manager.templ`, Line: 164, Col: 82}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -439,9 +439,9 @@ func EditDisciplineModal(discipline models.Discipline, groups []models.Group) te
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var22 string
-			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
+			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(group.IDtoStr())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/disciplines_manager.templ`, Line: 206, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/disciplines_manager.templ`, Line: 206, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {

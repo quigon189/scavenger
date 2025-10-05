@@ -214,7 +214,7 @@ func AddStudentModal(groups []models.Group) templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"modal fade\" id=\"addStudentModal\" tabindex=\"-1\"><div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\">Добавить студента</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button></div><form action=\"/admin/students\" method=\"post\"><div class=\"modal-body\"><div class=\"mb-3\"><label class=\"form-label\">Логин</label> <input type=\"text\" class=\"form-control\" name=\"username\" required></div><div class=\"mb-3\"><label class=\"form-label\">ФИО</label> <input type=\"text\" class=\"form-control\" name=\"name\" required></div><div class=\"mb-3\"><label class=\"form-label\">Пароль</label> <input type=\"password\" class=\"form-control\" name=\"password\" required></div><div class=\"mb-3\"><label class=\"form-label\">Группа</label> <select class=\"form-select\" name=\"group\"><option value=\"\">Выберите группу</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"modal fade\" id=\"addStudentModal\" tabindex=\"-1\"><div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\">Добавить студента</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button></div><form action=\"/admin/students\" method=\"post\"><div class=\"modal-body\"><div class=\"mb-3\"><label class=\"form-label\">Логин</label> <input type=\"text\" class=\"form-control\" name=\"username\" required></div><div class=\"mb-3\"><label class=\"form-label\">ФИО</label> <input type=\"text\" class=\"form-control\" name=\"name\" required></div><div class=\"mb-3\"><label class=\"form-label\">Пароль</label> <input type=\"password\" class=\"form-control\" name=\"password\" required></div><div class=\"mb-3\"><label class=\"form-label\">Группа</label> <select class=\"form-select\" name=\"group\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -226,7 +226,7 @@ func AddStudentModal(groups []models.Group) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(group.IDtoStr())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 108, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 107, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -239,7 +239,7 @@ func AddStudentModal(groups []models.Group) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 108, Col: 82}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 107, Col: 82}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -286,7 +286,7 @@ func EditStudentModal(user models.User, groups []models.Group) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("editStudentModal-" + user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 124, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 123, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -299,7 +299,7 @@ func EditStudentModal(user models.User, groups []models.Group) templ.Component {
 		var templ_7745c5c3_Var13 templ.SafeURL
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/students/" + user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 131, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 130, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -312,7 +312,7 @@ func EditStudentModal(user models.User, groups []models.Group) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 135, Col: 89}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 134, Col: 89}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -325,13 +325,13 @@ func EditStudentModal(user models.User, groups []models.Group) templ.Component {
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 136, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 135, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"></div><div class=\"mb-3\"><label class=\"form-label\">Новые ФИО</label> <input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"Оставьте пустым, чтобы не менять\"></div><div class=\"mb-3\"><label class=\"form-label\">Новый пароль</label> <input type=\"password\" class=\"form-control\" name=\"password\" placeholder=\"Оставьте пустым, чтобы не менять\"></div><div class=\"mb-3\"><label class=\"form-label\">Группа</label> <select class=\"form-select\" name=\"group\"><option value=\"\">Выберите группу</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"></div><div class=\"mb-3\"><label class=\"form-label\">Новые ФИО</label> <input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"Оставьте пустым, чтобы не менять\"></div><div class=\"mb-3\"><label class=\"form-label\">Новый пароль</label> <input type=\"password\" class=\"form-control\" name=\"password\" placeholder=\"Оставьте пустым, чтобы не менять\"></div><div class=\"mb-3\"><label class=\"form-label\">Группа</label> <select class=\"form-select\" name=\"group\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -344,7 +344,7 @@ func EditStudentModal(user models.User, groups []models.Group) templ.Component {
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(group.IDtoStr())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 152, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 150, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
@@ -357,7 +357,7 @@ func EditStudentModal(user models.User, groups []models.Group) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 153, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 151, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -373,9 +373,9 @@ func EditStudentModal(user models.User, groups []models.Group) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var18 string
-			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
+			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(group.IDtoStr())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 156, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 154, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -388,7 +388,7 @@ func EditStudentModal(user models.User, groups []models.Group) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 157, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 155, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -435,7 +435,7 @@ func DeleteStudentModal(student models.User) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs("deleteStudentModal-" + student.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 174, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 172, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -448,7 +448,7 @@ func DeleteStudentModal(student models.User) templ.Component {
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(student.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 187, Col: 118}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 185, Col: 118}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -461,26 +461,26 @@ func DeleteStudentModal(student models.User) templ.Component {
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(student.GroupName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 187, Col: 175}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 185, Col: 175}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</strong>?</p><div class=\"card border-danger\"><div class=\"card-body\"><h6 class=\"card-title\">Последствия удаления:</h6><ul class=\"small\"><li>Все отчеты студента сохранятся в системе</li></ul></div></div></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button><form action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</strong>?</p><div class=\"card border-danger\"><div class=\"card-body\"><h6 class=\"card-title\">Последствия удаления:</h6><ul class=\"small\"><li>Все отчеты студента сохранятся в системе</li></ul></div></div></div><div class=\"modal-footer\"><form action=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 templ.SafeURL
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/students/" + student.Username + "/delete")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 200, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/students_manager.templ`, Line: 197, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" method=\"post\" class=\"d-inline\"><button type=\"submit\" class=\"btn btn-danger\"><i class=\"fas fa-trash\"></i> Удалить группу</button></form></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" method=\"post\" class=\"d-inline\"><div class=\"input-group\"><input type=\"text\" class=\"form-control\" name=\"username\" placeholder=\"Логин\" required> <button type=\"submit\" class=\"btn btn-danger\"><i class=\"fas fa-trash\"></i> Удалить студента</button></div></form><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
