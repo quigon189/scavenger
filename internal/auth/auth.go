@@ -38,6 +38,7 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request, user *models
 	session.Values["name"] = user.Name
 	session.Values["role"] = user.RoleName
 	session.Values["group"] = user.GroupName
+	session.Values["groupID"] = user.GroupID
 	err := session.Save(r, w)
 	if err != nil {
 		log.Printf("Failed to save session: %v", err)
@@ -64,12 +65,14 @@ func (s *AuthService) GetUser(r *http.Request) *models.User {
 	name, _ := session.Values["name"].(string)
 	role, _ := session.Values["role"].(string)
 	group, _ := session.Values["group"].(string)
+	groupID, _ := session.Values["groupID"].(int)
 
 	return &models.User{
 		Username: username,
 		Name:     name,
 		RoleName: role,
 		GroupName: group,
+		GroupID: groupID,
 	}
 }
 

@@ -35,7 +35,9 @@ templ disciplinesManager(disciplines []models.Discipline, groups []models.Group)
 									<div class="col-md-4 mb-3">
 										<div class="card h-100">
 											<div class="card-header d-flex justify-content-between align-items-center">
-												<h6 class="card-title mb-0">{ discipline.Name }</h6>
+												<h6 class="card-title mb-0">
+														{ discipline.Name }
+												</h6>
 												<div class="btn-group btn-group-sm">
 													<button type="button" 
 															class="btn btn-outline-primary"
@@ -56,15 +58,14 @@ templ disciplinesManager(disciplines []models.Discipline, groups []models.Group)
 													<i class="fas fa-flask me-1"></i>
 													<strong>Лабораторные:</strong> { len(discipline.Labs) }<br>
 												</p>
+											<a href={ "/admin/disciplines/" + discipline.IDtoStr() }
+												class="btn btn-sm btn-outline-primary w-100">
+												<i class="fas fa-eye"></i> Просмотр
+											</a>
 											</div>
-											<div class="card-footer bg-transparent">
-												<small class="text-muted">
-													<i class="fas fa-users me-1"></i>Группа: { group.Name }
-												</small>
-											</div>
-											
+																						
 											<!-- Модальные окна для дисциплины -->
-											@EditDisciplineModal(discipline, groups)
+											@EditDisciplineModal(discipline, group, groups)
 											@DeleteDisciplineModal(discipline)
 										</div>
 									</div>
@@ -112,10 +113,14 @@ templ disciplinesManager(disciplines []models.Discipline, groups []models.Group)
 												<i class="fas fa-info-circle me-1"></i>
 												Назначьте группу для этой дисциплины
 											</p>
+											<a href={ "/admin/disciplines/" + discipline.IDtoStr() }
+												class="btn btn-sm btn-outline-warning w-100">
+												<i class="fas fa-eye"></i> Просмотр
+											</a>
 										</div>
 										
 										<!-- Модальные окна для дисциплины без группы -->
-										@EditDisciplineModal(discipline, groups)
+										@EditDisciplineModal(discipline, models.Group{}, groups)
 										@DeleteDisciplineModal(discipline)
 									</div>
 								</div>
@@ -127,7 +132,7 @@ templ disciplinesManager(disciplines []models.Discipline, groups []models.Group)
 		}
 	</div>
 
-	if len(disciplines) == 0 {
+	if len(disciplines) == 0 && len(groups) == 0 {
 		<div class="text-center py-5">
 			<i class="fas fa-book fa-3x text-muted mb-3"></i>
 			<h4 class="text-muted">Дисциплины не добавлены</h4>
@@ -179,7 +184,7 @@ templ AddDisciplineModal(groups []models.Group) {
     </div>
 }
 
-templ EditDisciplineModal(discipline models.Discipline, groups []models.Group) {
+templ EditDisciplineModal(discipline models.Discipline, discGroup models.Group, groups []models.Group) {
     <div class="modal fade" id={ "editDisciplineModal-" + discipline.IDtoStr() } tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -203,6 +208,11 @@ templ EditDisciplineModal(discipline models.Discipline, groups []models.Group) {
                                     <select class="form-select" name="group">
                                         <option value="">Без группы</option>
                                         for _, group := range groups {
+											if group.Name == discGroup.Name {
+												<option value={ group.IDtoStr() } selected>
+													{ group.Name }
+												</option>
+											}
                                             <option value={ group.IDtoStr() }>
                                                 { group.Name }
                                             </option>
@@ -251,12 +261,15 @@ templ DeleteDisciplineModal(discipline models.Discipline) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                     <form action={ "/admin/disciplines/" + discipline.IDtoStr() + "/delete" } method="post" class="d-inline">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Удалить дисциплину
-                        </button>
+						<div class="input-group">
+							<input type="text" class="form-control" name="name" placeholder="Название" required>
+							<button type="submit" class="btn btn-danger">
+								<i class="fas fa-trash"></i> Удалить дисциплину
+							</button>
+						</div>
                     </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                 </div>
             </div>
         </div>

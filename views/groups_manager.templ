@@ -242,7 +242,7 @@ templ AddDisciplineToGroupModal(group models.Group, ungroupedDisciplines []model
                                     for _, disc := range ungroupedDisciplines {
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" 
-                                                   name="existing_disciplines" value={ disc.Name }
+                                                   name="existing_disciplines" value={ disc.IDtoStr() }
                                                    id={ "add-to-group-" + group.IDtoStr() + "-" + disc.IDtoStr() }>
                                             <label class="form-check-label" for={ "add-to-group-" + group.IDtoStr() + "-" + disc.IDtoStr() }>
                                                 { disc.Name }

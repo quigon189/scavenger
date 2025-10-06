@@ -14,7 +14,7 @@ import (
 	"scavenger/internal/models"
 )
 
-func DisciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport, user *models.User) templ.Component {
+func DisciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -35,7 +35,7 @@ func DisciplinePage(discipline *models.Discipline, reports map[string][]models.L
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Base(discipline.Name, disciplinePage(discipline, reports, user)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Base(discipline.Name, disciplinePage(discipline, reports)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -43,7 +43,7 @@ func DisciplinePage(discipline *models.Discipline, reports map[string][]models.L
 	})
 }
 
-func disciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport, user2 *models.User) templ.Component {
+func disciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -78,20 +78,20 @@ func disciplinePage(discipline *models.Discipline, reports map[string][]models.L
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h3><p class=\"text-muted\">Группа</p><hr></div><a href=\"/dashboard\" class=\"btn btn-outline-secondary\"><i class=\"fas fa-arrow-left\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h3><p class=\"text-muted\">Группа: ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.GroupName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipline.templ`, Line: 24, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipline.templ`, Line: 20, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</i> Назад</a></div><div class=\"row\"><div class=\"col-md-8\"><h4 class=\"mb-3\"><i class=\"fas fa-book\"></i> Методические материалы</h4>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</p><hr></div><a href=\"/dashboard\" class=\"btn btn-outline-secondary\"><i class=\"fas fa-arrow-left\"></i> Назад</a></div><div class=\"row\"><div class=\"col-md-8\"><h4 class=\"mb-3\"><i class=\"fas fa-book\"></i> Методические материалы</h4>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -132,9 +132,9 @@ func disciplinePage(discipline *models.Discipline, reports map[string][]models.L
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 templ.SafeURL
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs("/download/" + lab.Path)
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs("/download/" + lab.PDFPath)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipline.templ`, Line: 46, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipline.templ`, Line: 46, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {

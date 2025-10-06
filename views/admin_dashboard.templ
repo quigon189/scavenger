@@ -128,9 +128,9 @@ templ adminDashboard(stats *models.AdminStats, reports []models.LabReport, disci
 								<thead>
 									<tr>
 										<th>Дисциплина</th>
+										<th>Группа</th>
 										<th>Всего работ</th>
 										<th>На проверке</th>
-										<th>Проверено</th>
 										<th>Действия</th>
 									</tr>
 								</thead>
@@ -138,13 +138,13 @@ templ adminDashboard(stats *models.AdminStats, reports []models.LabReport, disci
 									for _, discipline := range disciplines {
 										<tr>
 											<td>{ discipline.Name }</td>
-											<td></td>
-											<td></td>
+											<td>{ discipline.Group.Name }</td>
+											<td>{ len(discipline.Labs) }</td>
 											<td></td>
 											<td>
-												<a href={ "/admin/discipline/" + discipline.Name } 
+												<a href={ "/admin/disciplines/" + discipline.IDtoStr() } 
 												   class="btn btn-sm btn-outline-primary">
-													<i class="fas fa-eye"></i> Просмотреть
+													<i class="fas fa-eye"></i> Просмотр
 												</a>
 											</td>
 										</tr>

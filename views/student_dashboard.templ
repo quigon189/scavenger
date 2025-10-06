@@ -4,11 +4,11 @@ import (
 	"scavenger/internal/models"
 )
 
-templ StudentDashboard(disciplines []models.Discipline, user *models.User, reports []models.LabReport) {
-	@Base("Панель студента", studentDashboard(disciplines, user, reports))
+templ StudentDashboard(disciplines []models.Discipline, reports []models.LabReport) {
+	@Base("Панель студента", studentDashboard(disciplines, reports))
 }
 
-templ studentDashboard(disciplines []models.Discipline, user2 *models.User, reports []models.LabReport) {
+templ studentDashboard(disciplines []models.Discipline, reports []models.LabReport) {
 	{{ user := models.GetUserFromContext(ctx) }}
 	<div class="row">
       <div class="col-md-3">

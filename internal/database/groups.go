@@ -67,6 +67,26 @@ func (d *Database) GetAllGroupsWithDisciplines() ([]models.Group, error) {
 	return groups, nil
 }
 
+func (d *Database) GetAllGroupsWithStudentsAndDisciplines() ([]models.Group, error) {
+	groups, err := d.GetAllGroups()
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range groups {
+		students, err := d.GetStudentByGroupID(groups[i].ID)
+		if err == nil {
+			groups[i].Students = append(groups[i].Students, students...)
+		}
+		discs, err := d.GetDisciplinesByGroupID(groups[i].ID)
+		if err == nil {
+			groups[i].Disciplines = append(groups[i].Disciplines, discs...)
+		}
+	}
+
+	return groups, nil
+}
+
 func (d *Database) GetGroupByID(id int) (*models.Group, error) {
 	group := &models.Group{}
 	err := d.db.QueryRow(GetGroupByIDQuery, id).Scan(&group.ID, &group.Name)
@@ -75,5 +95,10 @@ func (d *Database) GetGroupByID(id int) (*models.Group, error) {
 
 func (d *Database) DeleteGroupByID(id int) error {
 	_, err := d.db.Exec(DeleteGroupByIDQuery, id)
+	return err
+}
+
+func (d *Database) UpdateGroup(group *models.Group) error {
+	_, err := d.db.Exec(UpdateGroupQuery, group.Name, group.ID)
 	return err
 }

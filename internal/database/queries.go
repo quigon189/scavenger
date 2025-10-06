@@ -11,13 +11,14 @@ const (
 	GetGroupByIDQuery = `SELECT id, name FROM groups WHERE id = ?`
 	GetGroupByName = `SELECT id, name FROM groups WHERE name = ?`
 	GetStudentGroupQuery = `
-		SELECT g.name
+		SELECT g.name, g.id
 		FROM students s
 		LEFT JOIN groups g ON s.group_id = g.id
 		WHERE s.user_id = ?
 	`
 	CreateGroupQuery = `INSERT INTO groups (number, name) VALUES (?, ?)`
 	DeleteGroupByIDQuery = `DELETE FROM groups WHERE id = ?`
+	UpdateGroupQuery = `UPDATE groups SET name = ? WHERE id = ?`
 
 	// Users
 	CreateUserQuery = `INSERT INTO users (username, name, password_hash, role_id) VALUES (?, ?, ?, ?)`
@@ -66,5 +67,9 @@ const (
 	CreateDisciplineQuery = `INSERT INTO disciplines (name, group_id) VALUES (?, ?)`
 	GetAllDisciplinesQuery = `SELECT id, name, group_id FROM disciplines`
 	GetAllDisciplinesByGroupIDQuery = `SELECT id, name, group_id FROM disciplines WHERE group_id = ?`
+	GetDisciplinesWithoutGroupQuery = `SELECT id, name, group_id FROM disciplines WHERE group_id IS NULL`
+	GetDisciplineByIDQuery = `SELECT id, name, group_id FROM disciplines WHERE id = ?`
+	UpdateDisciplineQuery = `UPDATE disciplines SET name = ?, group_id = ? WHERE id = ?`
+	DeleteDisciplineQuery = `DELETE FROM disciplines WHERE id = ?`
 )
 

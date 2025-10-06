@@ -12,7 +12,7 @@ import (
 	"scavenger/internal/models"
 )
 
-func StudentDashboard(disciplines []models.Discipline, user *models.User, reports []models.LabReport) templ.Component {
+func StudentDashboard(disciplines []models.Discipline, reports []models.LabReport) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -33,7 +33,7 @@ func StudentDashboard(disciplines []models.Discipline, user *models.User, report
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Base("Панель студента", studentDashboard(disciplines, user, reports)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Base("Панель студента", studentDashboard(disciplines, reports)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -41,7 +41,7 @@ func StudentDashboard(disciplines []models.Discipline, user *models.User, report
 	})
 }
 
-func studentDashboard(disciplines []models.Discipline, user2 *models.User, reports []models.LabReport) templ.Component {
+func studentDashboard(disciplines []models.Discipline, reports []models.LabReport) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

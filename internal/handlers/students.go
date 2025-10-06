@@ -11,28 +11,35 @@ import (
 	"scavenger/internal/config"
 	"scavenger/internal/models"
 	"scavenger/views"
+	"strconv"
 	"time"
 )
 
 func (h *Handler) StudentDashboard(w http.ResponseWriter, r *http.Request) {
-	user := h.authService.GetUser(r)
+	stud := r.Context().Value("user").(models.User)
+	disciplines, err := h.db.GetDisciplinesByGroupID(stud.GroupID)
+	if err != nil {
+		alerts.FlashWarning(w,r,"Дисциплины не загружены")
+		disciplines = []models.Discipline{}
+	}
 
-	disciplines := h.cfg.GetGroupDisciplines("СА-502")
-	reports := h.cfg.GetStudentReports(user.Username)
+	reports := []models.LabReport{}
 
-	views.StudentDashboard(disciplines, user, reports).Render(r.Context(), w)
+	views.StudentDashboard(disciplines, reports).Render(r.Context(), w)
 }
 
 func (h *Handler) DisciplinePage(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	id,err := strconv.Atoi(r.PathValue("id"))
 
-	user := h.authService.GetUser(r)
-	disc := h.cfg.GetDiscepline(id)
-	reports := h.cfg.GetStudentReports(user.Username)
-
-	if disc.Name == "" {
-		http.Redirect(w, r, "/404", http.StatusSeeOther)
+	disc, err := h.db.GetDisciplineByID(id)
+	if err != nil {
+		alerts.FlashError(w,r,"Ошибка чтения дисциплины из БД")
+		log.Printf("Failed to get discipline: %v", err)
+		http.Redirect(w,r,"/",http.StatusSeeOther)
+		return
 	}
+
+	reports := []models.LabReport{}
 
 	repMap := map[string][]models.LabReport{}
 
@@ -44,7 +51,7 @@ func (h *Handler) DisciplinePage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	views.DisciplinePage(disc, repMap, user).Render(r.Context(), w)
+	views.DisciplinePage(disc, repMap).Render(r.Context(), w)
 }
 
 func (h *Handler) DownloadLabs(w http.ResponseWriter, r *http.Request) {

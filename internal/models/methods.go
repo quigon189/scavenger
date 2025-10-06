@@ -43,3 +43,7 @@ func(g *Group) IDtoStr() string {
 func(d *Discipline) IDtoStr() string {
 	return strconv.Itoa(d.ID)
 }
+
+func(l *Lab) FormatDeadline() string {
+	return l.Deadline.Format("01.02.2006")
+}

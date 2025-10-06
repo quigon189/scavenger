@@ -24,10 +24,16 @@ func setupRouter(cfg *models.Config, db *database.Database) *http.Handler {
 
 	mux.HandleFunc("GET /admin/groups", handler.AdminMiddleware(handler.GroupManager))
 	mux.HandleFunc("POST /admin/groups", handler.AdminMiddleware(handler.AddGroup))
+	mux.HandleFunc("POST /admin/groups/{id}", handler.AdminMiddleware(handler.EditGroup))
 	mux.HandleFunc("POST /admin/groups/{groupID}/delete", handler.AdminMiddleware(handler.DeleteGroup))
+	mux.HandleFunc("POST /admin/groups/{id}/disciplines", handler.AdminMiddleware(handler.AddDiscToGroup))
+	mux.HandleFunc("POST /admin/groups/{groupID}/disciplines/{discID}/remove", handler.AdminMiddleware(handler.RemoveDiscFromGroup))
 
 	mux.HandleFunc("GET /admin/disciplines", handler.AdminMiddleware(handler.DisciplinesManager))
 	mux.HandleFunc("POST /admin/disciplines", handler.AdminMiddleware(handler.AddDiscipline))
+	mux.HandleFunc("POST /admin/disciplines/{id}", handler.AdminMiddleware(handler.EditDiscipline))
+	mux.HandleFunc("GET /admin/disciplines/{id}", handler.AdminMiddleware(handler.DisciplineLabs))
+	mux.HandleFunc("POST /admin/disciplines/{id}/delete", handler.AdminMiddleware(handler.DeleteDiscipline))
 
 	mux.HandleFunc("GET /admin/students", handler.AdminMiddleware(handler.StudentsManager))
 	mux.HandleFunc("POST /admin/students", handler.AdminMiddleware(handler.AddStudents))

@@ -113,8 +113,6 @@ func (h *Handler) EditStudent(w http.ResponseWriter, r *http.Request) {
 	student.username = r.FormValue("username")
 	student.password = r.FormValue("password")
 
-	log.Printf("Edit student: %+v", student)
-
 	var groupID int
 	groupID, err = strconv.Atoi(r.FormValue("group"))
 	if err != nil {

@@ -183,7 +183,7 @@ func (d *Database) GetStudentByUsername(username string) (*models.User, error) {
 }
 
 func (d *Database) GetStudentGroup(student *models.User) error {
-	return d.db.QueryRow(GetStudentGroupQuery, student.ID).Scan(&student.GroupName)
+	return d.db.QueryRow(GetStudentGroupQuery, student.ID).Scan(&student.GroupName, &student.GroupID)
 }
 
 func (d *Database) UpadateStudent(student *models.User) error {
