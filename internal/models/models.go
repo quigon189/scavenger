@@ -39,14 +39,15 @@ type Discipline struct {
 }
 
 type Lab struct {
-	ID       string
-	Name     string
-	PDFPath  string
-	MDPath   string
-	Deadline time.Time
+	ID           string
+	Name         string
+	MDPath       string
+	Deadline     time.Time
+	Description  string
+	DisciplineID int
 
-	Description string
-	Reports     []LabReport
+	PDFPath []string
+	Reports []LabReport
 }
 
 type LabReport struct {

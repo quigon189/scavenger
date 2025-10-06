@@ -2,17 +2,18 @@ package database
 
 import (
 	"scavenger/internal/models"
+	"strconv"
 )
 
 func (d *Database) CreateDiscipline(disc *models.Discipline) error {
 	result, err := d.db.Exec(CreateDisciplineQuery, disc.Name, disc.GroupID)
 	if err != nil {
-		 return err
+		return err
 	}
 
 	dID, err := result.LastInsertId()
 	if err != nil {
-		 return err
+		return err
 	}
 
 	disc.ID = int(dID)
@@ -30,7 +31,7 @@ func (d *Database) GetDisciplines() ([]models.Discipline, error) {
 		var disc models.Discipline
 		err := row.Scan(&disc.ID, &disc.Name, &disc.GroupID)
 		if err == nil {
-			discs =append(discs, disc)
+			discs = append(discs, disc)
 		}
 	}
 
@@ -48,7 +49,7 @@ func (d *Database) GetDisciplinesByGroupID(groupID int) ([]models.Discipline, er
 		var disc models.Discipline
 		err := row.Scan(&disc.ID, &disc.Name, &disc.GroupID)
 		if err == nil {
-			discs =append(discs, disc)
+			discs = append(discs, disc)
 		}
 	}
 
@@ -85,7 +86,7 @@ func (d *Database) GetDisciplinesWithoutGroup() ([]models.Discipline, error) {
 		var disc models.Discipline
 		err := row.Scan(&disc.ID, &disc.Name, &disc.GroupID)
 		if err == nil {
-			discs =append(discs, disc)
+			discs = append(discs, disc)
 		}
 	}
 
@@ -111,4 +112,26 @@ func (d *Database) UpdateDiscipline(disc *models.Discipline) error {
 func (d *Database) DeleteDiscipline(disc *models.Discipline) error {
 	_, err := d.db.Exec(DeleteDisciplineQuery, disc.ID)
 	return err
+}
+
+func (d *Database) AddDisciplineLab(lab *models.Lab) error {
+	result, err := d.db.Exec(
+		CreateDisciplineLabQuery,
+		lab.Name,
+		lab.Description,
+		lab.MDPath,
+		lab.Deadline.Unix(),
+		lab.DisciplineID,
+	)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	lab.ID = strconv.Itoa(int(id))
+	return nil
 }

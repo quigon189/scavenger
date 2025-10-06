@@ -71,5 +71,9 @@ const (
 	GetDisciplineByIDQuery = `SELECT id, name, group_id FROM disciplines WHERE id = ?`
 	UpdateDisciplineQuery = `UPDATE disciplines SET name = ?, group_id = ? WHERE id = ?`
 	DeleteDisciplineQuery = `DELETE FROM disciplines WHERE id = ?`
+
+	// Lab
+	CreateDisciplineLabQuery = `INSERT INTO labs (name, description, md_path, deadline, discipline_id) VALUES (?, ?, ?, ?, ?)`
+	CreatePDFFilesQuery = `INSERT INTO pdf_files (lab_id, file_path) VALUES (?, ?)`
 )
 

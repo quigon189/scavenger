@@ -5,7 +5,7 @@ import (
 )
 
 templ DisciplineLabs(discipline *models.Discipline) {
-	@Base("Редактирование" + discipline.Name, discLabs(discipline))
+	@Base("Редактирование: " + discipline.Name, discLabs(discipline))
 }
 
 templ discLabs(discipline *models.Discipline) {
@@ -85,7 +85,7 @@ templ discLabs(discipline *models.Discipline) {
 												</td>
 												<td>
 													<div class="btn-group btn-group-sm">
-														if lab.PDFPath != "" {
+														if len(lab.PDFPath) > 0 {
 															<a href={ "/download/lab/pdf/" + lab.ID } class="btn btn-outline-danger" title="PDF">
 																<i class="fas fa-file-pdf"></i>
 															</a>
@@ -188,7 +188,7 @@ templ AddLabWorkModal(discipline *models.Discipline) {
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Название работы *</label>
-                                    <input type="text" class="form-control" name="title" required 
+                                    <input type="text" class="form-control" name="name" required 
                                            placeholder="Например: Лабораторная работа №1">
                                 </div>
                             </div>
@@ -207,21 +207,21 @@ templ AddLabWorkModal(discipline *models.Discipline) {
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+							<div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">PDF файл задания</label>
-                                    <input type="file" class="form-control" name="pdf_file" accept=".pdf">
+                                    <label class="form-label">Markdown файл</label>
+                                    <input type="file" class="form-control" name="md_file" accept=".md">
                                     <div class="form-text">
-                                        Файл в формате PDF с условиями задания
+                                        Лабораторная работа в формате Markdown
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Markdown файл (опционально)</label>
-                                    <input type="file" class="form-control" name="md_file" accept=".md,.txt">
+                                    <label class="form-label">PDF файлы (опционально)</label>
+                                    <input type="file" class="form-control" name="pdf_files" accept=".pdf" multiple>
                                     <div class="form-text">
-                                        Дополнительные материалы в формате Markdown
+                                        Файл в формате PDF с условиями задания
                                     </div>
                                 </div>
                             </div>
@@ -280,11 +280,11 @@ templ EditLabWorkModal(lab models.Lab, discipline *models.Discipline) {
                                 <div class="mb-3">
                                     <label class="form-label">PDF файл задания</label>
                                     <input type="file" class="form-control" name="pdf_file" accept=".pdf">
-                                    if lab.PDFPath != "" {
+                                    if len(lab.PDFPath) > 0 {
                                         <div class="form-text">
                                             Текущий файл: 
                                             <a href={ "/download/lab/pdf/" + lab.ID } target="_blank">
-                                                { lab.PDFPath }
+                                                { lab.PDFPath[0] }
                                             </a>
                                             <br>
                                             <label class="form-check-label">

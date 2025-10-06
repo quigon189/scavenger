@@ -33,7 +33,7 @@ func DisciplineLabs(discipline *models.Discipline) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Base("Редактирование"+discipline.Name, discLabs(discipline)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Base("Редактирование: "+discipline.Name, discLabs(discipline)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -128,7 +128,7 @@ func discLabs(discipline *models.Discipline) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if lab.PDFPath != "" {
+				if len(lab.PDFPath) > 0 {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<a href=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -337,7 +337,7 @@ func AddLabWorkModal(discipline *models.Discipline) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" method=\"post\" enctype=\"multipart/form-data\"><div class=\"modal-body\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Название работы *</label> <input type=\"text\" class=\"form-control\" name=\"title\" required placeholder=\"Например: Лабораторная работа №1\"></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Крайний срок сдачи *</label> <input type=\"date\" class=\"form-control\" name=\"deadline\" required></div></div></div><div class=\"mb-3\"><label class=\"form-label\">Описание работы</label> <textarea class=\"form-control\" name=\"description\" rows=\"3\" placeholder=\"Подробное описание задания...\"></textarea></div><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">PDF файл задания</label> <input type=\"file\" class=\"form-control\" name=\"pdf_file\" accept=\".pdf\"><div class=\"form-text\">Файл в формате PDF с условиями задания</div></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Markdown файл (опционально)</label> <input type=\"file\" class=\"form-control\" name=\"md_file\" accept=\".md,.txt\"><div class=\"form-text\">Дополнительные материалы в формате Markdown</div></div></div></div><div class=\"alert alert-info\"><i class=\"fas fa-info-circle\"></i> <strong>Поля, отмеченные *</strong>, обязательны для заполнения.</div></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button> <button type=\"submit\" class=\"btn btn-primary\"><i class=\"fas fa-plus\"></i> Добавить работу</button></div></form></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" method=\"post\" enctype=\"multipart/form-data\"><div class=\"modal-body\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Название работы *</label> <input type=\"text\" class=\"form-control\" name=\"name\" required placeholder=\"Например: Лабораторная работа №1\"></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Крайний срок сдачи *</label> <input type=\"date\" class=\"form-control\" name=\"deadline\" required></div></div></div><div class=\"mb-3\"><label class=\"form-label\">Описание работы</label> <textarea class=\"form-control\" name=\"description\" rows=\"3\" placeholder=\"Подробное описание задания...\"></textarea></div><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Markdown файл</label> <input type=\"file\" class=\"form-control\" name=\"md_file\" accept=\".md\"><div class=\"form-text\">Лабораторная работа в формате Markdown</div></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">PDF файлы (опционально)</label> <input type=\"file\" class=\"form-control\" name=\"pdf_files\" accept=\".pdf\" multiple><div class=\"form-text\">Файл в формате PDF с условиями задания</div></div></div></div><div class=\"alert alert-info\"><i class=\"fas fa-info-circle\"></i> <strong>Поля, отмеченные *</strong>, обязательны для заполнения.</div></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button> <button type=\"submit\" class=\"btn btn-primary\"><i class=\"fas fa-plus\"></i> Добавить работу</button></div></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -435,7 +435,7 @@ func EditLabWorkModal(lab models.Lab, discipline *models.Discipline) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if lab.PDFPath != "" {
+		if len(lab.PDFPath) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<div class=\"form-text\">Текущий файл:  <a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -454,9 +454,9 @@ func EditLabWorkModal(lab models.Lab, discipline *models.Discipline) templ.Compo
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var24 string
-			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(lab.PDFPath)
+			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(lab.PDFPath[0])
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 287, Col: 61}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 287, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
