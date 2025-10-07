@@ -14,7 +14,7 @@ import (
 func (h *Handler) DisciplineLabs(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		http.Redirect(w, r, "/404", http.StatusNotFound)
+		http.Redirect(w, r, "/404", http.StatusSeeOther)
 		return
 	}
 
@@ -32,7 +32,7 @@ func (h *Handler) DisciplineLabs(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) AddDisciplineLabs(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		http.Redirect(w, r, "/404", http.StatusNotFound)
+		http.Redirect(w, r, "/404", http.StatusSeeOther)
 		return
 	}
 
@@ -191,7 +191,7 @@ func (h *Handler) EditDisciplineLab(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) DeleteDisciplineLab(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("labID"))
 	if err != nil {
-		http.Redirect(w, r, "/404", http.StatusNotFound)
+		http.Redirect(w, r, "/404", http.StatusSeeOther)
 		return
 	}
 

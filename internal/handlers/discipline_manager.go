@@ -69,7 +69,7 @@ func (h *Handler) AddDiscipline(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) EditDiscipline(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		http.Redirect(w, r, "/404", http.StatusNotFound)
+		http.Redirect(w, r, "/404", http.StatusSeeOther)
 		return
 	}
 
@@ -121,7 +121,7 @@ func (h *Handler) EditDiscipline(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) DeleteDiscipline(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		http.Redirect(w, r, "/404", http.StatusNotFound)
+		http.Redirect(w, r, "/404", http.StatusSeeOther)
 		return
 	}
 
