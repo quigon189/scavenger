@@ -56,7 +56,6 @@ templ discLabs(discipline *models.Discipline) {
 											<th>Название</th>
 											<th>Срок сдачи</th>
 											<th>Статус</th>
-											<th>Файлы</th>
 											<th>Действия</th>
 										</tr>
 									</thead>
@@ -68,37 +67,18 @@ templ discLabs(discipline *models.Discipline) {
 												</td>
 												<td>
 													{ lab.Deadline.Format("02.01.2006") }
-													<!--
-													if isDeadlineSoon(lab.Deadline) {
-														<br><small class="text-warning">
-															<i class="fas fa-clock"></i> Осталось { daysLeft(lab.Deadline) } д.
-														</small>
-													}
-													-->
 												</td>
 												<td>
-													<!--
-													<span class={ "badge bg-" + getLabStatusBadge(lab.Deadline) }>
-														{ getLabStatus(lab.Deadline) }
+													<span class={ "badge bg-" + lab.GetStatusBadge() }>
+														{ lab.GetStatus() }
 													</span>
-													-->
 												</td>
 												<td>
 													<div class="btn-group btn-group-sm">
-														if len(lab.PDFPath) > 0 {
-															<a href={ "/download/lab/pdf/" + lab.ID } class="btn btn-outline-danger" title="PDF">
-																<i class="fas fa-file-pdf"></i>
-															</a>
-														}
-														if lab.MDPath != "" {
-															<a href={ "/download/lab/md/" + lab.ID } class="btn btn-outline-info" title="Markdown">
-																<i class="fas fa-file-code"></i>
-															</a>
-														}
-													</div>
-												</td>
-												<td>
-													<div class="btn-group btn-group-sm">
+														<a href={ "/admin/disciplines/" + discipline.Name + "/labs/" + lab.ID + "/reports" } 
+														   class="btn btn-sm btn-outline-primary">
+															<i class="fas fa-eye"></i>
+														</a>
 														<button type="button" 
 																class="btn btn-outline-primary"
 																data-bs-toggle="modal" 
@@ -134,38 +114,6 @@ templ discLabs(discipline *models.Discipline) {
 						}
 					</div>
 				</div>
-
-				<!-- Быстрый просмотр отчетов -->
-				if len(discipline.Labs) > 0 {
-					<div class="card mt-4">
-						<div class="card-header">
-							<h6 class="card-title mb-0">
-								<i class="fas fa-list-check"></i> Последние отчеты студентов
-							</h6>
-						</div>
-						<div class="card-body">
-							<div class="list-group list-group-flush">
-								for _, lab := range discipline.Labs {
-									<div class="list-group-item">
-										<div class="d-flex w-100 justify-content-between">
-											<h6 class="mb-1">{ lab.Name }</h6>
-											<small>{ len(lab.Reports) } отчетов</small>
-										</div>
-										<div class="d-flex justify-content-between align-items-center">
-											<small class="text-muted">
-												Срок: { lab.Deadline.Format("02.01.2006") }
-											</small>
-											<a href={ "/admin/disciplines/" + discipline.Name + "/labs/" + lab.ID + "/reports" } 
-											   class="btn btn-sm btn-outline-primary">
-												Просмотреть отчеты
-											</a>
-										</div>
-									</div>
-								}
-							</div>
-						</div>
-					</div>
-				}
 			</div>
 		</div>
 	</div>
@@ -218,10 +166,10 @@ templ AddLabWorkModal(discipline *models.Discipline) {
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">PDF файлы (опционально)</label>
-                                    <input type="file" class="form-control" name="pdf_files" accept=".pdf" multiple>
+                                    <label class="form-label">Дополнительные файлы (опционально)</label>
+                                    <input type="file" class="form-control" name="files" multiple>
                                     <div class="form-text">
-                                        Файл в формате PDF с условиями задания
+										Дополнительные файлы необходимые для выполнения работы
                                     </div>
                                 </div>
                             </div>
@@ -258,14 +206,14 @@ templ EditLabWorkModal(lab models.Lab, discipline *models.Discipline) {
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Название работы *</label>
-                                    <input type="text" class="form-control" name="title" value={ lab.Name } required>
+                                    <input type="text" class="form-control" name="name" value={ lab.Name } required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Крайний срок сдачи *</label>
-                                    <input type="datetime-local" class="form-control" name="deadline" 
-                                           value={ lab.FormatDeadline() } required>
+                                    <input type="date" class="form-control" name="deadline" 
+                                           value={ lab.Deadline.Format("2006-01-02") } required>
                                 </div>
                             </div>
                         </div>
@@ -276,45 +224,43 @@ templ EditLabWorkModal(lab models.Lab, discipline *models.Discipline) {
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+							<div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">PDF файл задания</label>
-                                    <input type="file" class="form-control" name="pdf_file" accept=".pdf">
-                                    if len(lab.PDFPath) > 0 {
+                                    <label class="form-label">Заменить Markdown файл</label>
+                                    <input type="file" class="form-control" name="md_file" accept=".md,.txt">
+                                    if lab.MDPath != "" {
                                         <div class="form-text">
                                             Текущий файл: 
-                                            <a href={ "/download/lab/pdf/" + lab.ID } target="_blank">
-                                                { lab.PDFPath[0] }
+                                            <a href={ lab.MDPath } target="_blank">
+                                                Ссылка
                                             </a>
-                                            <br>
-                                            <label class="form-check-label">
-                                                <input type="checkbox" name="remove_pdf" value="true" class="form-check-input">
-                                                Удалить текущий PDF файл
-                                            </label>
                                         </div>
                                     } else {
-                                        <div class="form-text">PDF файл не загружен</div>
+                                        <div class="form-text">MD файл не загружен</div>
                                     }
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Markdown файл</label>
-                                    <input type="file" class="form-control" name="md_file" accept=".md,.txt">
-                                    if lab.MDPath != "" {
+                                    <label class="form-label">Дополнительные файлы</label>
+                                    <input type="file" class="form-control" name="files" multiple>
+   	                                if len(lab.FilesPath) > 0 {
                                         <div class="form-text">
-                                            Текущий файл: 
-                                            <a href={ "/download/lab/md/" + lab.ID } target="_blank">
-                                                { lab.MDPath }
-                                            </a>
-                                            <br>
-                                            <label class="form-check-label">
-                                                <input type="checkbox" name="remove_md" value="true" class="form-check-input">
-                                                Удалить текущий MD файл
-                                            </label>
+                                            Текущие файлы: 
+											<br>
+											for _,filePath := range lab.FilesPath {
+												<label class="form-check-label">
+													<input type="checkbox" name="remove_file" value={ filePath } class="form-check-input">
+                                                Удалить 
+												</label>
+												<a href={ filePath } target="_blank">
+													{ filePath }
+												</a>
+												<br>
+											}
                                         </div>
                                     } else {
-                                        <div class="form-text">MD файл не загружен</div>
+                                        <div class="form-text">Файлы не загружены</div>
                                     }
                                 </div>
                             </div>
@@ -361,12 +307,15 @@ templ DeleteLabWorkModal(lab models.Lab, discipline *models.Discipline) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                     <form action={ "/admin/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID + "/delete" } method="post" class="d-inline">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Удалить работу
-                        </button>
+						<div class="input-group">
+							<input type="text" class="form-control" name="name" placeholder="Название" required>
+							<button type="submit" class="btn btn-danger">
+								<i class="fas fa-trash"></i> Удалить работу
+							</button>
+						</div>
                     </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                 </div>
             </div>
         </div>

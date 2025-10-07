@@ -8,11 +8,11 @@ CREATE TABLE labs (
 	discipline_id INTEGER REFERENCES disciplines(id)
 );
 
-CREATE TABLE pdf_files (
+CREATE TABLE lab_files (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	lab_id INTEGER NOT NULL,
 	file_path TEXT NOT NULL,
-	FOREIGN KEY(lab_id) REFERENCES labs(id)
+	FOREIGN KEY(lab_id) REFERENCES labs(id) ON DELETE CASCADE
 );
 -- +goose Down
 DROP TABLE labs;

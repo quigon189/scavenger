@@ -36,6 +36,8 @@ func setupRouter(cfg *models.Config, db *database.Database) *http.Handler {
 	mux.HandleFunc("POST /admin/disciplines/{id}/delete", handler.AdminMiddleware(handler.DeleteDiscipline))
 
 	mux.HandleFunc("POST /admin/disciplines/{id}/labs", handler.AdminMiddleware(handler.AddDisciplineLabs))
+	mux.HandleFunc("POST /admin/disciplines/{discID}/labs/{labID}", handler.AdminMiddleware(handler.EditDisciplineLab))
+	mux.HandleFunc("POST /admin/disciplines/{discID}/labs/{labID}/delete", handler.AdminMiddleware(handler.DeleteDisciplineLab))
 
 	mux.HandleFunc("GET /admin/students", handler.AdminMiddleware(handler.StudentsManager))
 	mux.HandleFunc("POST /admin/students", handler.AdminMiddleware(handler.AddStudents))

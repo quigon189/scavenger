@@ -74,6 +74,12 @@ const (
 
 	// Lab
 	CreateDisciplineLabQuery = `INSERT INTO labs (name, description, md_path, deadline, discipline_id) VALUES (?, ?, ?, ?, ?)`
-	CreatePDFFilesQuery = `INSERT INTO pdf_files (lab_id, file_path) VALUES (?, ?)`
+	CreateLabFilesQuery = `INSERT INTO lab_files (lab_id, file_path) VALUES (?, ?)`
+	GetDisciplineLabsQuery = `SELECT id, name, description, md_path, deadline FROM labs WHERE discipline_id = ?`
+	GetLabFilesQuery = `SELECT file_path FROM lab_files WHERE lab_id = ?`
+	GetLabByIDQuery = `SELECT id, name, description, md_path, deadline, discipline_id FROM labs WHERE id = ?`
+	UpdateLabQuery = `UPDATE labs SET name = ?, description = ?, md_path = ?, deadline = ? WHERE id = ?`
+	DeleteLabQuery = `DELETE FROM labs WHERE id = ?`
+	DeleteLabFilesQuery = `DELETE FROM lab_files WHERE lab_id = ? AND file_path = ?`
 )
 

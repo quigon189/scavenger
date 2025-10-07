@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"strconv"
+	"time"
 )
 
 func (cfg *Config) GetGroupDisciplines(groupName string) []Discipline {
@@ -37,13 +38,35 @@ func (g *Group) StudentCount() int {
 	return len(g.Students)
 }
 
-func(g *Group) IDtoStr() string {
+func (g *Group) IDtoStr() string {
 	return strconv.Itoa(g.ID)
 }
-func(d *Discipline) IDtoStr() string {
+func (d *Discipline) IDtoStr() string {
 	return strconv.Itoa(d.ID)
 }
 
-func(l *Lab) FormatDeadline() string {
+func (l *Lab) FormatDeadline() string {
 	return l.Deadline.Format("01.02.2006")
+}
+
+func (l *Lab) GetStatus() string {
+	now := time.Now()
+	if now.After(l.Deadline) {
+		return "Скрок вышел"
+	} else if now.Add(7 * 24 * time.Hour).After(l.Deadline) {
+		return "Скрок истекает"
+	} else {
+		return "Активно"
+	}
+}
+
+func (l *Lab) GetStatusBadge() string {
+	now := time.Now()
+	if now.After(l.Deadline) {
+		return "secondary"
+	} else if now.Add(7 * 24 * time.Hour).After(l.Deadline) {
+		return "warning"
+	} else {
+		return "success"
+	}
 }

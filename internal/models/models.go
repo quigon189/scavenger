@@ -46,8 +46,8 @@ type Lab struct {
 	Description  string
 	DisciplineID int
 
-	PDFPath []string
-	Reports []LabReport
+	FilesPath []string
+	Reports   []LabReport
 }
 
 type LabReport struct {
