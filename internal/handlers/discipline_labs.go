@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"scavenger/internal/alerts"
+	filestorage "scavenger/internal/file_storage"
 	"scavenger/internal/models"
 	"scavenger/views"
 	"strconv"
@@ -72,20 +73,73 @@ func (h *Handler) AddDisciplineLabs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lab.MDPath = header.Filename
+	lab.DisciplineID = id
 
-	pdfFiles := r.MultipartForm.File["files"]
-	for _, fileHeader := range pdfFiles {
+	storedFile, err := h.fs.SaveLabFile(
+		filestorage.Markdowm,
+		lab,
+		MDFile,
+		header,
+	)
+	if err != nil {
+		alerts.FlashError(w, r, "Ошибка сохранения файла")
+		log.Printf("Failed to save file: %v", err)
+		http.Redirect(w, r, "/admin/disciplines/"+r.PathValue("id"), http.StatusSeeOther)
+		return
+	}
+
+	lab.MDFile.Path = storedFile.Path
+	lab.MDFile.URL = storedFile.URL
+	lab.MDFile.Filename = storedFile.Filename
+	lab.MDFile.Size = storedFile.Size
+
+	err = h.db.AddStoredFile(&lab.MDFile)
+	if err != nil {
+		alerts.FlashError(w, r, "Ошибка сохранения файла в БД")
+		log.Printf("Failed to save file to db: %v", err)
+		http.Redirect(w, r, "/admin/disciplines/"+r.PathValue("id"), http.StatusSeeOther)
+		return
+	}
+
+	lab.MDFileID = lab.MDFile.ID
+
+	otherFiles := r.MultipartForm.File["files"]
+	storedFiles := []models.StoredFile{}
+	for _, fileHeader := range otherFiles {
 		file, err := fileHeader.Open()
 		if err != nil {
 			continue
 		}
 		defer file.Close()
 
-		lab.FilesPath = append(lab.FilesPath, fileHeader.Filename)
+		storedFile, err := h.fs.SaveLabFile(
+			filestorage.LabMaterial,
+			lab,
+			file,
+			fileHeader,
+		)
+		if err != nil {
+			alerts.FlashError(w, r, "Ошибка сохранения файла")
+			log.Printf("Failed to save file: %v", err)
+			http.Redirect(w, r, "/admin/disciplines/"+r.PathValue("id"), http.StatusSeeOther)
+			return
+
+		}
+
+		sFile := models.StoredFile{
+			Path:     storedFile.Path,
+			URL:      storedFile.URL,
+			Filename: storedFile.Filename,
+			Size:     storedFile.Size,
+		}
+
+		err = h.db.AddStoredFile(&sFile)
+		if err == nil {
+			storedFiles = append(storedFiles, sFile)
+		}
 	}
 
-	lab.DisciplineID = id
+	lab.StoredFiles = append(lab.StoredFiles, storedFiles...)
 
 	err = h.db.AddDisciplineLab(lab)
 	if err != nil {
@@ -150,11 +204,37 @@ func (h *Handler) EditDisciplineLab(w http.ResponseWriter, r *http.Request) {
 				http.Redirect(w, r, "/admin/disciplines/"+r.PathValue("discID"), http.StatusSeeOther)
 				return
 			}
-			lab.MDPath = header.Filename
+			storedFile, err := h.fs.SaveLabFile(
+				filestorage.Markdowm,
+				lab,
+				MDFile,
+				header,
+			)
+			if err != nil {
+				alerts.FlashError(w, r, "Ошибка сохранения файла")
+				log.Printf("Failed to save file: %v", err)
+				http.Redirect(w, r, "/admin/disciplines/"+r.PathValue("id"), http.StatusSeeOther)
+				return
+			}
+
+			lab.MDFile.Path = storedFile.Path
+			lab.MDFile.URL = storedFile.URL
+			lab.MDFile.Filename = storedFile.Filename
+			lab.MDFile.Size = storedFile.Size
+
+			err = h.db.AddStoredFile(&lab.MDFile)
+			if err != nil {
+				alerts.FlashError(w, r, "Ошибка сохранения файла в БД")
+				log.Printf("Failed to save file to db: %v", err)
+				http.Redirect(w, r, "/admin/disciplines/"+r.PathValue("id"), http.StatusSeeOther)
+				return
+			}
+
+			lab.MDFileID = lab.MDFile.ID
 		}
 	}
 
-	var newFiles []string
+	var newFiles []models.StoredFile
 
 	files := r.MultipartForm.File["files"]
 	for _, fileHeader := range files {
@@ -164,16 +244,48 @@ func (h *Handler) EditDisciplineLab(w http.ResponseWriter, r *http.Request) {
 		}
 		defer file.Close()
 
-		lab.FilesPath = append(lab.FilesPath, fileHeader.Filename)
-		newFiles = append(newFiles, fileHeader.Filename)
+		storedFile, err := h.fs.SaveLabFile(
+			filestorage.LabMaterial,
+			lab,
+			file,
+			fileHeader,
+		)
+		if err != nil {
+			alerts.FlashError(w, r, "Ошибка сохранения файла")
+			log.Printf("Failed to save file: %v", err)
+			http.Redirect(w, r, "/admin/disciplines/"+r.PathValue("id"), http.StatusSeeOther)
+			return
+		}
+
+		sFile := models.StoredFile{
+			Path:     storedFile.Path,
+			URL:      storedFile.URL,
+			Filename: storedFile.Filename,
+			Size:     storedFile.Size,
+		}
+
+		err = h.db.AddStoredFile(&sFile)
+		if err == nil {
+			newFiles = append(newFiles, sFile)
+		}
 	}
 	if len(newFiles) > 0 {
 		h.db.AddLabFiles(labID, newFiles)
 	}
 
-	delFiles := r.Form["remove_file"]
-	if len(delFiles) > 0 {
-		h.db.RemoveLabFiles(labID, delFiles)
+	delFilesID := r.Form["remove_file"]
+	if len(delFilesID) > 0 {
+		delStoredFiles := []models.StoredFile{}
+		for _, idS := range delFilesID {
+			id, err := strconv.Atoi(idS)
+			if err != nil {
+				continue
+			}
+			delStoredFiles = append(delStoredFiles, models.StoredFile{
+				ID: id,
+			})
+		}
+		h.db.RemoveLabFiles(labID, delStoredFiles)
 	}
 
 	err = h.db.UpdateLab(lab)

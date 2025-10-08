@@ -1,6 +1,7 @@
 package database
 
 import (
+	"log"
 	"scavenger/internal/models"
 	"strconv"
 	"time"
@@ -136,7 +137,7 @@ func (d *Database) AddDisciplineLab(lab *models.Lab) error {
 		CreateDisciplineLabQuery,
 		lab.Name,
 		lab.Description,
-		lab.MDPath,
+		lab.MDFileID,
 		lab.Deadline.Unix(),
 		lab.DisciplineID,
 	)
@@ -151,17 +152,19 @@ func (d *Database) AddDisciplineLab(lab *models.Lab) error {
 
 	lab.ID = strconv.Itoa(int(id))
 
-	for _, filePath := range lab.FilesPath {
-		d.db.Exec(CreateLabFilesQuery, lab.ID, filePath)
+	err = d.AddLabFiles(int(id), lab.StoredFiles)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 
-func (d *Database) AddLabFiles(labID int, filePaths []string) error {
+func (d *Database) AddLabFiles(labID int, files []models.StoredFile) error {
 	var err error = nil
 
-	for _, filePath := range filePaths {
-		_, f_err := d.db.Exec(CreateLabFilesQuery, labID, filePath)
+	for _, file := range files {
+		_, f_err := d.db.Exec(CreateLabFileQuery, file.ID, labID)
 		if f_err != nil {
 			err = f_err
 		}
@@ -169,17 +172,17 @@ func (d *Database) AddLabFiles(labID int, filePaths []string) error {
 	return err
 }
 
-func (d *Database) RemoveLabFiles(labID int, filePaths []string) error {
+func (d *Database) RemoveLabFiles(labID int, files []models.StoredFile) error {
 	var err error = nil
 
-	for _, filePath := range filePaths {
-		_, f_err := d.db.Exec(DeleteLabFilesQuery, labID, filePath)
+	for _, file := range files {
+		_, f_err := d.db.Exec(DeleteLabFileQuery, file.ID, labID)
 		if f_err != nil {
 			err = f_err
 		}
 	}
 
-	return err	
+	return err
 }
 
 func (d *Database) GetDisciplineLabs(id int) ([]models.Lab, error) {
@@ -197,7 +200,7 @@ func (d *Database) GetDisciplineLabs(id int) ([]models.Lab, error) {
 			&lab.ID,
 			&lab.Name,
 			&lab.Description,
-			&lab.MDPath,
+			&lab.MDFileID,
 			&deadline,
 		)
 		if err != nil {
@@ -206,22 +209,46 @@ func (d *Database) GetDisciplineLabs(id int) ([]models.Lab, error) {
 
 		lab.Deadline = time.Unix(deadline, 0)
 
-		filesRow, err := d.db.Query(GetLabFilesQuery, lab.ID)
-		if err == nil {
-			for filesRow.Next() {
-				var filePath string
-				err := filesRow.Scan(&filePath)
-				if err != nil {
-					continue
-				}
-				lab.FilesPath = append(lab.FilesPath, filePath)
-			}
+		mdFile, _ := d.GetStoredFile(lab.MDFileID)
+		lab.MDFile = *mdFile
+
+		files, err := d.GetLabFiles(lab.ID)
+		if err != nil {
+			log.Printf("err to get lab files: %v", err)
+			labs = append(labs, lab)
+			continue
 		}
 
+		lab.StoredFiles = append(lab.StoredFiles, files...)
 		labs = append(labs, lab)
 	}
 
 	return labs, nil
+}
+
+func (d *Database) GetLabFiles(id string) ([]models.StoredFile, error) {
+	var files []models.StoredFile
+
+	row, err := d.db.Query(GetLabFilesQuery, id)
+	if err != nil {
+		return files, err
+	}
+	for row.Next() {
+		var file models.StoredFile
+		err := row.Scan(
+			&file.ID,
+			&file.Path,
+			&file.URL,
+			&file.Filename,
+			&file.Size,
+		)
+		if err != nil {
+			return []models.StoredFile{}, err
+		}
+		files = append(files, file)
+	}
+
+	return files, nil
 }
 
 func (d *Database) GetLabByID(id int) (*models.Lab, error) {
@@ -232,7 +259,7 @@ func (d *Database) GetLabByID(id int) (*models.Lab, error) {
 		&lab.ID,
 		&lab.Name,
 		&lab.Description,
-		&lab.MDPath,
+		&lab.MDFileID,
 		&deadline,
 		&lab.DisciplineID,
 	)
@@ -240,18 +267,15 @@ func (d *Database) GetLabByID(id int) (*models.Lab, error) {
 		return &models.Lab{}, err
 	}
 
-	row, err := d.db.Query(GetLabFilesQuery, lab.ID)
+	mdfile, _ := d.GetStoredFile(lab.MDFileID)
+	lab.MDFile = *mdfile
+
+	files, err := d.GetLabFiles(lab.ID)
 	if err != nil {
 		return &models.Lab{}, err
 	}
 
-	for row.Next() {
-		var filePath string
-		err := row.Scan(&filePath)
-		if err == nil {
-			lab.FilesPath = append(lab.FilesPath, filePath)
-		}
-	}
+	lab.StoredFiles = append(lab.StoredFiles, files...)
 
 	return lab, nil
 }
@@ -261,7 +285,7 @@ func (d *Database) UpdateLab(lab *models.Lab) error {
 		UpdateLabQuery,
 		lab.Name,
 		lab.Description,
-		lab.MDPath,
+		lab.MDFileID,
 		lab.Deadline.Unix(),
 		lab.ID,
 	)

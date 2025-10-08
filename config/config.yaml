@@ -6,6 +6,9 @@ auth:
 database:
     data_source: "scavanger.db"
     migrations_path: "./migrations"
+filestorage:
+    base_path: "./storage"
+    base_url: "./files"
 
 test_data:
   roles:
@@ -26,73 +29,3 @@ test_data:
         - username: "sh280-sidorova"
           name: Sidorova S.S.
           password: 123321
-
-# users:
-#     - username: admin
-#       name: Админ
-#       password: ghjgecr123
-#       role: admin
-#     - username: sa502-ivanov
-#       name: Иванов Иван Иванович
-#       password: "123"
-#       role: student
-#       group: СА-502
-groups:
-    - name: СА-502
-      disciplines:
-#         - Основы алгоритмизации и программирования
-#         - Основы проектирования баз данных
-disciplines:
-    - id: "1"
-      name: Основы алгоритмизации и программирования
-      labs:
-        - id: "1"
-          name: ЛР 1. Построение алгоритмов и блок-схем
-          path: labs/prog/lab1.pdf
-    - id: "2"
-      name: Основы проектирования баз данных
-      labs:
-        - id: "2"
-          name: ЛР 1. Построение ER-диаграмм
-          path: labs/db/lab1.pdf
-lab_reports:
-    - id: 20250909-13250919
-      student: sa502-ivanov
-      group: СА-502
-      discipline: Основы алгоритмизации и программирования
-      lab_name: ЛР 1. Построение алгоритмов и блок-схем
-      path: uploads/reports/СА-502/sa502-ivanov/1/20250909-13250919..doc
-      comment: ""
-      uploadet_at: 2025-09-24T13:25:19.933565851+03:00
-      stastus: submitted
-      grade: 0
-    - id: 20250909-00280941
-      student: sa502-ivanov
-      group: СА-502
-      discipline: Основы алгоритмизации и программирования
-      lab_name: ЛР 1. Построение алгоритмов и блок-схем
-      path: uploads/reports/СА-502/sa502-ivanov/1/20250909-00280941..docx
-      comment: ""
-      uploadet_at: 2025-09-25T00:28:41.669082486+03:00
-      stastus: submitted
-      grade: 0
-    - id: 20250909-0029097
-      student: sa502-ivanov
-      group: СА-502
-      discipline: Основы проектирования баз данных
-      lab_name: ЛР 1. Построение ER-диаграмм
-      path: uploads/reports/СА-502/sa502-ivanov/2/20250909-0029097..docx
-      comment: ""
-      uploadet_at: 2025-09-25T00:29:07.970155486+03:00
-      stastus: submitted
-      grade: 0
-    - id: 20250909-12200946
-      student: sa502-ivanov
-      group: СА-502
-      discipline: Основы алгоритмизации и программирования
-      lab_name: ЛР 1. Построение алгоритмов и блок-схем
-      path: uploads/reports/СА-502/sa502-ivanov/1/20250909-12200946..docx
-      comment: ""
-      uploadet_at: 2025-09-25T12:20:46.850052991+03:00
-      stastus: submitted
-      grade: 0

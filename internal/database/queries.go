@@ -73,13 +73,23 @@ const (
 	DeleteDisciplineQuery = `DELETE FROM disciplines WHERE id = ?`
 
 	// Lab
-	CreateDisciplineLabQuery = `INSERT INTO labs (name, description, md_path, deadline, discipline_id) VALUES (?, ?, ?, ?, ?)`
-	CreateLabFilesQuery = `INSERT INTO lab_files (lab_id, file_path) VALUES (?, ?)`
-	GetDisciplineLabsQuery = `SELECT id, name, description, md_path, deadline FROM labs WHERE discipline_id = ?`
-	GetLabFilesQuery = `SELECT file_path FROM lab_files WHERE lab_id = ?`
-	GetLabByIDQuery = `SELECT id, name, description, md_path, deadline, discipline_id FROM labs WHERE id = ?`
-	UpdateLabQuery = `UPDATE labs SET name = ?, description = ?, md_path = ?, deadline = ? WHERE id = ?`
+	CreateDisciplineLabQuery = `INSERT INTO labs (name, description, md_id, deadline, discipline_id) VALUES (?, ?, ?, ?, ?)`
+	GetDisciplineLabsQuery = `SELECT id, name, description, md_id, deadline FROM labs WHERE discipline_id = ?`
+	GetLabByIDQuery = `SELECT id, name, description, md_id, deadline, discipline_id FROM labs WHERE id = ?`
+	UpdateLabQuery = `UPDATE labs SET name = ?, description = ?, md_id = ?, deadline = ? WHERE id = ?`
 	DeleteLabQuery = `DELETE FROM labs WHERE id = ?`
-	DeleteLabFilesQuery = `DELETE FROM lab_files WHERE lab_id = ? AND file_path = ?`
+
+	// labs_files
+	CreateLabFileQuery = `INSERT INTO labs_files (file_id, lab_id) VALUES (?, ?)`
+	GetLabFilesQuery = `
+		SELECT lf.file_id, sf.path, sf.url, sf.filename, sf.size
+		FROM labs_files lf
+		LEFT JOIN stored_files sf ON lf.file_id = sf.id
+		WHERE lf.lab_id = ?`
+	DeleteLabFileQuery = `DELETE FROM labs_files WHERE file_id = ? AND lab_id = ?`
+
+	// Files
+	CreateStoredFileQuery = `INSERT INTO stored_files (path, url, filename, size) VALUES (?, ?, ?, ?)`
+	GetStoredFileQuery = `SELECT id, path, url, filename, size FROM stored_files WHERE id = ?`
 )
 

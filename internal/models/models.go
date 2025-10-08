@@ -41,13 +41,22 @@ type Discipline struct {
 type Lab struct {
 	ID           string
 	Name         string
-	MDPath       string
+	MDFileID     int
 	Deadline     time.Time
 	Description  string
 	DisciplineID int
 
-	FilesPath []string
-	Reports   []LabReport
+	MDFile      StoredFile
+	StoredFiles []StoredFile
+	Reports     []LabReport
+}
+
+type StoredFile struct {
+	ID       int
+	Filename string
+	Path     string
+	URL      string
+	Size     int64
 }
 
 type LabReport struct {
@@ -77,6 +86,11 @@ type AuthConfig struct {
 	SessionSecret string `yaml:"session_secret"`
 }
 
+type FSConfig struct {
+	BasePath string `yaml:"base_path"`
+	BaseURL  string `yaml:"base_url"`
+}
+
 type TestDataConfig struct {
 	Roles struct {
 		Admin   []User            `yaml:"admin"`
@@ -95,5 +109,6 @@ type Config struct {
 	Server   ServerConfig   `yaml:"server"`
 	Auth     AuthConfig     `yaml:"auth"`
 	DB       DatebaseConfig `yaml:"database"`
+	FS       FSConfig       `yaml:"filestorage"`
 	TestData TestDataConfig `yaml:"test_data"`
 }

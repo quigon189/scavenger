@@ -6,6 +6,7 @@ import (
 	"scavenger/internal/alerts"
 	"scavenger/internal/auth"
 	"scavenger/internal/database"
+	filestorage "scavenger/internal/file_storage"
 	"scavenger/internal/models"
 	"scavenger/views"
 )
@@ -14,13 +15,15 @@ type Handler struct {
 	authService *auth.AuthService
 	cfg *models.Config
 	db *database.Database
+	fs *filestorage.FileStorage
 }
 
-func NewHandler(cfg *models.Config, db *database.Database) *Handler {
+func NewHandler(cfg *models.Config, db *database.Database, fs *filestorage.FileStorage) *Handler {
 	return &Handler{
 		authService: auth.New(cfg.Auth),
 		cfg: cfg,
 		db: db,
+		fs: fs,
 	}
 }
 func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {

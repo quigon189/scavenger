@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"scavenger/internal/config"
 	"scavenger/internal/database"
+	filestorage "scavenger/internal/file_storage"
 	"scavenger/internal/server"
 	"syscall"
 	"time"
@@ -31,7 +32,12 @@ func main() {
 
 	db.SetTestData(cfg)
 
-	srv := server.New(cfg, db)
+	fs, err := filestorage.New(cfg.FS)
+	if err != nil {
+		log.Fatalf("Failed to start FileStorage: %v", err)
+	}
+
+	srv := server.New(cfg, db, fs)
 
 	go func() {
 		if err := srv.Start(); err != nil && err != http.ErrServerClosed {

@@ -369,15 +369,15 @@ func EditLabWorkModal(lab models.Lab, discipline *models.Discipline) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if lab.MDPath != "" {
+		if lab.MDFile.Path != "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"form-text\">Текущий файл:  <a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var21 templ.SafeURL
-			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(lab.MDPath)
+			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(lab.MDFile.Path)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 234, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 234, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -397,20 +397,20 @@ func EditLabWorkModal(lab models.Lab, discipline *models.Discipline) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(lab.FilesPath) > 0 {
+		if len(lab.StoredFiles) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div class=\"form-text\">Текущие файлы: <br>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, filePath := range lab.FilesPath {
+			for _, file := range lab.StoredFiles {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<label class=\"form-check-label\"><input type=\"checkbox\" name=\"remove_file\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var22 string
-				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(filePath)
+				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(file.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 253, Col: 71}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 253, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -421,9 +421,9 @@ func EditLabWorkModal(lab models.Lab, discipline *models.Discipline) templ.Compo
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var23 templ.SafeURL
-				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinURLErrs(filePath)
+				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinURLErrs(file.Path)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 256, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 256, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 				if templ_7745c5c3_Err != nil {
@@ -434,9 +434,9 @@ func EditLabWorkModal(lab models.Lab, discipline *models.Discipline) templ.Compo
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var24 string
-				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(filePath)
+				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(file.Path)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 257, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 257, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {

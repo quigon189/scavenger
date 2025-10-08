@@ -228,10 +228,10 @@ templ EditLabWorkModal(lab models.Lab, discipline *models.Discipline) {
                                 <div class="mb-3">
                                     <label class="form-label">Заменить Markdown файл</label>
                                     <input type="file" class="form-control" name="md_file" accept=".md,.txt">
-                                    if lab.MDPath != "" {
+                                    if lab.MDFile.Path != "" {
                                         <div class="form-text">
                                             Текущий файл: 
-                                            <a href={ lab.MDPath } target="_blank">
+                                            <a href={ lab.MDFile.Path } target="_blank">
                                                 Ссылка
                                             </a>
                                         </div>
@@ -244,17 +244,17 @@ templ EditLabWorkModal(lab models.Lab, discipline *models.Discipline) {
                                 <div class="mb-3">
                                     <label class="form-label">Дополнительные файлы</label>
                                     <input type="file" class="form-control" name="files" multiple>
-   	                                if len(lab.FilesPath) > 0 {
+   	                                if len(lab.StoredFiles) > 0 {
                                         <div class="form-text">
                                             Текущие файлы: 
 											<br>
-											for _,filePath := range lab.FilesPath {
+											for _,file := range lab.StoredFiles {
 												<label class="form-check-label">
-													<input type="checkbox" name="remove_file" value={ filePath } class="form-check-input">
+													<input type="checkbox" name="remove_file" value={ file.ID } class="form-check-input">
                                                 Удалить 
 												</label>
-												<a href={ filePath } target="_blank">
-													{ filePath }
+												<a href={ file.Path } target="_blank">
+													{ file.Path }
 												</a>
 												<br>
 											}
