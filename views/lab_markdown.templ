@@ -1,0 +1,216 @@
+package views
+
+import (
+	"scavenger/internal/models"
+)
+
+templ LabMarkdownPage(lab models.Lab, discipline models.Discipline, htmlContent string) {
+	@Base(lab.Name + " - " + discipline.Name, labMarkdownPage(lab, discipline, htmlContent))
+}
+
+templ labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlContent string) {
+	<div class="container-lg mb-4">
+		<!-- Хлебные крошки -->
+		<nav aria-label="breadcrumb" class="mb-4">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="/">Главная</a></li>
+				<li class="breadcrumb-item"><a href={ "/student/discipline/" + discipline.Name }>{ discipline.Name }</a></li>
+				<li class="breadcrumb-item active">{ labWork.Name }</li>
+			</ol>
+		</nav>
+
+		<div class="row">
+			<div class="col-md-3">
+				<!-- Боковая панель с информацией -->
+				<div class="sticky-top" style="top: 20px;">
+					<div class="card">
+						<div class="card-header">
+							<h5 class="card-title mb-0">Информация о работе</h5>
+						</div>
+						<div class="card-body">
+							<div class="mb-3">
+								<strong>Дисциплина:</strong><br>
+								{ discipline.Name }
+							</div>
+							<div class="mb-3">
+								<strong>Название работы:</strong><br>
+								{ labWork.Name }
+							</div>
+							<div class="mb-3">
+								<strong>Крайний срок:</strong><br>
+								<span class={ "badge bg-" + labWork.GetStatusBadge() }>
+									{ labWork.FormatDeadline() }
+								</span>
+							</div>
+							if labWork.Description != "" {
+								<div class="mb-3">
+									<strong>Описание:</strong><br>
+									<small class="text-muted">{ labWork.Description }</small>
+								</div>
+							}
+							<div class="d-grid gap-2">
+								if len(labWork.StoredFiles) > 0 {
+									for _, file := range labWork.StoredFiles {
+										<a href={ file.URL } class="btn btn-outline-danger btn-sm">
+											<i class="fas fa-file-pdf"></i> { file.Filename }
+										</a>
+									}
+								}
+								<a href={ "/student/discipline/" + discipline.IDtoStr() } class="btn btn-outline-secondary btn-sm">
+									<i class="fas fa-arrow-left"></i> Назад
+								</a>
+							</div>
+						</div>
+					</div>
+
+					<!-- Блок для загрузки отчета -->
+					<div class="card mt-4 border-success">
+						<div class="card-header bg-success text-white">
+							<h5 class="card-title mb-0">
+								<i class="fas fa-upload"></i> Загрузка отчета
+							</h5>
+						</div>
+						<div class="card-body">
+							<p>После изучения материалов вы можете загрузить отчет по лабораторной работе.</p>
+							<div class="d-grid gap-2 d-md-flex justify-content-md-end">
+								<a href={ "/student/discipline/" + discipline.IDtoStr() } class="btn btn-primary">
+									<i class="fas fa-upload"></i> Загрузить отчет
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-9">
+				<!-- Основной контент Markdown -->
+				<div class="card">
+					<div class="card-header d-flex justify-content-between align-items-center">
+						<h3 class="card-title mb-0">{ labWork.Name }</h3>
+					</div>
+					<div class="card-body">
+						if htmlContent != "" {
+							<article class="markdown-body" id="markdown-content">
+								@unescapeHTML(htmlContent)
+							</article>
+						} else {
+							<div class="text-center py-5">
+								<i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+								<h5 class="text-muted">Материалы не найдены</h5>
+								<p class="text-muted">Markdown файл для этой работы не загружен</p>
+							</div>
+						}
+					</div>
+					<div class="card-footer">
+						<div class="row">
+							<div class="col-md-6 text-end">
+								<small class="text-muted">
+									<i class="fas fa-graduation-cap"></i> { discipline.Name }
+								</small>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<style>
+		.markdown-body {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+			font-size: 16px;
+			line-height: 1.6;
+			word-wrap: break-word;
+		}
+
+		.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+			border-bottom: 1px solid #eaecef;
+			padding-bottom: 0.3em;
+			margin-top: 1.5em;
+		}
+
+		.markdown-body code {
+			background-color: rgba(175, 184, 193, 0.2);
+			border-radius: 6px;
+			padding: 0.2em 0.4em;
+			font-size: 0.9em;
+		}
+
+		.markdown-body pre {
+			background-color: #f6f8fa;
+			border-radius: 6px;
+			padding: 1em;
+			overflow: auto;
+		}
+
+		.markdown-body blockquote {
+			border-left: 4px solid #dfe2e5;
+			padding-left: 1em;
+			margin-left: 0;
+			color: #6a737d;
+		}
+
+		.markdown-body table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		.markdown-body table th,
+		.markdown-body table td {
+			border: 1px solid #dfe2e5;
+			padding: 6px 13px;
+		}
+
+		.markdown-body table tr {
+			background-color: #fff;
+			border-top: 1px solid #c6cbd1;
+		}
+
+		.markdown-body table tr:nth-child(2n) {
+			background-color: #f6f8fa;
+		}
+
+		/* Темная тема */
+		.dark-theme .markdown-body {
+			color: #c9d1d9;
+			background-color: #0d1117;
+		}
+
+		.dark-theme .markdown-body h1,
+		.dark-theme .markdown-body h2,
+		.dark-theme .markdown-body h3 {
+			border-bottom-color: #30363d;
+		}
+
+		.dark-theme .markdown-body code {
+			background-color: rgba(110, 118, 129, 0.4);
+		}
+
+		.dark-theme .markdown-body pre {
+			background-color: #161b22;
+		}
+
+		.dark-theme .markdown-body blockquote {
+			border-left-color: #3b434b;
+			color: #8b949e;
+		}
+
+		.dark-theme .markdown-body table th,
+		.dark-theme .markdown-body table td {
+			border-color: #30363d;
+		}
+
+		.dark-theme .markdown-body table tr {
+			background-color: #0d1117;
+			border-top-color: #21262d;
+		}
+
+		.dark-theme .markdown-body table tr:nth-child(2n) {
+			background-color: #161b22;
+		}
+	</style>
+}
+
+func unescapeHTML(html string) templ.Component {
+    return templ.Raw(html)
+}

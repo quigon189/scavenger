@@ -279,8 +279,18 @@ func (h *Handler) EditDisciplineLab(w http.ResponseWriter, r *http.Request) {
 		for _, idS := range delFilesID {
 			id, err := strconv.Atoi(idS)
 			if err != nil {
+				alerts.FlashError(w, r, "Ошибка удаления файла")
+				log.Printf("Failed to delete file: %v", err)
 				continue
 			}
+			delFile, err := h.db.GetStoredFile(id)
+			if err != nil {
+				alerts.FlashError(w, r, "Ошибка удаления файла")
+				log.Printf("Failed to delete file: %v", err)
+				continue
+			}
+
+			h.fs.DeleteFile(delFile.Path)
 			delStoredFiles = append(delStoredFiles, models.StoredFile{
 				ID: id,
 			})

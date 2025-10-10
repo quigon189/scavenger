@@ -7,6 +7,7 @@ require (
 	github.com/gorilla/sessions v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/pressly/goose/v3 v3.25.0
+	github.com/yuin/goldmark v1.7.13
 	golang.org/x/crypto v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
 )

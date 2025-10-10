@@ -91,5 +91,6 @@ const (
 	// Files
 	CreateStoredFileQuery = `INSERT INTO stored_files (path, url, filename, size) VALUES (?, ?, ?, ?)`
 	GetStoredFileQuery = `SELECT id, path, url, filename, size FROM stored_files WHERE id = ?`
+	GetStoredFileByURLQuery = `SELECT id, path, url, filename, size FROM stored_files WHERE url = ?`
 )
 

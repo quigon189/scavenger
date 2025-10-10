@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"scavenger/internal/models"
 )
@@ -24,6 +25,7 @@ const (
 type FileStorage struct {
 	basePath string
 	baseURL  string
+	mu       sync.RWMutex
 }
 
 type StoredFile struct {
@@ -64,6 +66,9 @@ func (fs *FileStorage) SaveFile(ft FileType, path string, file multipart.File, h
 
 	dirPath := filepath.Dir(filePath)
 
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
+
 	if err := os.MkdirAll(dirPath, 0755); err != nil {
 		return nil, err
 	}
@@ -83,10 +88,29 @@ func (fs *FileStorage) SaveFile(ft FileType, path string, file multipart.File, h
 
 	return &StoredFile{
 		Filename: filename,
-		Path: filePath,
-		URL: url,
-		Size: size,
+		Path:     filePath,
+		URL:      url,
+		Size:     size,
 	}, nil
+}
+
+func (fs *FileStorage) GetFile(filePath string) ([]byte, error) {
+	fs.mu.RLock()
+	defer fs.mu.RUnlock()
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func (fs *FileStorage) DeleteFile(filePath string) error {
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
+
+	return os.Remove(filePath)
 }
 
 func (fs *FileStorage) sanitizeFilename(filename string) string {
@@ -98,7 +122,7 @@ func (fs *FileStorage) sanitizeFilename(filename string) string {
 	safe := reg.ReplaceAllString(nameWithoutExt, "-")
 
 	reg = regexp.MustCompile(`-+`)
-	safe = reg.ReplaceAllString(safe , "-")
+	safe = reg.ReplaceAllString(safe, "-")
 
 	safe = strings.Trim(safe, "-")
 
@@ -143,10 +167,10 @@ func (fs *FileStorage) getFilePath(ft FileType, path string, fn string) string {
 
 func (fs *FileStorage) getURL(ft FileType, path string, fn string) string {
 	return fmt.Sprintf(
-		"%s/%s/%s/%s",
+		"/%s/%s/%s/%s",
 		strings.TrimSuffix(fs.baseURL, "/"),
 		string(ft),
 		path,
 		fn,
-)
+	)
 }

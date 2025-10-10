@@ -23,6 +23,24 @@ func (d *Database) AddStoredFile(file *models.StoredFile) error {
 	return nil
 }
 
+func (d *Database) GetStoredFileByURL(url string) (*models.StoredFile, error) {
+	file := &models.StoredFile{}
+
+	err := d.db.QueryRow(GetStoredFileByURLQuery, url).Scan(
+		&file.ID,
+		&file.Path,
+		&file.URL,
+		&file.Filename,
+		&file.Size,
+	)
+	if err != nil {
+		return &models.StoredFile{}, err
+	}
+
+	return file, nil
+
+}
+
 func (d *Database) GetStoredFile(id int) (*models.StoredFile, error) {
 	file := &models.StoredFile{}
 

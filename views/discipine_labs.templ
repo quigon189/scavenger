@@ -75,7 +75,7 @@ templ discLabs(discipline *models.Discipline) {
 												</td>
 												<td>
 													<div class="btn-group btn-group-sm">
-														<a href={ "/admin/disciplines/" + discipline.Name + "/labs/" + lab.ID + "/reports" } 
+														<a href={ "/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID } 
 														   class="btn btn-sm btn-outline-primary">
 															<i class="fas fa-eye"></i>
 														</a>
@@ -231,8 +231,8 @@ templ EditLabWorkModal(lab models.Lab, discipline *models.Discipline) {
                                     if lab.MDFile.Path != "" {
                                         <div class="form-text">
                                             Текущий файл: 
-                                            <a href={ lab.MDFile.Path } target="_blank">
-                                                Ссылка
+                                            <a href={ lab.MDFile.URL } >
+                                                { lab.MDFile.Filename }
                                             </a>
                                         </div>
                                     } else {
@@ -253,8 +253,8 @@ templ EditLabWorkModal(lab models.Lab, discipline *models.Discipline) {
 													<input type="checkbox" name="remove_file" value={ file.ID } class="form-check-input">
                                                 Удалить 
 												</label>
-												<a href={ file.Path } target="_blank">
-													{ file.Path }
+												<a href={ file.URL } target="_blank">
+													{ file.Filename }
 												</a>
 												<br>
 											}

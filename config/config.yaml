@@ -7,8 +7,8 @@ database:
     data_source: "scavanger.db"
     migrations_path: "./migrations"
 filestorage:
-    base_path: "./storage"
-    base_url: "./files"
+    base_path: "storage"
+    base_url: "files"
 
 test_data:
   roles:
