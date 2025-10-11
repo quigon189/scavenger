@@ -23,6 +23,14 @@ func (h *Handler) StudentDashboard(w http.ResponseWriter, r *http.Request) {
 		disciplines = []models.Discipline{}
 	}
 
+	for i, discipline := range disciplines {
+		labs,err  := h.db.GetDisciplineLabs(discipline.ID)
+		if err != nil {
+			continue
+		}
+		disciplines[i].Labs = append(disciplines[i].Labs, labs...)
+	}
+
 	reports := []models.LabReport{}
 
 	views.StudentDashboard(disciplines, reports).Render(r.Context(), w)
@@ -31,7 +39,7 @@ func (h *Handler) StudentDashboard(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) DisciplinePage(w http.ResponseWriter, r *http.Request) {
 	id,err := strconv.Atoi(r.PathValue("id"))
 
-	disc, err := h.db.GetDisciplineByID(id)
+	disc, err := h.db.GetDisciplineWithLabs(id)
 	if err != nil {
 		alerts.FlashError(w,r,"Ошибка чтения дисциплины из БД")
 		log.Printf("Failed to get discipline: %v", err)
@@ -45,7 +53,7 @@ func (h *Handler) DisciplinePage(w http.ResponseWriter, r *http.Request) {
 
 	for _, lab := range disc.Labs {
 		for _, r := range reports {
-			if r.LabName == lab.Name {
+			if r.Lab.Name == lab.Name {
 				repMap[lab.ID] = append(repMap[lab.ID], r)
 			}
 		}
@@ -85,8 +93,6 @@ func (h *Handler) UploadReport(w http.ResponseWriter, r *http.Request) {
 	}
 
 	labID := r.FormValue("lab_id")
-	discipline := r.FormValue("discipline")
-	comment := r.FormValue("comment")
 
 	file, header, err := r.FormFile("report_file")
 	if err != nil {
@@ -118,17 +124,7 @@ func (h *Handler) UploadReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	report := models.LabReport{
-		ID:         timestamp,
-		Student:    username,
-		Group:      group,
-		Discipline: discipline,
-		LabName:    h.cfg.GetLab(labID).Name,
-		Path:       uploadPath,
-		Comment:    comment,
-		UploadedAt: time.Now(),
-		Status:     "submitted",
-	}
+	report := models.LabReport{}
 
 	log.Printf("report: %v", report)
 

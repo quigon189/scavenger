@@ -37,8 +37,8 @@ templ studentDashboard(disciplines []models.Discipline, reports []models.LabRepo
                 for _, report := range reports {
                   <div class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
-                      <small class="text-muted">{ report.Discipline }</small><br>
-                      <strong>{ report.LabName }</strong>
+                      <small class="text-muted">{ report.Discipline.Name }</small><br>
+                      <strong>{ report.Lab.Name }</strong>
                     </div>
 					<!--
                     <span class="badge bg-success">
@@ -74,7 +74,7 @@ templ studentDashboard(disciplines []models.Discipline, reports []models.LabRepo
                     </p>
                   </div>
                   <div class="card-footer">
-                    <a href={ "/discipline/" + discipline.IDtoStr() } class="btn btn-primary btn-sm">
+                    <a href={ "/disciplines/" + discipline.IDtoStr() } class="btn btn-primary btn-sm">
                       <i class="fas fa-folder-open"></i> Открыть
                     </a>
                   </div>

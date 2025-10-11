@@ -96,13 +96,13 @@ templ adminDashboard(stats *models.AdminStats, reports []models.LabReport, disci
 					if len(reports) > 0 {
 						<div class="list-group list-group-flush">
 							for _, report := range reports {
-								<a href={ "/admin/report/" + report.ID } 
+								<a href={ "/admin/report/" + report.IDtoStr() } 
 								   class="list-group-item list-group-item-action">
 									<div class="d-flex w-100 justify-content-between">
-										<h6 class="mb-1">{ report.Student }</h6>
+										<h6 class="mb-1">{ report.Student.Name }</h6>
 										<small>{ report.UploadedAt.Format("02.01.2006") }</small>
 									</div>
-									<p class="mb-1">{ report.Discipline } - { report.LabName }</p>
+									<p class="mb-1">{ report.Discipline.Name } - { report.Lab.Name }</p>
 									<span class="badge">
 										{ report.Status }
 									</span>

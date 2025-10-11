@@ -57,6 +57,10 @@ func (fs *FileStorage) SaveLabFile(ft FileType, lab *models.Lab, file multipart.
 	return fs.SaveFile(ft, strconv.Itoa(lab.DisciplineID), file, header)
 }
 
+func (fs *FileStorage) SaveReportFile(report *models.LabReport, file multipart.File, header *multipart.FileHeader) (*StoredFile, error) {
+	return fs.SaveFile(LabReport, fmt.Sprintf("%d/%s",report.DisciplineID, report.Lab.ID), file, header)
+}
+
 func (fs *FileStorage) SaveFile(ft FileType, path string, file multipart.File, header *multipart.FileHeader) (*StoredFile, error) {
 	filename := fs.sanitizeFilename(header.Filename)
 

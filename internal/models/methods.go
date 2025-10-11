@@ -46,7 +46,7 @@ func (d *Discipline) IDtoStr() string {
 }
 
 func (l *Lab) FormatDeadline() string {
-	return l.Deadline.Format("01.02.2006")
+	return l.Deadline.Format("02.01.2006")
 }
 
 func (l *Lab) GetStatus() string {
@@ -69,4 +69,34 @@ func (l *Lab) GetStatusBadge() string {
 	} else {
 		return "success"
 	}
+}
+
+func (r *LabReport) GetStatusText() string {
+	switch r.Status {
+	case "graded" :
+		return "Проверено"
+	case "draft":
+		return "Черновик"
+	case "submitted":
+		return "Ожидает проверки"
+	default:
+		return r.Status
+	}
+}
+
+func (r *LabReport) GetStatusBadge() string {
+    switch r.Status {
+    case "draft":
+        return "secondary"
+    case "submitted":
+        return "warning"
+    case "graded":
+        return "success"
+    default:
+        return "secondary"
+    }
+}
+
+func (r *LabReport) IDtoStr() string {
+	return strconv.Itoa(r.ID)
 }

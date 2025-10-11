@@ -32,5 +32,13 @@ func (h *Handler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 		disciplines = []models.Discipline{}
 	}
 
+	for i, discipline := range disciplines {
+		labs,err  := h.db.GetDisciplineLabs(discipline.ID)
+		if err != nil {
+			continue
+		}
+		disciplines[i].Labs = append(disciplines[i].Labs, labs...)
+	}
+
 	views.AdminDashboard(&stats, reports, disciplines).Render(r.Context(), w)
 }

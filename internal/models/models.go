@@ -60,16 +60,21 @@ type StoredFile struct {
 }
 
 type LabReport struct {
-	ID         string
-	Student    string
-	Group      string
-	Discipline string
-	LabName    string
-	Path       string
-	Comment    string
-	UploadedAt time.Time
-	Status     string
-	Grade      int
+	ID           int
+	StudentID    int
+	DisciplineID int
+	LabID        int
+	Comment      string
+	TeacherNote  string
+	UploadedAt   time.Time
+	UpdatedAt    time.Time
+	Status       string
+	Grade        int
+
+	Student    User
+	Discipline Discipline
+	Lab        Lab
+	Files      []StoredFile
 }
 
 type DatebaseConfig struct {

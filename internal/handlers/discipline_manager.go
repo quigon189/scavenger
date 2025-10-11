@@ -17,6 +17,15 @@ func (h *Handler) DisciplinesManager(w http.ResponseWriter, r *http.Request) {
 		groups = []models.Group{}
 	}
 
+	for i, group := range groups {
+		for j, disc :=range group.Disciplines {
+			labs, err := h.db.GetDisciplineLabs(disc.ID)
+			if err == nil {
+				groups[i].Disciplines[j].Labs = append(groups[i].Disciplines[j].Labs, labs...)
+			}
+		}
+	}
+
 	disciplines, err := h.db.GetDisciplinesWithoutGroup()
 	if err != nil {
 		alerts.FlashError(w, r, "Ошибка при получении дисциплин")

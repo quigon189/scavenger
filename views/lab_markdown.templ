@@ -14,7 +14,7 @@ templ labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlCont
 		<nav aria-label="breadcrumb" class="mb-4">
 			<ol class="breadcrumb">
 				<li class="breadcrumb-item"><a href="/">Главная</a></li>
-				<li class="breadcrumb-item"><a href={ "/student/discipline/" + discipline.Name }>{ discipline.Name }</a></li>
+				<li class="breadcrumb-item"><a href={ "/disciplines/" + discipline.IDtoStr() }>{ discipline.Name }</a></li>
 				<li class="breadcrumb-item active">{ labWork.Name }</li>
 			</ol>
 		</nav>
@@ -48,19 +48,19 @@ templ labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlCont
 									<small class="text-muted">{ labWork.Description }</small>
 								</div>
 							}
-							<div class="d-grid gap-2">
-								if len(labWork.StoredFiles) > 0 {
+							if len(labWork.StoredFiles) > 0 {
+								<div>
+									<strong>Дополнительные файлы:</strong><br>
+									<div class="d-grid gap-2">
 									for _, file := range labWork.StoredFiles {
 										<a href={ file.URL } class="btn btn-outline-danger btn-sm">
 											<i class="fas fa-file-pdf"></i> { file.Filename }
 										</a>
 									}
-								}
-								<a href={ "/student/discipline/" + discipline.IDtoStr() } class="btn btn-outline-secondary btn-sm">
-									<i class="fas fa-arrow-left"></i> Назад
-								</a>
+									</div>
+								</div>
+							}
 							</div>
-						</div>
 					</div>
 
 					<!-- Блок для загрузки отчета -->
@@ -71,9 +71,9 @@ templ labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlCont
 							</h5>
 						</div>
 						<div class="card-body">
-							<p>После изучения материалов вы можете загрузить отчет по лабораторной работе.</p>
-							<div class="d-grid gap-2 d-md-flex justify-content-md-end">
-								<a href={ "/student/discipline/" + discipline.IDtoStr() } class="btn btn-primary">
+							<p>После выполнения работы загрузитe отчет.</p>
+							<div class="d-grid gap-2">
+								<a href={ "/disciplines/" + discipline.IDtoStr() + "/labs/" + labWork.ID + "/reports" } class="btn btn-primary">
 									<i class="fas fa-upload"></i> Загрузить отчет
 								</a>
 							</div>
@@ -87,6 +87,9 @@ templ labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlCont
 				<div class="card">
 					<div class="card-header d-flex justify-content-between align-items-center">
 						<h3 class="card-title mb-0">{ labWork.Name }</h3>
+						<a href={ "/disciplines/" + discipline.IDtoStr() } class="btn btn-outline-secondary btn-sm">
+							<i class="fas fa-arrow-left"></i> Назад
+						</a>
 					</div>
 					<div class="card-body">
 						if htmlContent != "" {

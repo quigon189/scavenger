@@ -67,9 +67,9 @@ func labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlConte
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 templ.SafeURL
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs("/student/discipline/" + discipline.Name)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs("/disciplines/" + discipline.IDtoStr())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 17, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 17, Col: 80}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -82,7 +82,7 @@ func labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlConte
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 17, Col: 102}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 17, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -185,11 +185,11 @@ func labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlConte
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"d-grid gap-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		if len(labWork.StoredFiles) > 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div><strong>Дополнительные файлы:</strong><br><div class=\"d-grid gap-2\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			for _, file := range labWork.StoredFiles {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<a href=\"")
 				if templ_7745c5c3_Err != nil {
@@ -198,7 +198,7 @@ func labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlConte
 				var templ_7745c5c3_Var12 templ.SafeURL
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(file.URL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 54, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 56, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -211,41 +211,32 @@ func labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlConte
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(file.Filename)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 55, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 57, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</a> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div></div><!-- Блок для загрузки отчета --><div class=\"card mt-4 border-success\"><div class=\"card-header bg-success text-white\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-upload\"></i> Загрузка отчета</h5></div><div class=\"card-body\"><p>После выполнения работы загрузитe отчет.</p><div class=\"d-grid gap-2\"><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 templ.SafeURL
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs("/student/discipline/" + discipline.IDtoStr())
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs("/disciplines/" + discipline.IDtoStr() + "/labs/" + labWork.ID + "/reports")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 59, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 76, Col: 93}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"btn btn-outline-secondary btn-sm\"><i class=\"fas fa-arrow-left\"></i> Назад</a></div></div></div><!-- Блок для загрузки отчета --><div class=\"card mt-4 border-success\"><div class=\"card-header bg-success text-white\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-upload\"></i> Загрузка отчета</h5></div><div class=\"card-body\"><p>После изучения материалов вы можете загрузить отчет по лабораторной работе.</p><div class=\"d-grid gap-2 d-md-flex justify-content-md-end\"><a href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var15 templ.SafeURL
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinURLErrs("/student/discipline/" + discipline.IDtoStr())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 76, Col: 63}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -253,21 +244,34 @@ func labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlConte
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(labWork.Name)
+		var templ_7745c5c3_Var15 string
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(labWork.Name)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 89, Col: 48}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</h3><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var16 templ.SafeURL
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs("/disciplines/" + discipline.IDtoStr())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 90, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</h3></div><div class=\"card-body\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" class=\"btn btn-outline-secondary btn-sm\"><i class=\"fas fa-arrow-left\"></i> Назад</a></div><div class=\"card-body\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if htmlContent != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<article class=\"markdown-body\" id=\"markdown-content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<article class=\"markdown-body\" id=\"markdown-content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -275,30 +279,30 @@ func labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlConte
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</article>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</article>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"text-center py-5\"><i class=\"fas fa-file-alt fa-3x text-muted mb-3\"></i><h5 class=\"text-muted\">Материалы не найдены</h5><p class=\"text-muted\">Markdown файл для этой работы не загружен</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"text-center py-5\"><i class=\"fas fa-file-alt fa-3x text-muted mb-3\"></i><h5 class=\"text-muted\">Материалы не найдены</h5><p class=\"text-muted\">Markdown файл для этой работы не загружен</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div><div class=\"card-footer\"><div class=\"row\"><div class=\"col-md-6 text-end\"><small class=\"text-muted\"><i class=\"fas fa-graduation-cap\"></i> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div><div class=\"card-footer\"><div class=\"row\"><div class=\"col-md-6 text-end\"><small class=\"text-muted\"><i class=\"fas fa-graduation-cap\"></i> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 108, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/lab_markdown.templ`, Line: 111, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</small></div></div></div></div></div></div></div><style>\n\t\t.markdown-body {\n\t\t\tfont-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif;\n\t\t\tfont-size: 16px;\n\t\t\tline-height: 1.6;\n\t\t\tword-wrap: break-word;\n\t\t}\n\n\t\t.markdown-body h1, .markdown-body h2, .markdown-body h3 {\n\t\t\tborder-bottom: 1px solid #eaecef;\n\t\t\tpadding-bottom: 0.3em;\n\t\t\tmargin-top: 1.5em;\n\t\t}\n\n\t\t.markdown-body code {\n\t\t\tbackground-color: rgba(175, 184, 193, 0.2);\n\t\t\tborder-radius: 6px;\n\t\t\tpadding: 0.2em 0.4em;\n\t\t\tfont-size: 0.9em;\n\t\t}\n\n\t\t.markdown-body pre {\n\t\t\tbackground-color: #f6f8fa;\n\t\t\tborder-radius: 6px;\n\t\t\tpadding: 1em;\n\t\t\toverflow: auto;\n\t\t}\n\n\t\t.markdown-body blockquote {\n\t\t\tborder-left: 4px solid #dfe2e5;\n\t\t\tpadding-left: 1em;\n\t\t\tmargin-left: 0;\n\t\t\tcolor: #6a737d;\n\t\t}\n\n\t\t.markdown-body table {\n\t\t\tborder-collapse: collapse;\n\t\t\twidth: 100%;\n\t\t}\n\n\t\t.markdown-body table th,\n\t\t.markdown-body table td {\n\t\t\tborder: 1px solid #dfe2e5;\n\t\t\tpadding: 6px 13px;\n\t\t}\n\n\t\t.markdown-body table tr {\n\t\t\tbackground-color: #fff;\n\t\t\tborder-top: 1px solid #c6cbd1;\n\t\t}\n\n\t\t.markdown-body table tr:nth-child(2n) {\n\t\t\tbackground-color: #f6f8fa;\n\t\t}\n\n\t\t/* Темная тема */\n\t\t.dark-theme .markdown-body {\n\t\t\tcolor: #c9d1d9;\n\t\t\tbackground-color: #0d1117;\n\t\t}\n\n\t\t.dark-theme .markdown-body h1,\n\t\t.dark-theme .markdown-body h2,\n\t\t.dark-theme .markdown-body h3 {\n\t\t\tborder-bottom-color: #30363d;\n\t\t}\n\n\t\t.dark-theme .markdown-body code {\n\t\t\tbackground-color: rgba(110, 118, 129, 0.4);\n\t\t}\n\n\t\t.dark-theme .markdown-body pre {\n\t\t\tbackground-color: #161b22;\n\t\t}\n\n\t\t.dark-theme .markdown-body blockquote {\n\t\t\tborder-left-color: #3b434b;\n\t\t\tcolor: #8b949e;\n\t\t}\n\n\t\t.dark-theme .markdown-body table th,\n\t\t.dark-theme .markdown-body table td {\n\t\t\tborder-color: #30363d;\n\t\t}\n\n\t\t.dark-theme .markdown-body table tr {\n\t\t\tbackground-color: #0d1117;\n\t\t\tborder-top-color: #21262d;\n\t\t}\n\n\t\t.dark-theme .markdown-body table tr:nth-child(2n) {\n\t\t\tbackground-color: #161b22;\n\t\t}\n\t</style>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</small></div></div></div></div></div></div></div><style>\n\t\t.markdown-body {\n\t\t\tfont-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif;\n\t\t\tfont-size: 16px;\n\t\t\tline-height: 1.6;\n\t\t\tword-wrap: break-word;\n\t\t}\n\n\t\t.markdown-body h1, .markdown-body h2, .markdown-body h3 {\n\t\t\tborder-bottom: 1px solid #eaecef;\n\t\t\tpadding-bottom: 0.3em;\n\t\t\tmargin-top: 1.5em;\n\t\t}\n\n\t\t.markdown-body code {\n\t\t\tbackground-color: rgba(175, 184, 193, 0.2);\n\t\t\tborder-radius: 6px;\n\t\t\tpadding: 0.2em 0.4em;\n\t\t\tfont-size: 0.9em;\n\t\t}\n\n\t\t.markdown-body pre {\n\t\t\tbackground-color: #f6f8fa;\n\t\t\tborder-radius: 6px;\n\t\t\tpadding: 1em;\n\t\t\toverflow: auto;\n\t\t}\n\n\t\t.markdown-body blockquote {\n\t\t\tborder-left: 4px solid #dfe2e5;\n\t\t\tpadding-left: 1em;\n\t\t\tmargin-left: 0;\n\t\t\tcolor: #6a737d;\n\t\t}\n\n\t\t.markdown-body table {\n\t\t\tborder-collapse: collapse;\n\t\t\twidth: 100%;\n\t\t}\n\n\t\t.markdown-body table th,\n\t\t.markdown-body table td {\n\t\t\tborder: 1px solid #dfe2e5;\n\t\t\tpadding: 6px 13px;\n\t\t}\n\n\t\t.markdown-body table tr {\n\t\t\tbackground-color: #fff;\n\t\t\tborder-top: 1px solid #c6cbd1;\n\t\t}\n\n\t\t.markdown-body table tr:nth-child(2n) {\n\t\t\tbackground-color: #f6f8fa;\n\t\t}\n\n\t\t/* Темная тема */\n\t\t.dark-theme .markdown-body {\n\t\t\tcolor: #c9d1d9;\n\t\t\tbackground-color: #0d1117;\n\t\t}\n\n\t\t.dark-theme .markdown-body h1,\n\t\t.dark-theme .markdown-body h2,\n\t\t.dark-theme .markdown-body h3 {\n\t\t\tborder-bottom-color: #30363d;\n\t\t}\n\n\t\t.dark-theme .markdown-body code {\n\t\t\tbackground-color: rgba(110, 118, 129, 0.4);\n\t\t}\n\n\t\t.dark-theme .markdown-body pre {\n\t\t\tbackground-color: #161b22;\n\t\t}\n\n\t\t.dark-theme .markdown-body blockquote {\n\t\t\tborder-left-color: #3b434b;\n\t\t\tcolor: #8b949e;\n\t\t}\n\n\t\t.dark-theme .markdown-body table th,\n\t\t.dark-theme .markdown-body table td {\n\t\t\tborder-color: #30363d;\n\t\t}\n\n\t\t.dark-theme .markdown-body table tr {\n\t\t\tbackground-color: #0d1117;\n\t\t\tborder-top-color: #21262d;\n\t\t}\n\n\t\t.dark-theme .markdown-body table tr:nth-child(2n) {\n\t\t\tbackground-color: #161b22;\n\t\t}\n\t</style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

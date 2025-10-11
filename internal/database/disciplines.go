@@ -267,6 +267,8 @@ func (d *Database) GetLabByID(id int) (*models.Lab, error) {
 		return &models.Lab{}, err
 	}
 
+	lab.Deadline = time.Unix(deadline, 0)
+
 	mdfile, _ := d.GetStoredFile(lab.MDFileID)
 	lab.MDFile = *mdfile
 
