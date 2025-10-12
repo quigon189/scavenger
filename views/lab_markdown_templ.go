@@ -101,7 +101,7 @@ func labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlConte
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</li></ol></nav><div class=\"row\"><div class=\"col-md-3\"><!-- Боковая панель с информацией --><div class=\"sticky-top\" style=\"top: 20px;\"><div class=\"card\"><div class=\"card-header\"><h5 class=\"card-title mb-0\">Информация о работе</h5></div><div class=\"card-body\"><div class=\"mb-3\"><strong>Дисциплина:</strong><br>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</li></ol></nav><div class=\"row\"><div class=\"col-md-3\"><!-- Боковая панель с информацией --><div class=\"sticky-top mb-4\" style=\"top: 20px;\"><div class=\"card\"><div class=\"card-header\"><h5 class=\"card-title mb-0\">Информация о работе</h5></div><div class=\"card-body\"><div class=\"mb-3\"><strong>Дисциплина:</strong><br>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

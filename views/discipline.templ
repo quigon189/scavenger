@@ -6,11 +6,169 @@ import (
 	"scavenger/internal/models"
 )
 
-templ DisciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport) {
-@Base(discipline.Name, disciplinePage(discipline, reports))
+templ DisciplinePage(discipline *models.Discipline) {
+@Base(discipline.Name, disciplinePage(discipline))
 }
 
-templ disciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport) {
+templ disciplinePage(discipline *models.Discipline) {
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Главная</a></li>
+            <li class="breadcrumb-item active">{ discipline.Name }</li>
+        </ol>
+    </nav>
+
+    {{ user := models.GetUserFromContext(ctx) }}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3>{ discipline.Name }</h3>
+            <p class="text-muted">Группа: { user.GroupName }</p>
+            <hr>
+        </div>
+        <a href="/dashboard" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Назад
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4 class="mb-3">
+                <i class="fas fa-book"></i> Лабораторные работы
+            </h4>
+
+            if len(discipline.Labs) > 0 {
+                <div class="list-group mb-4">
+                    for _, lab := range discipline.Labs {
+                        <!-- Получаем отчет текущего студента для этой лабораторной работы -->
+                        {{ 
+							studentReport := &models.LabReport{}
+							status := ""
+							if len(lab.Reports) > 0 {
+								studentReport = &lab.Reports[0]
+								status = studentReport.Status
+							} 
+						}}
+                        
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1">
+                                        { lab.Name }
+                                        <span class={ "badge " + studentReport.GetStatusBadge() + " ms-2" }>
+                                            { studentReport.GetStatusText() }
+                                        </span>
+                                    </h5>
+                                    
+                                    if lab.Description != "" {
+                                        <p class="mb-2 text-muted">{ lab.Description }</p>
+                                    }
+                                </div>
+                                
+                                <div class="text-end">
+                                    <small class="text-muted">
+                                        { lab.FormatDeadline() }
+                                    </small>
+                                    <div class="mt-1">
+                                        if lab.Deadline.Before(time.Now()) {
+                                            <small class="text-danger">
+                                                <i class="fas fa-exclamation-triangle"></i> Срок сдачи прошел
+                                            </small>
+                                        } else if daysLeft(lab.Deadline) < 7 {
+                                            <small class="text-warning">
+                                                Осталось { daysLeft(lab.Deadline) } дней
+                                            </small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="btn-group">
+                                    <a href={ "/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID } class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> Просмотр
+                                    </a>
+                                    
+                                    <!-- Кнопка меняется в зависимости от статуса -->
+                                    if status == "" {
+                                        <a href={ "/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID + "/reports" } 
+                                           class="btn btn-sm btn-success">
+                                            <i class="fas fa-upload"></i> Загрузить отчет
+                                        </a>
+                                    } else if status == "submitted" {
+                                        <a href={ "/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID + "/reports" } 
+                                           class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i> Обновить отчет
+                                        </a>
+                                    } else if status == "graded" {
+                                        <a href={ "/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID + "/reports" } 
+                                           class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> Просмотреть отчет
+                                        </a>
+                                    }
+                                </div>
+								<!-- Информация о проверке -->
+								if status == "graded" {
+									<div class="d-flex align-items-center mt-2">
+										<span class="badge bg-primary me-2">
+											Оценка: { studentReport.Grade }
+										</span>
+										if studentReport.TeacherNote != "" {
+											<small class="text-muted">
+												<i class="fas fa-comment"></i> { studentReport.TeacherNote }
+											</small>
+										}
+									</div>
+								}
+								if status == "" {
+									<div class="d-flex align-items-center mt-2">
+										<span class="badge bg-secondary me-2">
+											Отчет не загружен
+										</span>
+									</div>
+								}
+								if status == "submitted" {
+									<div class="d-flex align-items-center mt-2">
+										<span class="badge bg-warning me-2">
+											Отчет на проверке
+										</span>
+									</div>
+								}
+                            </div>
+                        </div>
+                    }
+                </div>
+            } else {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Лабораторные работы пока не добавлены.
+                </div>
+            }
+        </div>
+
+        <div class="col-md-4">
+            <!-- Статистика -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar"></i> Статистика
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Всего работ:</strong> { len(discipline.Labs) }
+                    </div>
+                    <div class="mb-3">
+                        <strong>Срочных работ:</strong> 
+                        <span class="badge bg-warning">{ countUrgentLabs(discipline.Labs) }</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+templ olddisciplinePage(discipline *models.Discipline, reports map[string][]models.LabReport) {
 
 <!-- Хлебные крошки -->
 <nav aria-label="breadcrumb" class="mb-4">

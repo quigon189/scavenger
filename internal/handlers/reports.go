@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 	"scavenger/internal/alerts"
-	filestorage "scavenger/internal/file_storage"
 	"scavenger/internal/models"
 	"scavenger/views"
 	"strconv"
+	"time"
 )
 
 func (h *Handler) LabReportPage(w http.ResponseWriter, r *http.Request) {
@@ -35,12 +35,17 @@ func (h *Handler) LabReportPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	report := models.LabReport{}
+	student := models.GetUserFromContext(r.Context())
+
+	report, err := h.db.GetLabReport(student.ID, labID)
+	if err != nil {
+		report = &models.LabReport{}
+	}
 
 	report.Lab = *lab
 	report.Discipline = *discipline
 
-	views.LabReportPage(report).Render(r.Context(), w)
+	views.LabReportPage(*report).Render(r.Context(), w)
 }
 
 func (h *Handler) UploadLabReport(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +55,7 @@ func (h *Handler) UploadLabReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	labID, err := strconv.Atoi(r.PathValue("discID"))
+	labID, err := strconv.Atoi(r.PathValue("labID"))
 	if err != nil {
 		http.Redirect(w, r, "/404", http.StatusSeeOther)
 		return
@@ -62,13 +67,13 @@ func (h *Handler) UploadLabReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lab, err := h.db.GetLabByID(labID)
+	_, err = h.db.GetLabByID(labID)
 	if err != nil {
 		http.Redirect(w, r, "/404", http.StatusSeeOther)
 		return
 	}
 
-	student := r.Context().Value("user").(models.User)
+	student := models.GetUserFromContext(r.Context())
 
 	err = r.ParseMultipartForm(10 << 20)
 	if err != nil {
@@ -78,12 +83,22 @@ func (h *Handler) UploadLabReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	report := &models.LabReport{
-		StudentID:    student.ID,
-		DisciplineID: discipline.ID,
-		LabID:        labID,
-		Comment:      r.Form.Get("comment"),
-		Status:       "submitted",
+	report, err := h.db.GetLabReport(student.ID, labID)
+	if err != nil {
+		report = &models.LabReport{
+			StudentID:    student.ID,
+			DisciplineID: discipline.ID,
+			LabID:        labID,
+			Comment:      r.Form.Get("comment"),
+			Status:       "submitted",
+		}
+		report.UploadedAt = time.Now()
+		report.UpdatedAt = time.Now()
+	} else {
+		report.UpdatedAt = time.Now()
+		report.Comment = r.Form.Get("comment")
+
+		log.Printf("equal %v", !report.UpdatedAt.Equal(report.UploadedAt))
 	}
 
 	files := r.MultipartForm.File["report_files"]
@@ -105,7 +120,6 @@ func (h *Handler) UploadLabReport(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Failed to save file: %v", err)
 			http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
 			return
-
 		}
 
 		sFile := models.StoredFile{
@@ -121,5 +135,34 @@ func (h *Handler) UploadLabReport(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	report.Files = append(report.Files, storedFiles...)
 
+	if report.ID == 0 {
+		err = h.db.AddLabReport(report)
+		if err != nil {
+			alerts.FlashError(w, r, "Ошибка сохранения отчета")
+			log.Printf("Failed to add report ot db: %v", err)
+			http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+			return
+		}
+	} else {
+		err = h.db.UpdateReport(report)
+		if err != nil {
+			alerts.FlashError(w, r, "Ошибка обновления отчета")
+			log.Printf("Failed to add report ot db: %v", err)
+			http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+			return
+		}
+
+		err = h.db.AddReportFiles(report.ID, storedFiles)
+		if err != nil {
+			alerts.FlashError(w, r, "Ошибка обновления отчета")
+			log.Printf("Failed to add report ot db: %v", err)
+			http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+			return
+		}
+	}
+
+	alerts.FlashSuccess(w, r, "Отчет отправлен")
+	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
 }

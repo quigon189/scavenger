@@ -16,7 +16,7 @@ import (
 )
 
 func (h *Handler) StudentDashboard(w http.ResponseWriter, r *http.Request) {
-	stud := r.Context().Value("user").(models.User)
+	stud := models.GetUserFromContext(r.Context())
 	disciplines, err := h.db.GetDisciplinesByGroupID(stud.GroupID)
 	if err != nil {
 		alerts.FlashWarning(w,r,"Дисциплины не загружены")
@@ -32,6 +32,23 @@ func (h *Handler) StudentDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reports := []models.LabReport{}
+	for _, disc := range disciplines {
+		for _, lab := range disc.Labs {
+			labID, err := strconv.Atoi(lab.ID)
+			if err != nil {
+				continue
+			}
+			report, err := h.db.GetLabReport(stud.ID, labID)
+			if err != nil {
+				continue
+			}
+
+			report.Discipline = disc
+			report.Lab = lab
+
+			reports = append(reports, *report)
+		}
+	}
 
 	views.StudentDashboard(disciplines, reports).Render(r.Context(), w)
 }
@@ -47,19 +64,22 @@ func (h *Handler) DisciplinePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reports := []models.LabReport{}
+	student := models.GetUserFromContext(r.Context())
 
-	repMap := map[string][]models.LabReport{}
-
-	for _, lab := range disc.Labs {
-		for _, r := range reports {
-			if r.Lab.Name == lab.Name {
-				repMap[lab.ID] = append(repMap[lab.ID], r)
-			}
+	for i, lab := range disc.Labs {
+		labID, err := strconv.Atoi(lab.ID)
+		if err != nil {
+			continue
 		}
+		report, err := h.db.GetLabReport(student.ID, labID)
+		if err != nil {
+			continue
+		}
+
+		disc.Labs[i].Reports = append(disc.Labs[i].Reports, *report)
 	}
 
-	views.DisciplinePage(disc, repMap).Render(r.Context(), w)
+	views.DisciplinePage(disc).Render(r.Context(), w)
 }
 
 func (h *Handler) DownloadLabs(w http.ResponseWriter, r *http.Request) {

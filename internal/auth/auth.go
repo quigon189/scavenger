@@ -35,6 +35,7 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request, user *models
 	session, _ := s.store.Get(r, "session")
 	session.Values["authenticated"] = true
 	session.Values["username"] = user.Username
+	session.Values["userID"] = user.ID
 	session.Values["name"] = user.Name
 	session.Values["role"] = user.RoleName
 	session.Values["group"] = user.GroupName
@@ -62,12 +63,14 @@ func (s *AuthService) IsAuthenticated(r *http.Request) bool {
 func (s *AuthService) GetUser(r *http.Request) *models.User {
 	session, _ := s.store.Get(r, "session")
 	username, _ := session.Values["username"].(string)
+	id, _ := session.Values["userID"].(int)
 	name, _ := session.Values["name"].(string)
 	role, _ := session.Values["role"].(string)
 	group, _ := session.Values["group"].(string)
 	groupID, _ := session.Values["groupID"].(int)
 
 	return &models.User{
+		ID: id,
 		Username: username,
 		Name:     name,
 		RoleName: role,

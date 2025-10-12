@@ -58,7 +58,7 @@ func (fs *FileStorage) SaveLabFile(ft FileType, lab *models.Lab, file multipart.
 }
 
 func (fs *FileStorage) SaveReportFile(report *models.LabReport, file multipart.File, header *multipart.FileHeader) (*StoredFile, error) {
-	return fs.SaveFile(LabReport, fmt.Sprintf("%d/%s",report.DisciplineID, report.Lab.ID), file, header)
+	return fs.SaveFile(LabReport, fmt.Sprintf("%d/%d",report.DisciplineID, report.LabID), file, header)
 }
 
 func (fs *FileStorage) SaveFile(ft FileType, path string, file multipart.File, header *multipart.FileHeader) (*StoredFile, error) {

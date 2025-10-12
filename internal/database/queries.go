@@ -85,12 +85,32 @@ const (
 		SELECT lf.file_id, sf.path, sf.url, sf.filename, sf.size
 		FROM labs_files lf
 		LEFT JOIN stored_files sf ON lf.file_id = sf.id
-		WHERE lf.lab_id = ?`
+		WHERE lf.lab_id = ?
+	`
 	DeleteLabFileQuery = `DELETE FROM labs_files WHERE file_id = ? AND lab_id = ?`
 
 	// Files
 	CreateStoredFileQuery = `INSERT INTO stored_files (path, url, filename, size) VALUES (?, ?, ?, ?)`
 	GetStoredFileQuery = `SELECT id, path, url, filename, size FROM stored_files WHERE id = ?`
 	GetStoredFileByURLQuery = `SELECT id, path, url, filename, size FROM stored_files WHERE url = ?`
+
+	// LabReports
+	CreateLabReportQuery = `
+		INSERT INTO lab_reports (student_id, discipline_id, lab_id, comment, teacher_note, uploaded_at, updated_at, status, grade)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`
+	CreateReportFileQuery = `INSERT INTO report_files (report_id, file_id) VALUES (?, ?)`
+	GetLabReportQuery = `
+		SELECT id, student_id, discipline_id, lab_id, comment, teacher_note, uploaded_at, updated_at, status, grade
+		FROM lab_reports
+		WHERE student_id = ? AND lab_id = ?
+	`
+	GetReportFilesQuery = `
+		SELECT rf.file_id, sf.path, sf.url, sf.filename, sf.size
+		FROM report_files rf
+		LEFT JOIN stored_files sf ON rf.file_id = sf.id
+		WHERE rf.report_id = ?
+	`
+	UpdateLabReportQuery = `UPDATE lab_reports SET comment = ?, updated_at = ? WHERE id = ?`
 )
 

@@ -35,16 +35,16 @@ templ studentDashboard(disciplines []models.Discipline, reports []models.LabRepo
             if len(reports) > 0 {
               <div class="list-group list-group-flush">
                 for _, report := range reports {
-                  <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div class="list-group-item align-items-center">
                     <div>
                       <small class="text-muted">{ report.Discipline.Name }</small><br>
-                      <strong>{ report.Lab.Name }</strong>
+                      <a href={ "/disciplines/" + report.Discipline.IDtoStr() + "/labs/" + report.Lab.ID + "/reports" } class="btn">
+					  	<strong>{ report.Lab.Name }</strong>
+                      </a>
                     </div>
-					<!--
-                    <span class="badge bg-success">
-                      { report.Status }
+                    <span class={ "badge bg-" + report.GetStatusBadge() }>
+                      { report.GetStatusText() }
                     </span>
-					-->
                   </div>
                 }
               </div>

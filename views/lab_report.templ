@@ -69,15 +69,15 @@ templ labReportPage(report models.LabReport) {
 							status = "primary"
 						} 
 					}}
-						<div class={"card mt-3 border-" + status}>
+						<div class={"card my-3 border-" + status}>
 							<div class={"card-header bg-" + status + " text-white"}>
 							<h6 class="card-title mb-0">Статус отчета</h6>
 							</div>
 							<div class="card-body">
 								<div class="text-center">
-									<span class={ "badge bg-" + report.GetStatusBadge() + " mb-2" }>
-										{ report.GetStatusText() }
-									</span>
+									<div class="nb-2">
+										<strong>{ report.GetStatusText() }</strong>
+									</div>
 									
 									if report.Status == "graded" {
 										<div class="mt-2">
@@ -109,12 +109,6 @@ templ labReportPage(report models.LabReport) {
 								"Загрузка отчета"
 							} 
 						</h5>
-						if existingReport {
-							<span class="badge bg-info">
-								<i class="fas fa-history"></i> 
-								Обновлен: { report.UpdatedAt.Format("02.01.2006 15:04") }
-							</span>
-						}
 					</div>
 					<div class="card-body">
 						if labWork.Deadline.Before(time.Now()) {
@@ -126,9 +120,13 @@ templ labReportPage(report models.LabReport) {
 
 						<form action={ "/disciplines/" + discipline.IDtoStr() + "/labs/" + labWork.ID + "/reports" } method="post" enctype="multipart/form-data" id="reportForm">
 							<div class="mb-3">
-								<label class="form-label">Файлы отчета *</label>
-								<input type="file" class="form-control" name="report_files" 
-									   id="reportFile" required multiple>
+								if existingReport {
+									<label class="form-label">Добавить файлы</label>
+									<input type="file" class="form-control" name="report_files" id="reportFile" multiple>
+								} else {
+									<label class="form-label">Файлы отчета *</label>
+									<input type="file" class="form-control" name="report_files" id="reportFile" required multiple>
+								}
 								<div class="form-text">
 									Максимальный размер: 20MB
 									if existingReport {
@@ -169,7 +167,7 @@ templ labReportPage(report models.LabReport) {
 
 				<!-- История изменений (если есть) -->
 				if existingReport {
-					<div class="card mt-4">
+					<div class="card my-4">
 						<div class="card-header">
 							<h6 class="card-title mb-0">
 								<i class="fas fa-history"></i> История отчета
