@@ -47,7 +47,7 @@ const (
 		LEFT JOIN groups g ON s.group_id = g.id
 	`
 	GetStudentQuery = `
-		SELECT u.id, u.username, u.name, g.name
+		SELECT u.id, u.username, u.name, g.id, g.name
 		FROM students s
 		LEFT JOIN users u ON s.user_id = u.id
 		LEFT JOIN groups g ON s.group_id = g.id
@@ -104,6 +104,10 @@ const (
 		SELECT id, student_id, discipline_id, lab_id, comment, teacher_note, uploaded_at, updated_at, status, grade
 		FROM lab_reports
 		WHERE student_id = ? AND lab_id = ?
+	`
+	GetAllLabReportsQuery = `
+		SELECT id, student_id, discipline_id, lab_id, comment, teacher_note, uploaded_at, updated_at, status, grade
+		FROM lab_reports
 	`
 	GetReportFilesQuery = `
 		SELECT rf.file_id, sf.path, sf.url, sf.filename, sf.size

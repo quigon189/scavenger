@@ -179,7 +179,21 @@ func (d *Database) GetStudentByUsername(username string) (*models.User, error) {
 		return nil, fmt.Errorf("failed to get student %s: %v", username, err)
 	}
 	return student, nil
+}
 
+func (d *Database) GetStudentByID(id int) (*models.User, error) {
+	student := &models.User{}
+	err := d.db.QueryRow(GetStudentQuery, id).Scan(
+		&student.ID,
+		&student.Username,
+		&student.Name,
+		&student.GroupID,
+		&student.GroupName,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get student %d: %v", id, err)
+	}
+	return student, nil
 }
 
 func (d *Database) GetStudentGroup(student *models.User) error {

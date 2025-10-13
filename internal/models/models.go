@@ -77,6 +77,20 @@ type LabReport struct {
 	Files      []StoredFile
 }
 
+type ReportFilterParams struct {
+	DisciplineID  int
+	LabID         int
+	Status        string
+	Grade         int
+	StudentSearch string
+	Period        string
+	SortBy        string
+	SortOrder     string
+	Page          int
+	PageSize      int
+	TotalPages    int
+}
+
 type DatebaseConfig struct {
 	DataSource     string `yaml:"data_source"`
 	MigrationsPath string `yaml:"migrations_path"`

@@ -77,7 +77,7 @@ templ disciplinePage(discipline *models.Discipline) {
                                             </small>
                                         } else if daysLeft(lab.Deadline) < 7 {
                                             <small class="text-warning">
-                                                Осталось { daysLeft(lab.Deadline) } дней
+                                                Осталось дней: { daysLeft(lab.Deadline) }
                                             </small>
                                         }
                                     </div>
