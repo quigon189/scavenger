@@ -121,5 +121,6 @@ const (
 		WHERE rf.report_id = ?
 	`
 	UpdateLabReportQuery = `UPDATE lab_reports SET comment = ?, updated_at = ? WHERE id = ?`
+	UpdateReportGradeQuery = `UPDATE lab_reports SET grade = ?, status = ?, teacher_note = ? WHERE id = ?`
 )
 

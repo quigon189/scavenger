@@ -434,7 +434,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</div><!-- Модальные окна будут загружаться динамически --><div id=\"modals-container\"></div></div><!-- HTMX конфигурация --><script>\n\t\t// Показ индикатора загрузки\n\t\tdocument.addEventListener('htmx:beforeRequest', function(e) {\n\t\t\tconst target = e.detail.target;\n\t\t\tif (target.id === 'reports-table') {\n\t\t\t\ttarget.innerHTML = `\n\t\t\t\t\t<div class=\"text-center py-4\">\n\t\t\t\t\t\t<div class=\"spinner-border text-primary\" role=\"status\">\n\t\t\t\t\t\t\t<span class=\"visually-hidden\">Загрузка...</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<p class=\"mt-2 text-muted\">Загрузка данных...</p>\n\t\t\t\t\t</div>\n\t\t\t\t`;\n\t\t\t}\n\t\t});\n\n\t\t// Обработка ошибок\n\t\tdocument.addEventListener('htmx:responseError', function(e) {\n\t\t\tconst target = e.detail.target;\n\t\t\tif (target.id === 'reports-table') {\n\t\t\t\ttarget.innerHTML = `\n\t\t\t\t\t<div class=\"alert alert-danger\">\n\t\t\t\t\t\t<i class=\"fas fa-exclamation-triangle\"></i>\n\t\t\t\t\t\tОшибка загрузки данных. Попробуйте еще раз.\n\t\t\t\t\t</div>\n\t\t\t\t`;\n\t\t\t}\n\t\t});\n\n\t\t// Открытие модальных окон в контейнере\n\t\tfunction openGradeModal(reportId) {\n\t\t\thtmx.ajax('GET', '/admin/reports/' + reportId + '/grade-modal', {\n\t\t\t\ttarget: '#modals-container',\n\t\t\t\tswap: 'beforeend'\n\t\t\t});\n\t\t}\n\n\t\tfunction openReportDetails(reportId) {\n\t\t\thtmx.ajax('GET', '/admin/reports/' + reportId + '/details-modal', {\n\t\t\t\ttarget: '#modals-container',\n\t\t\t\tswap: 'beforeend'\n\t\t\t});\n\t\t}\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</div></div><!-- HTMX конфигурация --><script>\n\t\t// Показ индикатора загрузки\n\t\tdocument.addEventListener('htmx:beforeRequest', function(e) {\n\t\t\tconst target = e.detail.target;\n\t\t\tif (target.id === 'reports-table') {\n\t\t\t\ttarget.innerHTML = `\n\t\t\t\t\t<div class=\"text-center py-4\">\n\t\t\t\t\t\t<div class=\"spinner-border text-primary\" role=\"status\">\n\t\t\t\t\t\t\t<span class=\"visually-hidden\">Загрузка...</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<p class=\"mt-2 text-muted\">Загрузка данных...</p>\n\t\t\t\t\t</div>\n\t\t\t\t`;\n\t\t\t}\n\t\t});\n\n\t\t// Обработка ошибок\n\t\tdocument.addEventListener('htmx:responseError', function(e) {\n\t\t\tconst target = e.detail.target;\n\t\t\tif (target.id === 'reports-table') {\n\t\t\t\ttarget.innerHTML = `\n\t\t\t\t\t<div class=\"alert alert-danger\">\n\t\t\t\t\t\t<i class=\"fas fa-exclamation-triangle\"></i>\n\t\t\t\t\t\tОшибка загрузки данных. Попробуйте еще раз.\n\t\t\t\t\t</div>\n\t\t\t\t`;\n\t\t\t}\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -470,7 +470,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(len(reports))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 287, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 269, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -488,7 +488,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(buildSortURL(filterParams, "student"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 298, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 280, Col: 85}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -518,7 +518,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(buildSortURL(filterParams, "discipline"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 313, Col: 88}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 295, Col: 88}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -548,7 +548,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(buildSortURL(filterParams, "uploaded_at"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 328, Col: 89}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 310, Col: 89}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -578,7 +578,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(buildSortURL(filterParams, "grade"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 343, Col: 83}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 325, Col: 83}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -613,7 +613,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(report.Student.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 362, Col: 69}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 344, Col: 69}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -626,7 +626,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(report.Student.GroupName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 365, Col: 99}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 347, Col: 99}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -639,7 +639,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var23 string
 				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(report.Discipline.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 367, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 349, Col: 64}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 				if templ_7745c5c3_Err != nil {
@@ -652,7 +652,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(report.Lab.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 369, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 351, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -665,7 +665,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var25 string
 				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(report.Lab.FormatDeadline())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 372, Col: 83}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 354, Col: 83}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
@@ -678,7 +678,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(report.UploadedAt.Format("02.01.2006 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 376, Col: 86}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 358, Col: 86}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -691,7 +691,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(formatTimeAgo(report.UploadedAt))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 378, Col: 100}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 360, Col: 100}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -726,7 +726,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(report.GetStatusText())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 382, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 364, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 				if templ_7745c5c3_Err != nil {
@@ -744,7 +744,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 					var templ_7745c5c3_Var31 string
 					templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(report.Grade)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 387, Col: 89}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 369, Col: 89}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 					if templ_7745c5c3_Err != nil {
@@ -760,20 +760,20 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "</td><td><div class=\"btn-group btn-group-sm\"><button hx-get=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "</td><td><div class=\"btn-group btn-group-sm\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var32 string
-				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs("/admin/reports/" + strconv.Itoa(report.ID) + "/grade-modal")
+				var templ_7745c5c3_Var32 templ.SafeURL
+				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/reports/" + strconv.Itoa(report.ID) + "/review")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 394, Col: 121}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 376, Col: 109}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "\" hx-target=\"#modals-container\" hx-swap=\"innerHTML\" class=\"btn btn-outline-primary\" title=\"Оценить\"><i class=\"fas fa-check\"></i></button> <button type=\"button\" class=\"btn btn-outline-info\" onclick=\"openReportDetails(1)\" title=\"Подробности\"><i class=\"fas fa-eye\"></i></button></div></td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "\" class=\"btn btn-outline-primary\" title=\"Проверить и оценить\"><i class=\"fas fa-check\"></i> Проверить</a></div></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -795,7 +795,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 					var templ_7745c5c3_Var33 string
 					templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(buildPageURL(filterParams, filterParams.Page-1))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 422, Col: 97}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 396, Col: 97}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 					if templ_7745c5c3_Err != nil {
@@ -815,7 +815,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 						var templ_7745c5c3_Var34 string
 						templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(buildPageURL(filterParams, i))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 433, Col: 77}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 407, Col: 77}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 						if templ_7745c5c3_Err != nil {
@@ -828,7 +828,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 						var templ_7745c5c3_Var35 string
 						templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(i)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 435, Col: 43}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 409, Col: 43}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 						if templ_7745c5c3_Err != nil {
@@ -846,7 +846,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 						var templ_7745c5c3_Var36 string
 						templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(buildPageURL(filterParams, i))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 441, Col: 77}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 415, Col: 77}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 						if templ_7745c5c3_Err != nil {
@@ -859,7 +859,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 						var templ_7745c5c3_Var37 string
 						templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(i)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 443, Col: 43}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 417, Col: 43}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 						if templ_7745c5c3_Err != nil {
@@ -879,7 +879,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 					var templ_7745c5c3_Var38 string
 					templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(buildPageURL(filterParams, filterParams.Page+1))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 453, Col: 97}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 427, Col: 97}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 					if templ_7745c5c3_Err != nil {
@@ -902,162 +902,6 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 			}
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "</div></div><script>\n        function toggleSelectAll(checkbox) {\n            const checkboxes = document.querySelectorAll('input.report-checkbox');\n            checkboxes.forEach(cb => cb.checked = checkbox.checked);\n        }\n\n        function downloadReport(reportId) {\n            window.open('/admin/reports/' + reportId + '/download', '_blank');\n        }\n    </script>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// Модальное окно для оценки отчета (загружается через HTMX)
-func GradeModal(report models.LabReport) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var39 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var39 == nil {
-			templ_7745c5c3_Var39 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "<div class=\"modal fade\" id=\"gradeModal-{ strconv.Itoa(report.ID) }\" tabindex=\"-1\" aria-hidden=\"true\"><div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\">Оценка отчета</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button></div><form hx-post=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var40 string
-		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs("/admin/reports/" + strconv.Itoa(report.ID) + "/grade")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 493, Col: 86}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "\" hx-target=\"#reports-table\"><div class=\"modal-body\"><div class=\"mb-3\"><label class=\"form-label\">Студент</label> <input type=\"text\" class=\"form-control\" value=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var41 string
-		templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(report.Student.Username + " (" + report.Student.GroupName + ")")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 497, Col: 139}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "\" disabled></div><div class=\"mb-3\"><label class=\"form-label\">Работа</label> <input type=\"text\" class=\"form-control\" value=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var42 string
-		templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(report.Lab.Name + " - " + report.Discipline.Name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 501, Col: 124}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "\" disabled></div><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Оценка *</label> <select class=\"form-select\" name=\"grade\" required><option value=\"\">Выберите оценку</option> ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if report.Grade == 5 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "<option value=\"5\" selected>5 - Отлично</option> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "<option value=\"5\">5 - Отлично</option> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if report.Grade == 4 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "<option value=\"4\" selected>4 - Хорошо</option> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "<option value=\"4\">4 - Хорошо</option> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if report.Grade == 3 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "<option value=\"3\" selected>3 - Удовлетворительно</option> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "<option value=\"3\" selected>3 - Удовлетворительно</option> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if report.Grade == 2 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "<option value=\"2\" selected>2 - Неудовлетворительно</option>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, "<option value=\"2\">2 - Неудовлетворительно</option>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "</select></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Статус</label> <select class=\"form-select\" name=\"status\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if report.Status == "submitted" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "<option value=\"submitted\" selected>На проверке</option> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 116, "<option value=\"submitted\">На проверке</option> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if report.Status == "graded" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 117, "<option value=\"graded\" selected>Проверено</option>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 118, "<option value=\"graded\">Проверено</option>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "</select></div></div></div><div class=\"mb-3\"><label class=\"form-label\">Комментарий преподавателя</label> <textarea class=\"form-control\" name=\"teacher_note\" rows=\"3\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var43 string
-		templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(report.TeacherNote)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_reports.templ`, Line: 552, Col: 108}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 120, "</textarea></div></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button> <button type=\"submit\" class=\"btn btn-primary\">Сохранить оценку</button></div></form></div></div></div><script>\n        // Активируем модальное окно после загрузки\n        setTimeout(() => {\n            const modal = new bootstrap.Modal(document.getElementById('gradeModal-{ strconv.Itoa(report.ID) }'));\n            modal.show();\n            \n            // Удаляем модальное окно из DOM после закрытия\n            document.getElementById('gradeModal-{ strconv.Itoa(report.ID) }').addEventListener('hidden.bs.modal', function () {\n                this.remove();\n            });\n        }, 100);\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

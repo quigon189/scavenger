@@ -11,6 +11,7 @@ import (
 	"scavenger/internal/config"
 	"scavenger/internal/models"
 	"scavenger/views"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -48,6 +49,14 @@ func (h *Handler) StudentDashboard(w http.ResponseWriter, r *http.Request) {
 
 			reports = append(reports, *report)
 		}
+	}
+
+	sort.Slice(reports, func(i, j int) bool {
+		return reports[i].UploadedAt.After(reports[j].UploadedAt)
+	})
+
+	if len(reports) > 5 {
+		reports = reports[:5]
 	}
 
 	views.StudentDashboard(disciplines, reports).Render(r.Context(), w)

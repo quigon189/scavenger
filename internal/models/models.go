@@ -118,10 +118,10 @@ type TestDataConfig struct {
 }
 
 type AdminStats struct {
-	TotalReports   int
-	PendingReports int
-	GradedReports  int
-	TotalGroups    int
+	TotalReports     int
+	PendingReports   int
+	TotalDisciplines int
+	TotalGroups      int
 }
 
 type Config struct {

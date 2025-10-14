@@ -31,8 +31,7 @@ func (h *Handler) ReportsPage(w http.ResponseWriter, r *http.Request) {
 
 	filterParams.Parse(r)
 
-	//reports, totalCount, err := getFilteredReports(filterParams)
-	reports, err := h.db.GetAllReports()
+	reports, err := h.db.GetFilteredReports(filterParams)
 	if err != nil {
 		log.Printf("Ошибка получения отчетов: %v", err)
 		reports = []models.LabReport{}
@@ -90,18 +89,97 @@ func (h *Handler) ReportsLabsByDiscipline(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func (h *Handler) GradeModalHandler(w http.ResponseWriter, r *http.Request) {
-	reportID, err := strconv.Atoi(r.PathValue("id"))
+func (h *Handler) ReportReviewPage(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Неверный ID отчета", http.StatusBadRequest)
+		http.Redirect(w, r, "/404", http.StatusSeeOther)
 		return
 	}
 
-	report, err := h.db.GetLabReportByID(reportID)
+	report, err := h.db.GetLabReportByID(id)
 	if err != nil {
-		http.Error(w, "Отчет не найден", http.StatusNotFound)
+		alerts.FlashError(w, r, "Ошибка чтения отчета")
+		log.Printf("Failed to get LabReport: %v", err)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
 		return
 	}
 
-	views.GradeModal(*report).Render(r.Context(), w)
+	student, err := h.db.GetStudentByID(report.StudentID)
+	if err != nil {
+		alerts.FlashError(w, r, "Ошибка чтения студента")
+		log.Printf("Failed to get student: %v", err)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+		return
+	}
+	report.Student = *student
+
+	discipline, err := h.db.GetDisciplineByID(report.DisciplineID)
+	if err != nil {
+		alerts.FlashError(w, r, "Ошибка чтения дисциплины")
+		log.Printf("Failed to get discipline: %v", err)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+		return
+	}
+	report.Discipline = *discipline
+
+	lab, err := h.db.GetLabByID(report.LabID)
+	if err != nil {
+		alerts.FlashError(w, r, "Ошибка чтения работы")
+		log.Printf("Failed to get lab: %v", err)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+		return
+	}
+	report.Lab = *lab
+
+	views.ReportReviewPage(*report).Render(r.Context(), w)
+}
+
+func (h *Handler) GradeReport(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Redirect(w, r, "/404", http.StatusSeeOther)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		alerts.FlashError(w, r, "Ошибка при обработке формы")
+		log.Printf("Failed to parse form: %v", err)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+		return
+	}
+
+	grade, _ := strconv.Atoi(r.FormValue("grade"))
+	teacherNote := r.FormValue("teacher_note")
+
+	if grade < 2 || grade > 5 {
+		alerts.FlashError(w, r, "Неверная оценка")
+		log.Printf("Failed to validate grade")
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+		return
+	}
+	
+	report, err := h.db.GetLabReportByID(id)
+	if err != nil {
+		alerts.FlashError(w, r, "Ошибка чтения отчета")
+		log.Printf("Failed to get report: %v", err)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+		return
+	}
+
+	report.Grade = grade
+	report.Status = "graded"
+	report.TeacherNote = teacherNote
+
+	err = h.db.UpdateReportGrade(report)
+	if err != nil {
+		alerts.FlashError(w, r, "Ошибка при сохранении оценки")
+		log.Printf("Failed to update report: %v", err)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+		return
+	}
+
+	alerts.FlashSuccess(w, r, "Оценка успешно сохранена")
+	http.Redirect(w, r, "/admin/reports", http.StatusSeeOther)
 }

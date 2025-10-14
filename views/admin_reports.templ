@@ -228,9 +228,6 @@ templ reportsPage(disciplines []models.Discipline, reports []models.LabReport, f
 		<div id="reports-table">
 			@ReportsTable(reports, filterParams)
 		</div>
-
-		<!-- Модальные окна будут загружаться динамически -->
-		<div id="modals-container"></div>
 	</div>
 
 	<!-- HTMX конфигурация -->
@@ -262,21 +259,6 @@ templ reportsPage(disciplines []models.Discipline, reports []models.LabReport, f
 				`;
 			}
 		});
-
-		// Открытие модальных окон в контейнере
-		function openGradeModal(reportId) {
-			htmx.ajax('GET', '/admin/reports/' + reportId + '/grade-modal', {
-				target: '#modals-container',
-				swap: 'beforeend'
-			});
-		}
-
-		function openReportDetails(reportId) {
-			htmx.ajax('GET', '/admin/reports/' + reportId + '/details-modal', {
-				target: '#modals-container',
-				swap: 'beforeend'
-			});
-		}
 	</script>
 }
 
@@ -390,20 +372,12 @@ templ ReportsTable(reports []models.LabReport, filterParams models.ReportFilterP
                                         }
                                     </td>
                                     <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <button hx-get={ "/admin/reports/" + strconv.Itoa(report.ID) + "/grade-modal"}
-													hx-target="#modals-container"
-													hx-swap="innerHTML"
-													class="btn btn-outline-primary"
-                                                    title="Оценить">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                            <button type="button" 
-                                                    class="btn btn-outline-info"
-                                                    onclick="openReportDetails(1)"
-                                                    title="Подробности">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
+										<div class="btn-group btn-group-sm">
+                                            <a href={ "/admin/reports/" + strconv.Itoa(report.ID) + "/review" }
+                                               class="btn btn-outline-primary"
+                                               title="Проверить и оценить">
+                                                <i class="fas fa-check"></i> Проверить
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -478,99 +452,6 @@ templ ReportsTable(reports []models.LabReport, filterParams models.ReportFilterP
         function downloadReport(reportId) {
             window.open('/admin/reports/' + reportId + '/download', '_blank');
         }
-    </script>
-}
-
-// Модальное окно для оценки отчета (загружается через HTMX)
-templ GradeModal(report models.LabReport) {
-    <div class="modal fade" id="gradeModal-{ strconv.Itoa(report.ID) }" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Оценка отчета</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form hx-post={ "/admin/reports/" + strconv.Itoa(report.ID) + "/grade" } hx-target="#reports-table">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Студент</label>
-                            <input type="text" class="form-control" value={ report.Student.Username + " (" + report.Student.GroupName + ")" } disabled>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Работа</label>
-                            <input type="text" class="form-control" value={ report.Lab.Name + " - " + report.Discipline.Name } disabled>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Оценка *</label>
-                                    <select class="form-select" name="grade" required>
-                                        <option value="">Выберите оценку</option>
-										if report.Grade == 5 {
-                                        	<option value="5" selected>5 - Отлично</option>
-										} else {
-                                        	<option value="5">5 - Отлично</option>
-										}
-										if report.Grade == 4 {
-                                       		<option value="4" selected>4 - Хорошо</option>
-										} else {
-                                       		<option value="4">4 - Хорошо</option>
-										}
-										if report.Grade == 3 {
-											<option value="3" selected>3 - Удовлетворительно</option>
-										} else {
-											<option value="3" selected>3 - Удовлетворительно</option>
-										}
-										if report.Grade == 2 {
-											<option value="2" selected>2 - Неудовлетворительно</option>
-										} else {
-											<option value="2">2 - Неудовлетворительно</option>
-										}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Статус</label>
-                                    <select class="form-select" name="status">
-										if report.Status == "submitted"	 {
-                                        	<option value="submitted" selected>На проверке</option>
-										} else {
-                                        	<option value="submitted">На проверке</option>
-										}
-										if report.Status == "graded" {
-                                        	<option value="graded" selected>Проверено</option>
-										} else {
-                                        	<option value="graded">Проверено</option>
-										}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Комментарий преподавателя</label>
-                            <textarea class="form-control" name="teacher_note" rows="3">{ report.TeacherNote }</textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                        <button type="submit" class="btn btn-primary">Сохранить оценку</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <script>
-        // Активируем модальное окно после загрузки
-        setTimeout(() => {
-            const modal = new bootstrap.Modal(document.getElementById('gradeModal-{ strconv.Itoa(report.ID) }'));
-            modal.show();
-            
-            // Удаляем модальное окно из DOM после закрытия
-            document.getElementById('gradeModal-{ strconv.Itoa(report.ID) }').addEventListener('hidden.bs.modal', function () {
-                this.remove();
-            });
-        }, 100);
     </script>
 }
 

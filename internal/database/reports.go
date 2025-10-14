@@ -229,6 +229,11 @@ func (d *Database) UpdateReport(report *models.LabReport) error {
 	return err
 }
 
+func (d *Database) UpdateReportGrade(report *models.LabReport) error {
+	_, err := d.db.Exec(UpdateReportGradeQuery, report.Grade, report.Status, report.TeacherNote, report.ID)
+	return err
+}
+
 func (d *Database) getReportFiles(report *models.LabReport) ([]models.StoredFile, error) {
 	files := []models.StoredFile{}
 	row, err := d.db.Query(GetReportFilesQuery, report.ID)

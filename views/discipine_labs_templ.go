@@ -93,7 +93,7 @@ func discLabs(discipline *models.Discipline) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if len(discipline.Labs) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"table-responsive\"><table class=\"table table-striped table-hover\"><thead><tr><th>Название</th><th>Срок сдачи</th><th>Статус</th><th>Действия</th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"table-responsive\"><table class=\"table table-striped table-hover\"><thead><tr><th>Название</th><th>Срок сдачи</th><th>Статус</th><th>Отчеты</th><th>Действия</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -105,7 +105,7 @@ func discLabs(discipline *models.Discipline) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 66, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 67, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -118,7 +118,7 @@ func discLabs(discipline *models.Discipline) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Deadline.Format("02.01.2006"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 69, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 70, Col: 48}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -153,52 +153,65 @@ func discLabs(discipline *models.Discipline) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(lab.GetStatus())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 73, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 74, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span></td><td><div class=\"btn-group btn-group-sm\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span></td><td><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var10 templ.SafeURL
-				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs("/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID)
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/reports?lab_id=" + lab.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 78, Col: 82}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 78, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"btn btn-sm btn-outline-primary\"><i class=\"fas fa-eye\"></i></a> <button type=\"button\" class=\"btn btn-outline-primary\" data-bs-toggle=\"modal\" data-bs-target=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"btn btn-sm btn-outline-success\"><i class=\"fas fa-book\"></i> Отчеты</a></td><td><div class=\"btn-group btn-group-sm\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("#editLabWorkModal-" + lab.ID)
+				var templ_7745c5c3_Var11 templ.SafeURL
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs("/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 85, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 85, Col: 82}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"><i class=\"fas fa-edit\"></i></button> <button type=\"button\" class=\"btn btn-outline-danger\" data-bs-toggle=\"modal\" data-bs-target=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" class=\"btn btn-sm btn-outline-primary\"><i class=\"fas fa-eye\"></i></a> <button type=\"button\" class=\"btn btn-outline-primary\" data-bs-toggle=\"modal\" data-bs-target=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var12 string
-				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("#deleteLabWorkModal-" + lab.ID)
+				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("#editLabWorkModal-" + lab.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 91, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 92, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"><i class=\"fas fa-trash\"></i></button></div></td></tr><!-- Модальные окна для лабораторной работы --> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"><i class=\"fas fa-edit\"></i></button> <button type=\"button\" class=\"btn btn-outline-danger\" data-bs-toggle=\"modal\" data-bs-target=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var13 string
+				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("#deleteLabWorkModal-" + lab.ID)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 98, Col: 64}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\"><i class=\"fas fa-trash\"></i></button></div></td></tr><!-- Модальные окна для лабораторной работы --> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -206,7 +219,7 @@ func discLabs(discipline *models.Discipline) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -215,17 +228,17 @@ func discLabs(discipline *models.Discipline) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</tbody></table></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</tbody></table></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"text-center py-5\"><i class=\"fas fa-flask fa-3x text-muted mb-3\"></i><h5 class=\"text-muted\">Лабораторные работы не добавлены</h5><p class=\"text-muted\">Добавьте первую лабораторную работу для этой дисциплины</p><button type=\"button\" class=\"btn btn-primary\" data-bs-toggle=\"modal\" data-bs-target=\"#addLabWorkModal\"><i class=\"fas fa-plus\"></i> Добавить работу</button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"text-center py-5\"><i class=\"fas fa-flask fa-3x text-muted mb-3\"></i><h5 class=\"text-muted\">Лабораторные работы не добавлены</h5><p class=\"text-muted\">Добавьте первую лабораторную работу для этой дисциплины</p><button type=\"button\" class=\"btn btn-primary\" data-bs-toggle=\"modal\" data-bs-target=\"#addLabWorkModal\"><i class=\"fas fa-plus\"></i> Добавить работу</button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div></div></div></div></div><!-- Модальное окно добавления лабораторной работы -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div></div></div></div></div><!-- Модальное окно добавления лабораторной работы -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -253,25 +266,25 @@ func AddLabWorkModal(discipline *models.Discipline) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var13 == nil {
-			templ_7745c5c3_Var13 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"modal fade\" id=\"addLabWorkModal\" tabindex=\"-1\" aria-labelledby=\"addLabWorkModalLabel\" aria-hidden=\"true\"><div class=\"modal-dialog modal-lg\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\" id=\"addLabWorkModalLabel\">Добавить лабораторную работу</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button></div><form action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"modal fade\" id=\"addLabWorkModal\" tabindex=\"-1\" aria-labelledby=\"addLabWorkModalLabel\" aria-hidden=\"true\"><div class=\"modal-dialog modal-lg\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\" id=\"addLabWorkModalLabel\">Добавить лабораторную работу</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button></div><form action=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var14 templ.SafeURL
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/disciplines/" + discipline.IDtoStr() + "/labs")
+		var templ_7745c5c3_Var15 templ.SafeURL
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/disciplines/" + discipline.IDtoStr() + "/labs")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 133, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 140, Col: 85}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" method=\"post\" enctype=\"multipart/form-data\"><div class=\"modal-body\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Название работы *</label> <input type=\"text\" class=\"form-control\" name=\"name\" required placeholder=\"Например: Лабораторная работа №1\"></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Крайний срок сдачи *</label> <input type=\"date\" class=\"form-control\" name=\"deadline\" required></div></div></div><div class=\"mb-3\"><label class=\"form-label\">Описание работы</label> <textarea class=\"form-control\" name=\"description\" rows=\"3\" placeholder=\"Подробное описание задания...\"></textarea></div><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Markdown файл *</label> <input type=\"file\" class=\"form-control\" name=\"md_file\" accept=\".md\"><div class=\"form-text\">Лабораторная работа в формате Markdown</div></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Дополнительные файлы (опционально)</label> <input type=\"file\" class=\"form-control\" name=\"files\" multiple><div class=\"form-text\">Дополнительные файлы необходимые для выполнения работы</div></div></div></div><div class=\"alert alert-info\"><i class=\"fas fa-info-circle\"></i> <strong>Поля, отмеченные *</strong>, обязательны для заполнения.</div></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button> <button type=\"submit\" class=\"btn btn-primary\"><i class=\"fas fa-plus\"></i> Добавить работу</button></div></form></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" method=\"post\" enctype=\"multipart/form-data\"><div class=\"modal-body\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Название работы *</label> <input type=\"text\" class=\"form-control\" name=\"name\" required placeholder=\"Например: Лабораторная работа №1\"></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Крайний срок сдачи *</label> <input type=\"date\" class=\"form-control\" name=\"deadline\" required></div></div></div><div class=\"mb-3\"><label class=\"form-label\">Описание работы</label> <textarea class=\"form-control\" name=\"description\" rows=\"3\" placeholder=\"Подробное описание задания...\"></textarea></div><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Markdown файл *</label> <input type=\"file\" class=\"form-control\" name=\"md_file\" accept=\".md\"><div class=\"form-text\">Лабораторная работа в формате Markdown</div></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Дополнительные файлы (опционально)</label> <input type=\"file\" class=\"form-control\" name=\"files\" multiple><div class=\"form-text\">Дополнительные файлы необходимые для выполнения работы</div></div></div></div><div class=\"alert alert-info\"><i class=\"fas fa-info-circle\"></i> <strong>Поля, отмеченные *</strong>, обязательны для заполнения.</div></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button> <button type=\"submit\" class=\"btn btn-primary\"><i class=\"fas fa-plus\"></i> Добавить работу</button></div></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -295,182 +308,182 @@ func EditLabWorkModal(lab models.Lab, discipline *models.Discipline) templ.Compo
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var15 == nil {
-			templ_7745c5c3_Var15 = templ.NopComponent
+		templ_7745c5c3_Var16 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var16 == nil {
+			templ_7745c5c3_Var16 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div class=\"modal fade\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"modal fade\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs("editLabWorkModal-" + lab.ID)
+		var templ_7745c5c3_Var17 string
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs("editLabWorkModal-" + lab.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 196, Col: 61}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" tabindex=\"-1\" aria-hidden=\"true\"><div class=\"modal-dialog modal-lg\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\">Редактировать лабораторную работу</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button></div><form action=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var17 templ.SafeURL
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 203, Col: 95}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 203, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" method=\"post\" enctype=\"multipart/form-data\"><div class=\"modal-body\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Название работы *</label> <input type=\"text\" class=\"form-control\" name=\"name\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" tabindex=\"-1\" aria-hidden=\"true\"><div class=\"modal-dialog modal-lg\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\">Редактировать лабораторную работу</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button></div><form action=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Name)
+		var templ_7745c5c3_Var18 templ.SafeURL
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 209, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 210, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" required></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Крайний срок сдачи *</label> <input type=\"date\" class=\"form-control\" name=\"deadline\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" method=\"post\" enctype=\"multipart/form-data\"><div class=\"modal-body\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Название работы *</label> <input type=\"text\" class=\"form-control\" name=\"name\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Deadline.Format("2006-01-02"))
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 216, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 216, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" required></div></div></div><div class=\"mb-3\"><label class=\"form-label\">Описание работы</label> <textarea class=\"form-control\" name=\"description\" rows=\"3\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" required></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Крайний срок сдачи *</label> <input type=\"date\" class=\"form-control\" name=\"deadline\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Description)
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Deadline.Format("2006-01-02"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 223, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 223, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</textarea></div><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Заменить Markdown файл</label> <input type=\"file\" class=\"form-control\" name=\"md_file\" accept=\".md,.txt\"> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" required></div></div></div><div class=\"mb-3\"><label class=\"form-label\">Описание работы</label> <textarea class=\"form-control\" name=\"description\" rows=\"3\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var21 string
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Description)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 230, Col: 104}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</textarea></div><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Заменить Markdown файл</label> <input type=\"file\" class=\"form-control\" name=\"md_file\" accept=\".md,.txt\"> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if lab.MDFile.Path != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"form-text\">Текущий файл:  <a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<div class=\"form-text\">Текущий файл:  <a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var21 templ.SafeURL
-			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(lab.MDFile.URL)
+			var templ_7745c5c3_Var22 templ.SafeURL
+			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinURLErrs(lab.MDFile.URL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 234, Col: 68}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var22 string
-			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(lab.MDFile.Filename)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 235, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 241, Col: 68}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</a></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var23 string
+			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(lab.MDFile.Filename)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 242, Col: 69}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</a></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div class=\"form-text\">MD файл не загружен</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div class=\"form-text\">MD файл не загружен</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Дополнительные файлы</label> <input type=\"file\" class=\"form-control\" name=\"files\" multiple> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Дополнительные файлы</label> <input type=\"file\" class=\"form-control\" name=\"files\" multiple> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if len(lab.StoredFiles) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"form-text\">Текущие файлы: <br>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"form-text\">Текущие файлы: <br>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, file := range lab.StoredFiles {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<label class=\"form-check-label\"><input type=\"checkbox\" name=\"remove_file\" value=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<label class=\"form-check-label\"><input type=\"checkbox\" name=\"remove_file\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var23 string
-				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(file.ID)
+				var templ_7745c5c3_Var24 string
+				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(file.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 253, Col: 70}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" class=\"form-check-input\"> Удалить </label> <a href=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var24 templ.SafeURL
-				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinURLErrs(file.URL)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 256, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 260, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" target=\"_blank\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" class=\"form-check-input\"> Удалить </label> <a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var25 string
-				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(file.Filename)
+				var templ_7745c5c3_Var25 templ.SafeURL
+				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinURLErrs(file.URL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 257, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 263, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</a><br>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" target=\"_blank\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var26 string
+				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(file.Filename)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 264, Col: 28}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</a><br>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<div class=\"form-text\">Файлы не загружены</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div class=\"form-text\">Файлы не загружены</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div></div></div></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button> <button type=\"submit\" class=\"btn btn-primary\"><i class=\"fas fa-save\"></i> Сохранить изменения</button></div></form></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div></div></div></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button> <button type=\"submit\" class=\"btn btn-primary\"><i class=\"fas fa-save\"></i> Сохранить изменения</button></div></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -494,51 +507,51 @@ func DeleteLabWorkModal(lab models.Lab, discipline *models.Discipline) templ.Com
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var26 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var26 == nil {
-			templ_7745c5c3_Var26 = templ.NopComponent
+		templ_7745c5c3_Var27 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var27 == nil {
+			templ_7745c5c3_Var27 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<div class=\"modal fade\" id=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var27 string
-		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs("deleteLabWorkModal-" + lab.ID)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 283, Col: 63}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" tabindex=\"-1\" aria-hidden=\"true\"><div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title text-danger\">Удаление лабораторной работы</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button></div><div class=\"modal-body\"><div class=\"alert alert-danger\"><i class=\"fas fa-exclamation-triangle me-2\"></i> <strong>Внимание! Это действие нельзя отменить.</strong></div><p>Вы уверены, что хотите удалить лабораторную работу <strong>\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<div class=\"modal fade\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var28 string
-		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Name)
+		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs("deleteLabWorkModal-" + lab.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 296, Col: 136}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 290, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\"</strong>?</p><div class=\"card border-danger\"><div class=\"card-body\"><h6 class=\"card-title\">Последствия удаления:</h6><ul class=\"small\"><li>Все файлы задания будут удалены</li><li>Все отчеты студентов по этой работе сохранятся в системе</li><li>Студенты больше не смогут загружать отчеты по этой работе</li></ul></div></div></div><div class=\"modal-footer\"><form action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\" tabindex=\"-1\" aria-hidden=\"true\"><div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title text-danger\">Удаление лабораторной работы</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button></div><div class=\"modal-body\"><div class=\"alert alert-danger\"><i class=\"fas fa-exclamation-triangle me-2\"></i> <strong>Внимание! Это действие нельзя отменить.</strong></div><p>Вы уверены, что хотите удалить лабораторную работу <strong>\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var29 templ.SafeURL
-		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID + "/delete")
+		var templ_7745c5c3_Var29 string
+		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 310, Col: 111}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 303, Col: 136}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\" method=\"post\" class=\"d-inline\"><div class=\"input-group\"><input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"Название\" required> <button type=\"submit\" class=\"btn btn-danger\"><i class=\"fas fa-trash\"></i> Удалить работу</button></div></form><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\"</strong>?</p><div class=\"card border-danger\"><div class=\"card-body\"><h6 class=\"card-title\">Последствия удаления:</h6><ul class=\"small\"><li>Все файлы задания будут удалены</li><li>Все отчеты студентов по этой работе сохранятся в системе</li><li>Студенты больше не смогут загружать отчеты по этой работе</li></ul></div></div></div><div class=\"modal-footer\"><form action=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var30 templ.SafeURL
+		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/disciplines/" + discipline.IDtoStr() + "/labs/" + lab.ID + "/delete")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipine_labs.templ`, Line: 317, Col: 111}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\" method=\"post\" class=\"d-inline\"><div class=\"input-group\"><input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"Название\" required> <button type=\"submit\" class=\"btn btn-danger\"><i class=\"fas fa-trash\"></i> Удалить работу</button></div></form><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

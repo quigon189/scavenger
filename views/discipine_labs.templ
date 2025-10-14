@@ -56,6 +56,7 @@ templ discLabs(discipline *models.Discipline) {
 											<th>Название</th>
 											<th>Срок сдачи</th>
 											<th>Статус</th>
+											<th>Отчеты</th>
 											<th>Действия</th>
 										</tr>
 									</thead>
@@ -72,6 +73,12 @@ templ discLabs(discipline *models.Discipline) {
 													<span class={ "badge bg-" + lab.GetStatusBadge() }>
 														{ lab.GetStatus() }
 													</span>
+												</td>
+												<td>
+													<a href={ "/admin/reports?lab_id=" + lab.ID }
+														class="btn btn-sm btn-outline-success">
+														<i class="fas fa-book"></i> Отчеты
+													</a>
 												</td>
 												<td>
 													<div class="btn-group btn-group-sm">
