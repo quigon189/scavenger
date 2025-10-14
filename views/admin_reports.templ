@@ -70,152 +70,157 @@ templ reportsPage(disciplines []models.Discipline, reports []models.LabReport, f
 
 		<!-- Фильтры -->
 		<div class="card mb-4">
-			<div class="card-header">
+			<div class="card-header btn btn-outline-info btn-block"
+					data-bs-toggle="collapse"
+					data-bs-target="#filterBody"
+					aria-controls="filterBody">
 				<h5 class="card-title mb-0">
 					<i class="fas fa-filter"></i> Фильтры
 				</h5>
 			</div>
-			<div class="card-body">
-				<form hx-get="/admin/reports/table" hx-target="#reports-table" hx-trigger="change, keyup delay:500ms">
-					<div class="row g-3">
-						<div class="col-md-3">
-							<label class="form-label">Дисциплина</label>
-							<select name="discipline_id" class="form-select" 
-									hx-get="/admin/reports/labs"
-									hx-target="#lab-select"
-									hx-trigger="change">
-								<option value="">Все дисциплины</option>
-								for _, disc := range disciplines {
-									if filterParams.DisciplineID == disc.ID {
-										<option value={ disc.ID } selected>{ disc.Name }</option>
-									} else {
-										<option value={ disc.ID }>{ disc.Name }</option>
+			<div id="filterBody" class="collapse">
+				<div class="card-body">
+					<form hx-get="/admin/reports/table" hx-target="#reports-table" hx-trigger="change, keyup delay:500ms">
+						<div class="row g-3">
+							<div class="col-md-3">
+								<label class="form-label">Дисциплина</label>
+								<select name="discipline_id" class="form-select" 
+										hx-get="/admin/reports/labs"
+										hx-target="#lab-select"
+										hx-trigger="change">
+									<option value="">Все дисциплины</option>
+									for _, disc := range disciplines {
+										if filterParams.DisciplineID == disc.ID {
+											<option value={ disc.ID } selected>{ disc.Name }</option>
+										} else {
+											<option value={ disc.ID }>{ disc.Name }</option>
+										}
 									}
-								}
-							</select>
-						</div>
-						<div class="col-md-3">
-							<label class="form-label">Лабораторная работа</label>
-							<select id="lab-select" name="lab_id" class="form-select" hx-trigger="change">
-								<option value="">Все работы</option>
-								for _, lab := range disc.Labs {
-									if strconv.Itoa(filterParams.LabID) == lab.ID {
-										<option value={ lab.ID } selected>{ lab.Name }</option>
-									} else {
-										<option value={ lab.ID }>{ lab.Name }</option>
+								</select>
+							</div>
+							<div class="col-md-3">
+								<label class="form-label">Лабораторная работа</label>
+								<select id="lab-select" name="lab_id" class="form-select" hx-trigger="change">
+									<option value="">Все работы</option>
+									for _, lab := range disc.Labs {
+										if strconv.Itoa(filterParams.LabID) == lab.ID {
+											<option value={ lab.ID } selected>{ lab.Name }</option>
+										} else {
+											<option value={ lab.ID }>{ lab.Name }</option>
+										}
 									}
-								}
-							</select>
+								</select>
+							</div>
+							<div class="col-md-2">
+								<label class="form-label">Статус</label>
+								<select name="status" class="form-select" hx-trigger="change">
+									<option value="">Все статусы</option>
+									if filterParams.Status == "submitted" {
+										<option value="submitted" selected>На проверке</option>
+									} else {
+										<option value="submitted">На проверке</option>
+									}
+									if filterParams.Status == "graded" {
+										<option value="graded" selected>Проверено</option>
+									} else {
+										<option value="graded">Проверено</option>
+									}
+								</select>
+							</div>
+							<div class="col-md-2">
+								<label class="form-label">Оценка</label>
+								<select name="grade" class="form-select" hx-trigger="change">
+									<option value="">Все оценки</option>
+									if filterParams.Grade == 5 {
+										<option value="5" selected>5</option>
+									} else {
+										<option value="5">5</option>
+									}
+									if filterParams.Grade == 4 {
+										<option value="4" selected>4</option>
+									} else {
+										<option value="4">4</option>
+									}
+									if filterParams.Grade == 3 {
+										<option value="3" selected>3</option>
+									} else {
+										<option value="3">3</option>
+									}
+									if filterParams.Grade == 2 {
+										<option value="2" selected>2</option>
+									} else {
+										<option value="2">2</option>
+									}
+								</select>
+							</div>
+							<div class="col-md-2">
+								<label class="form-label">Сортировка</label>
+								<select name="sort_by" class="form-select" hx-trigger="change">
+									if filterParams.SortBy == "uploaded_at" {
+										<option value="uploaded_at" selected>Дате загрузки</option>
+									} else {
+										<option value="uploaded_at">Дате загрузки</option>
+									}
+									if filterParams.SortBy == "student" {
+										<option value="student" selected>Студенту</option>
+									} else {
+										<option value="student">Студенту</option>
+									}
+									if filterParams.SortBy == "deadline" {
+										<option value="deadline" selected>Сроку сдачи</option>
+									} else {
+										<option value="deadline">Сроку сдачи</option>
+									}
+									if filterParams.SortBy == "grade" {
+										<option value="grade" selected>Оценке</option>
+									} else {
+										<option value="grade">Оценке</option>
+									}
+								</select>
+							</div>
 						</div>
-						<div class="col-md-2">
-							<label class="form-label">Статус</label>
-							<select name="status" class="form-select" hx-trigger="change">
-								<option value="">Все статусы</option>
-								if filterParams.Status == "submitted" {
-									<option value="submitted" selected>На проверке</option>
-								} else {
-									<option value="submitted">На проверке</option>
-								}
-								if filterParams.Status == "graded" {
-									<option value="graded" selected>Проверено</option>
-								} else {
-									<option value="graded">Проверено</option>
-								}
-							</select>
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<label class="form-label">Поиск по студенту</label>
+								<input type="text" 
+									   name="student_search" 
+									   class="form-control" 
+									   placeholder="ФИО студента..."
+									   value={ filterParams.StudentSearch }
+									   hx-trigger="keyup changed delay:500">
+							</div>
+							<div class="col-md-3">
+								<label class="form-label">Период</label>
+								<select name="period" class="form-select" hx-trigger="change">
+									<option value="">Все время</option>
+									if filterParams.Period == "today" {
+										<option value="today" selected>Сегодня</option>
+									} else {
+										<option value="today">Сегодня</option>
+									}
+									if filterParams.Period == "week" {
+										<option value="week" selected>За неделю</option>
+									} else {
+										<option value="week">За неделю</option>
+									}
+									if filterParams.Period == "month" {
+										<option value="month" selected>За месяц</option>
+									} else {
+										<option value="month">За месяц</option>
+									}
+								</select>
+							</div>
+							<div class="col-md-3 d-flex align-items-end">
+								<button type="button" 
+										class="btn btn-outline-secondary w-100" 
+										hx-get="/admin/reports/table" 
+										hx-target="#reports-table">
+									<i class="fas fa-refresh"></i> Сбросить
+								</button>
+							</div>
 						</div>
-						<div class="col-md-2">
-							<label class="form-label">Оценка</label>
-							<select name="grade" class="form-select" hx-trigger="change">
-								<option value="">Все оценки</option>
-								if filterParams.Grade == 5 {
-									<option value="5" selected>5</option>
-								} else {
-									<option value="5">5</option>
-								}
-								if filterParams.Grade == 4 {
-									<option value="4" selected>4</option>
-								} else {
-									<option value="4">4</option>
-								}
-								if filterParams.Grade == 3 {
-									<option value="3" selected>3</option>
-								} else {
-									<option value="3">3</option>
-								}
-								if filterParams.Grade == 2 {
-									<option value="2" selected>2</option>
-								} else {
-									<option value="2">2</option>
-								}
-							</select>
-						</div>
-						<div class="col-md-2">
-							<label class="form-label">Сортировка</label>
-							<select name="sort_by" class="form-select" hx-trigger="change">
-								if filterParams.SortBy == "uploaded_at" {
-									<option value="uploaded_at" selected>Дате загрузки</option>
-								} else {
-									<option value="uploaded_at">Дате загрузки</option>
-								}
-								if filterParams.SortBy == "student" {
-									<option value="student" selected>Студенту</option>
-								} else {
-									<option value="student">Студенту</option>
-								}
-								if filterParams.SortBy == "deadline" {
-									<option value="deadline" selected>Сроку сдачи</option>
-								} else {
-									<option value="deadline">Сроку сдачи</option>
-								}
-								if filterParams.SortBy == "grade" {
-									<option value="grade" selected>Оценке</option>
-								} else {
-									<option value="grade">Оценке</option>
-								}
-							</select>
-						</div>
-					</div>
-					<div class="row mt-3">
-						<div class="col-md-6">
-							<label class="form-label">Поиск по студенту</label>
-							<input type="text" 
-								   name="student_search" 
-								   class="form-control" 
-								   placeholder="ФИО студента..."
-								   value={ filterParams.StudentSearch }
-								   hx-trigger="keyup changed delay:500">
-						</div>
-						<div class="col-md-3">
-							<label class="form-label">Период</label>
-							<select name="period" class="form-select" hx-trigger="change">
-								<option value="">Все время</option>
-								if filterParams.Period == "today" {
-									<option value="today" selected>Сегодня</option>
-								} else {
-									<option value="today">Сегодня</option>
-								}
-								if filterParams.Period == "week" {
-									<option value="week" selected>За неделю</option>
-								} else {
-									<option value="week">За неделю</option>
-								}
-								if filterParams.Period == "month" {
-									<option value="month" selected>За месяц</option>
-								} else {
-									<option value="month">За месяц</option>
-								}
-							</select>
-						</div>
-						<div class="col-md-3 d-flex align-items-end">
-							<button type="button" 
-									class="btn btn-outline-secondary w-100" 
-									hx-get="/admin/reports/table" 
-									hx-target="#reports-table">
-								<i class="fas fa-refresh"></i> Сбросить
-							</button>
-						</div>
-					</div>
-				</form>
+					</form>
+				</div>
 			</div>
 		</div>
 
@@ -386,9 +391,10 @@ templ ReportsTable(reports []models.LabReport, filterParams models.ReportFilterP
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <button type="button" 
-                                                    class="btn btn-outline-primary"
-                                                    onclick="openGradeModal(1)"
+                                            <button hx-get={ "/admin/reports/" + strconv.Itoa(report.ID) + "/grade-modal"}
+													hx-target="#modals-container"
+													hx-swap="innerHTML"
+													class="btn btn-outline-primary"
                                                     title="Оценить">
                                                 <i class="fas fa-check"></i>
                                             </button>

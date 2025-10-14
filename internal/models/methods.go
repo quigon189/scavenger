@@ -103,52 +103,36 @@ func (r *LabReport) IDtoStr() string {
 }
 
 func (f *ReportFilterParams) Parse(r *http.Request) {
-	f.Page = 1
-	f.PageSize = 20
-	f.SortBy = "uploaded_at"
-	f.SortOrder = "desc"
+	f.DisciplineID, _ = strconv.Atoi(r.URL.Query().Get("discipline_id"))	
+	f.LabID, _ = strconv.Atoi(r.URL.Query().Get("lab_id"))
+	f.Status = r.URL.Query().Get("status")
+	f.Grade, _ =strconv.Atoi(r.URL.Query().Get("grade"))
+	f.StudentSearch = r.URL.Query().Get("student_search")
+	f.Period = r.URL.Query().Get("period")
 
-	if pageStr := r.URL.Query().Get("page"); pageStr != "" {
-		if page, err := strconv.Atoi(pageStr); err == nil && page > 0 {
-			f.Page = page
-		}
+	f.SortBy = r.URL.Query().Get("sort_by")
+	f.SortOrder = r.URL.Query().Get("sort_order")
+	if f.SortOrder == "" {
+		f.SortOrder = "desk"
 	}
 
-	if disciplineIDStr := r.URL.Query().Get("discipline_id"); disciplineIDStr != "" {
-		if id, err := strconv.Atoi(disciplineIDStr); err == nil {
-			f.DisciplineID = id
-		}
+	f.Page, _ = strconv.Atoi(r.URL.Query().Get("page"))
+	if f.Page == 0 {
+		f.Page = 1
 	}
 
-	if labIDStr := r.URL.Query().Get("lab_id"); labIDStr != "" {
-		if id, err := strconv.Atoi(labIDStr); err == nil {
-			f.LabID = id
-		}
+	f.PageSize, _ = strconv.Atoi(r.URL.Query().Get("page_size"))
+	if f.PageSize == 0 {
+		f.PageSize = 20
 	}
+}
 
-	if status := r.URL.Query().Get("status"); status != "" {
-		f.Status = status
-	}
-
-	if gradeStr := r.URL.Query().Get("grade"); gradeStr != "" {
-		if grade, err := strconv.Atoi(gradeStr); err == nil {
-			f.Grade = grade
-		}
-	}
-
-	if studentSearch := r.URL.Query().Get("student_search"); studentSearch != "" {
-		f.StudentSearch = studentSearch
-	}
-
-	if period := r.URL.Query().Get("period"); period != "" {
-		f.Period = period
-	}
-
-	if sortBy := r.URL.Query().Get("sort_by"); sortBy != "" {
-		f.SortBy = sortBy
-	}
-
-	if sortOrder := r.URL.Query().Get("sort_order"); sortOrder != "" {
-		f.SortOrder = sortOrder
-	}
+func (f *ReportFilterParams) IsEmpty() bool {
+	return f.DisciplineID == 0 &&
+		   f.LabID == 0 &&
+		   f.Status == "" &&
+		   f.Grade == 0 &&
+		   f.StudentSearch == "" &&
+		   f.Period == "" &&
+		   f.SortBy == ""
 }

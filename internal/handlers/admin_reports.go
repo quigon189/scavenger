@@ -89,3 +89,19 @@ func (h *Handler) ReportsLabsByDiscipline(w http.ResponseWriter, r *http.Request
 		fmt.Fprintf(w, `<option value="%s">%s</option>`, lab.ID, lab.Name)
 	}
 }
+
+func (h *Handler) GradeModalHandler(w http.ResponseWriter, r *http.Request) {
+	reportID, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "Неверный ID отчета", http.StatusBadRequest)
+		return
+	}
+
+	report, err := h.db.GetLabReportByID(reportID)
+	if err != nil {
+		http.Error(w, "Отчет не найден", http.StatusNotFound)
+		return
+	}
+
+	views.GradeModal(*report).Render(r.Context(), w)
+}

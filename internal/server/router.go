@@ -51,6 +51,7 @@ func setupRouter(cfg *models.Config, db *database.Database, fileStorage *filesto
 	mux.HandleFunc("/admin/reports", handler.AdminMiddleware(handler.ReportsPage))
 	mux.HandleFunc("/admin/reports/table", handler.AdminMiddleware(handler.ReportsTable))
 	mux.HandleFunc("/admin/reports/labs", handler.AdminMiddleware(handler.ReportsLabsByDiscipline))
+	mux.HandleFunc("/admin/reports/{id}/grade-modal", handler.AdminMiddleware(handler.GradeModalHandler))
 
 	mux.HandleFunc("/download/{path...}", handler.AuthMiddleware(handler.DownloadLabs))
 	mux.HandleFunc("/upload-report", handler.AuthMiddleware(handler.UploadReport))

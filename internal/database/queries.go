@@ -100,6 +100,11 @@ const (
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 	CreateReportFileQuery = `INSERT INTO report_files (report_id, file_id) VALUES (?, ?)`
+	GetLabReportByIDQuery = `
+		SELECT id, student_id, discipline_id, lab_id, comment, teacher_note, uploaded_at, updated_at, status, grade
+		FROM lab_reports
+		WHERE id = ?
+	`
 	GetLabReportQuery = `
 		SELECT id, student_id, discipline_id, lab_id, comment, teacher_note, uploaded_at, updated_at, status, grade
 		FROM lab_reports
