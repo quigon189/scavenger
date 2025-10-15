@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"scavenger/internal/alerts"
+	"scavenger/internal/auth"
 	"scavenger/internal/config"
 	"scavenger/internal/models"
 	"scavenger/views"
@@ -166,4 +167,90 @@ func (h *Handler) UploadReport(w http.ResponseWriter, r *http.Request) {
 
 	alerts.FlashSuccess(w, r, "Отчет загружен")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (h *Handler) StudentRegisterPage(w http.ResponseWriter, r *http.Request) {
+	groups, err := h.db.GetAllGroups()
+    if err != nil {
+		alerts.FlashError(w,r,"Ошибка получения групп")
+        log.Printf("Failed to get groups: %v", err)
+        groups = []models.Group{}
+    }
+    
+	views.StudentRegistrationPage(groups).Render(r.Context(), w)
+}
+
+func (h *Handler) RegisterStudent(w http.ResponseWriter, r *http.Request) {
+    if err := r.ParseForm(); err != nil {
+        alerts.FlashError(w, r, "Ошибка обработки формы")
+        http.Redirect(w, r, "/register", http.StatusSeeOther)
+        return
+    }
+
+    username := r.FormValue("username")
+    name := r.FormValue("name")
+    password := r.FormValue("password")
+    groupIDStr := r.FormValue("group_id")
+
+    if username == "" || name == "" || password == "" || groupIDStr == "" {
+        alerts.FlashError(w, r, "Все поля обязательны для заполнения")
+        http.Redirect(w, r, "/register", http.StatusSeeOther)
+        return
+    }
+
+    if len(password) < 6 {
+        alerts.FlashError(w, r, "Пароль должен содержать минимум 6 символов")
+        http.Redirect(w, r, "/register", http.StatusSeeOther)
+        return
+    }
+
+    groupID, err := strconv.Atoi(groupIDStr)
+    if err != nil {
+        alerts.FlashError(w, r, "Неверный формат группы")
+        http.Redirect(w, r, "/register", http.StatusSeeOther)
+        return
+    }
+
+    group, err := h.db.GetGroupByID(groupID)
+    if err != nil {
+        alerts.FlashError(w, r, "Выбранная группа не найдена")
+        http.Redirect(w, r, "/register", http.StatusSeeOther)
+        return
+    }
+
+    existingUser, err := h.db.GetUserByUsername(username)
+    if err == nil && existingUser != nil {
+        alerts.FlashError(w, r, "Пользователь с таким логином уже существует")
+        http.Redirect(w, r, "/register", http.StatusSeeOther)
+        return
+    }
+
+    newStudent, err := auth.RegisterUser(
+        username,
+        name,
+        password,
+        string(models.StudentRole),
+    )
+    if err != nil {
+        log.Printf("Ошибка регистрации студента: %v", err)
+        alerts.FlashError(w, r, "Ошибка при создании учетной записи")
+        http.Redirect(w, r, "/register", http.StatusSeeOther)
+        return
+    }
+
+    newStudent.GroupID = group.ID
+    newStudent.GroupName = group.Name
+
+    if err := h.db.CreateStudent(newStudent); err != nil {
+        log.Printf("Ошибка сохранения студента в БД: %v", err)
+        alerts.FlashError(w, r, "Ошибка при сохранении данных студента")
+        http.Redirect(w, r, "/register", http.StatusSeeOther)
+        return
+    }
+
+    log.Printf("Зарегистрирован новый студент: %s (%s), группа: %s", 
+        newStudent.Name, newStudent.Username, newStudent.GroupName)
+
+    alerts.FlashSuccess(w, r, "Регистрация успешно завершена! Теперь вы можете войти в систему.")
+    http.Redirect(w, r, "/", http.StatusSeeOther)
 }

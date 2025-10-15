@@ -19,6 +19,8 @@ func setupRouter(cfg *models.Config, db *database.Database, fileStorage *filesto
 
 	mux.HandleFunc("/404", handler.NotFound)
 	mux.HandleFunc("/", handler.AuthMiddleware(handler.Index))
+	mux.HandleFunc("/register", handler.StudentRegisterPage)
+	mux.HandleFunc("POST /register", handler.RegisterStudent)
 	mux.HandleFunc("/dashboard", handler.AuthMiddleware(handler.Dashboard))
 	mux.HandleFunc("/logout", handler.AuthMiddleware(handler.Logout))
 	mux.HandleFunc("/disciplines/{id}", handler.StudentMiddleware(handler.DisciplinePage))

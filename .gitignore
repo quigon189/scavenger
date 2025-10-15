@@ -10,4 +10,6 @@
 #хранилище файлов
 storage/
 
+main
+
 __pycache__/

@@ -1,5 +1,9 @@
 package views
 
+import (
+	"scavenger/internal/models"
+)
+
 templ Base(title string, content templ.Component) {
 <!DOCTYPE html>
 <html lang="ru">
@@ -14,13 +18,48 @@ templ Base(title string, content templ.Component) {
 </head>
 
 <body>
+	{{ user := models.GetUserFromContext(ctx) }}
 	<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
 		<div class="container">
 			<a class="navbar-brand" href="/">
 				<i class="fas fa-graduation-cap"></i> Сборщик работ
 			</a>
-			<div class="navbar-nav ms-auto">
-				<a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Выход</a>
+			<div class="navbar-nav">
+				<div class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+						<span>{ user.Name }</span>
+					</a>
+					<ul class="dropdown-menu dropdown-menu-end">
+						<li>
+							<div class="dropdown-header text-muted small">
+								<div>Логин: { user.Username }</div>
+								<div>Роль: { user.RoleName }</div>
+								if user.GroupName != "" {
+									<div>Группа: { user.GroupName }</div>
+								}
+							</div>
+						</li>
+						<li><hr class="dropdown-divider"></li>
+						<li>
+							<button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#userProfileModal">
+								<i class="fas fa-user me-2"></i>Профиль
+							</button>
+						</li>
+						<li>
+							<button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+								<i class="fas fa-key me-2"></i>Сменить пароль
+							</button>
+						</li>
+						<li><hr class="dropdown-divider"></li>
+						<li>
+							<form method="POST" action="/logout" class="d-inline">
+								<button type="submit" class="dropdown-item text-danger">
+									<i class="fas fa-sign-out-alt me-2"></i>Выйти
+								</button>
+							</form>
+						</li>
+					</ul>
+				</div>
 			</div>
 		</div>
 	</nav>
@@ -28,6 +67,13 @@ templ Base(title string, content templ.Component) {
 	<div class="container mt-4">
 		@content
 	</div>
+
+	if user != nil {
+		<div id="modals-container">
+			@UserProfileModal(user)
+			@ChangePasswordModal(user)
+		</div>
+	}
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
@@ -49,4 +95,108 @@ templ Base(title string, content templ.Component) {
 </body>
 
 </html>
+}
+
+templ UserProfileModal(user *models.User) {
+    <div class="modal fade" id="userProfileModal" tabindex="-1" aria-labelledby="userProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userProfileModalLabel">
+                        <i class="fas fa-user me-2"></i>Профиль пользователя
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h5>{ user.Name }</h5>
+                        <p class="text-muted">{ "@" + user.Username }</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Логин:</th>
+                                    <td>{ user.Username }</td>
+                                </tr>
+                                <tr>
+                                    <th>ФИО:</th>
+                                    <td>{ user.Name }</td>
+                                </tr>
+                                <tr>
+                                    <th>Роль:</th>
+                                    <td>
+                                        <span class="badge bg-primary">{ user.RoleName }</span>
+                                    </td>
+                                </tr>
+                                if user.GroupName != "" {
+                                    <tr>
+                                        <th>Группа:</th>
+                                        <td>
+                                            <span class="badge bg-secondary">{ user.GroupName }</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        <i class="fas fa-key me-2"></i>Сменить пароль
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+templ ChangePasswordModal(user *models.User) {
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="fas fa-key me-2"></i>Смена пароля
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form hx-post="/profile/change-password" hx-target="#password-change-result" hx-swap="innerHTML">
+                    <div class="modal-body">
+                        <div id="password-change-result"></div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Текущий пароль</label>
+                            <input type="password" class="form-control" name="current_password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Новый пароль</label>
+                            <input type="password" class="form-control" name="new_password" required 
+                                   pattern=".{6,}" title="Пароль должен содержать минимум 6 символов">
+                            <div class="form-text">Минимум 6 символов</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Подтвердите новый пароль</label>
+                            <input type="password" class="form-control" name="confirm_password" required>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            После смены пароля вам нужно будет войти заново.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Сменить пароль
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 }

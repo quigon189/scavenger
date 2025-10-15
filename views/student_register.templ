@@ -1,0 +1,138 @@
+package views
+
+import (
+	"strconv"
+
+    "scavenger/internal/models"
+)
+
+templ StudentRegistrationPage(groups []models.Group) {
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Регистрация</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+	@Alerts()
+
+    <div class="container mt-4 vh-100 d-flex justify-content-center">
+		<div class="card shadow-sm">
+			<div class="card-header bg-primary text-white text-center">
+				<h4 class="card-title mb-0">
+					<i class="fas fa-user-graduate me-2"></i>
+					Регистрация
+				</h4>
+			</div>
+			<div class="card-body p-4">
+				<div class="alert alert-info mb-4">
+					<h6 class="alert-heading">
+						<i class="fas fa-info-circle me-2"></i>
+						Информация о регистрации
+					</h6>
+					<p class="mb-0">
+						Заполните форму ниже для создания учетной записи студента. 
+						После регистрации вы сможете загружать лабораторные работы.
+					</p>
+				</div>
+
+				<form method="POST" action="/register">
+					<div class="row">
+						<div class="col-md-6">
+							<div class="mb-3">
+								<label class="form-label">Логин *</label>
+								<input type="text" 
+									   class="form-control" 
+									   name="username" 
+									   required
+									   placeholder="Придумайте логин">
+								<div class="form-text">
+									Логин должен быть уникальным
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="mb-3">
+								<label class="form-label">Пароль *</label>
+								<input type="password" 
+									   class="form-control" 
+									   name="password" 
+									   required
+									   placeholder="Придумайте пароль">
+								<div class="form-text">
+									Минимум 6 символов
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">ФИО *</label>
+						<input type="text" 
+							   class="form-control" 
+							   name="name" 
+							   required
+							   placeholder="Фамилия Имя Отчество">
+					</div>
+
+					<div class="mb-4">
+						<label class="form-label">Группа *</label>
+						<select class="form-select" name="group_id" required>
+							<option value="">Выберите группу</option>
+							for _, group := range groups {
+								<option value={ strconv.Itoa(group.ID) }>
+									{ group.Name }
+								</option>
+							}
+						</select>
+						<div class="form-text">
+							Выберите свою учебную группу
+						</div>
+					</div>
+
+					<div class="d-grid gap-2">
+						<button type="submit" class="btn btn-primary btn-lg">
+							<i class="fas fa-user-plus me-2"></i>
+							Зарегистрироваться
+						</button>
+						<a href="/login" class="btn btn-outline-secondary">
+							<i class="fas fa-arrow-left me-2"></i>
+							Вернуться к входу
+						</a>
+					</div>
+				</form>
+
+				<!-- Дополнительная информация -->
+				<div class="mt-4 pt-4 border-top">
+					<h6 class="text-muted">Что после регистрации?</h6>
+					<ul class="small text-muted">
+						<li>Вы сможете загружать лабораторные работы</li>
+						<li>Просматривать статус проверки работ</li>
+						<li>Получать комментарии преподавателя</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		var toastElList = [].slice.call(document.querySelectorAll('.toast[autoshow]'))
+
+		var toastList = toastElList.map(function (toastEl) {
+			toastEl.removeAttribute('autoshow');
+			var toast = new bootstrap.Toast(toastEl)
+			toast.show()
+			return toast
+		})
+
+		toastElList.forEach(function(toastEl) {
+			toastEl.addEventListener('hidden.bs.toast', function() {
+				this.remove()
+			})
+		})
+	</script>
+</body>
+</html>	
+}
