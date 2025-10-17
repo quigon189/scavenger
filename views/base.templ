@@ -163,7 +163,7 @@ templ ChangePasswordModal(user *models.User) {
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form hx-post="/profile/change-password" hx-target="#password-change-result" hx-swap="innerHTML">
+                <form action="/change-password" method="post">
                     <div class="modal-body">
                         <div id="password-change-result"></div>
                         

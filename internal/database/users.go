@@ -200,6 +200,11 @@ func (d *Database) GetStudentGroup(student *models.User) error {
 	return d.db.QueryRow(GetStudentGroupQuery, student.ID).Scan(&student.GroupName, &student.GroupID)
 }
 
+func (d *Database) UpdateUser(user *models.User) error {
+	_, err := d.db.Exec(UpdateUserQuery, user.Username, user.Name, user.PasswordHash, user.ID)
+	return err
+}
+
 func (d *Database) UpadateStudent(student *models.User) error {
 	tx, err := d.db.Begin()
 	if err != nil {

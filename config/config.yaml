@@ -1,5 +1,5 @@
 server:
-    port: "1234"
+    port: "8080"
     upload_path: ./uploads
 auth:
     session_secret: "123"

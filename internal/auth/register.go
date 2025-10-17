@@ -26,3 +26,7 @@ func GeneratePassHash(password string) (string, error) {
 	}
 	return string(passwordHash), nil
 }
+
+func ComparePassword(user models.User, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+}
