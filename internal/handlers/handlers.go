@@ -161,6 +161,16 @@ func (h *Handler) ChangeTheme(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.RoleName == string(models.StudentRole) {
+		err = h.db.GetStudentGroup(user)
+		if err != nil {
+			alerts.FlashError(w, r, "Ошибка чтения пользователя")
+			log.Printf("Failed get user from db: %v", err)
+			http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+			return
+		}
+	}
+
 	if user.Theme == "light" {
 		user.Theme = "dark"
 	} else {
