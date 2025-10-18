@@ -150,3 +150,37 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	alerts.FlashSuccess(w, r, "Пароль обнавлен")
 	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
 }
+
+func (h *Handler) ChangeTheme(w http.ResponseWriter, r *http.Request) {
+	user := models.GetUserFromContext(r.Context())
+	user, err := h.db.GetUserByUsername(user.Username)
+	if err != nil {
+		alerts.FlashError(w, r, "Ошибка чтения пользователя")
+		log.Printf("Failed get user from db: %v", err)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+		return
+	}
+
+	if user.Theme == "light" {
+		user.Theme = "dark"
+	} else {
+		user.Theme = "light"
+	}
+
+	if err = h.db.UpdateUser(user); err != nil {
+		alerts.FlashError(w, r, "Ошибка изменения данных пользователя")
+		log.Printf("Failed update user: %v", err)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+		return
+	}
+
+	if err = h.authService.UpdateUser(w, r, *user); err != nil {
+		alerts.FlashError(w, r, "Непобходимо перезайти")
+		log.Printf("Failed update user session: %v", err)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+		return
+	}
+
+	alerts.FlashSuccess(w, r, "Тема изменена")
+	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+}

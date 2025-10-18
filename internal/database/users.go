@@ -77,6 +77,7 @@ func (d *Database) GetUserByUsername(username string) (*models.User, error) {
 		&user.Name,
 		&user.PasswordHash,
 		&user.RoleName,
+		&user.Theme,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user %s: %v", username, err)
@@ -201,7 +202,7 @@ func (d *Database) GetStudentGroup(student *models.User) error {
 }
 
 func (d *Database) UpdateUser(user *models.User) error {
-	_, err := d.db.Exec(UpdateUserQuery, user.Username, user.Name, user.PasswordHash, user.ID)
+	_, err := d.db.Exec(UpdateUserQuery, user.Username, user.Name, user.PasswordHash, user.Theme, user.ID)
 	return err
 }
 

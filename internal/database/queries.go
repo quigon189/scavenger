@@ -23,12 +23,12 @@ const (
 	// Users
 	CreateUserQuery = `INSERT INTO users (username, name, password_hash, role_id) VALUES (?, ?, ?, ?)`
 	GetUserByUsernameQuery = `
-		SELECT u.id, u.username, u.name, u.password_hash, r.name AS role_name
+		SELECT u.id, u.username, u.name, u.password_hash, r.name, u.theme AS role_name
 		FROM users u
 		LEFT JOIN roles r ON u.role_id = r.id
 		WHERE u.username = ?
 	`
-	UpdateUserQuery = `UPDATE users SET username = ?, name = ?, password_hash = ? WHERE id = ?` 
+	UpdateUserQuery = `UPDATE users SET username = ?, name = ?, password_hash = ?, theme = ? WHERE id = ?` 
 	DeleteUserQuery =`DELETE FROM users WHERE id = ?` 
 
 	// Students

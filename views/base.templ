@@ -5,8 +5,9 @@ import (
 )
 
 templ Base(title string, content templ.Component) {
+{{ user := models.GetUserFromContext(ctx) }}
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-bs-theme={ user.Theme }>
 
 <head>
 	<meta charset="UTF-8">
@@ -18,7 +19,6 @@ templ Base(title string, content templ.Component) {
 </head>
 
 <body>
-	{{ user := models.GetUserFromContext(ctx) }}
 	<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
 		<div class="container">
 			<a class="navbar-brand" href="/">
@@ -44,6 +44,15 @@ templ Base(title string, content templ.Component) {
 							<button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#userProfileModal">
 								<i class="fas fa-user me-2"></i>Профиль
 							</button>
+						</li>
+						<li>
+							<a href="/change-theme" class="dropdown-item">
+								if user.Theme == "light" {
+									<i class="fas fa-brush me-2"></i> Темная тема
+								} else {
+									<i class="fas fa-brush me-2"></i> Светлая тема
+								}
+							</a>
 						</li>
 						<li>
 							<button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#changePasswordModal">

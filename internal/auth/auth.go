@@ -40,6 +40,7 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request, user *models
 	session.Values["role"] = user.RoleName
 	session.Values["group"] = user.GroupName
 	session.Values["groupID"] = user.GroupID
+	session.Values["theme"] = user.Theme
 	err := session.Save(r, w)
 	if err != nil {
 		log.Printf("Failed to save session: %v", err)
@@ -68,6 +69,7 @@ func (s *AuthService) GetUser(r *http.Request) *models.User {
 	role, _ := session.Values["role"].(string)
 	group, _ := session.Values["group"].(string)
 	groupID, _ := session.Values["groupID"].(int)
+	theme, _ := session.Values["theme"].(string)
 
 	return &models.User{
 		ID: id,
@@ -76,7 +78,22 @@ func (s *AuthService) GetUser(r *http.Request) *models.User {
 		RoleName: role,
 		GroupName: group,
 		GroupID: groupID,
+		Theme: theme,
 	}
+}
+
+func (s *AuthService) UpdateUser(w http.ResponseWriter, r *http.Request, user models.User) error {
+	session, _ := s.store.Get(r, "session")
+	session.Values["authenticated"] = true
+	session.Values["username"] = user.Username
+	session.Values["userID"] = user.ID
+	session.Values["name"] = user.Name
+	session.Values["role"] = user.RoleName
+	session.Values["group"] = user.GroupName
+	session.Values["groupID"] = user.GroupID
+	session.Values["theme"] = user.Theme
+	err := session.Save(r, w)
+	return err
 }
 
 func (s *AuthService) GetUserRole(r *http.Request) string {

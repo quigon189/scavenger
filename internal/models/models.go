@@ -14,6 +14,7 @@ type User struct {
 	Username     string `yaml:"username"`
 	Name         string `yaml:"name"`
 	PasswordHash string `yaml:"password"`
+	Theme        string `yaml:"theme"`
 
 	RoleID   int    `yaml:"role_id"`
 	RoleName string `yaml:"role"`
