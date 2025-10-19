@@ -65,7 +65,7 @@ func reportReviewPage(report models.LabReport) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container-fluid\"><!-- Хлебные крошки --><nav aria-label=\"breadcrumb\" class=\"mb-4\"><ol class=\"breadcrumb\"><li class=\"breadcrumb-item\"><a href=\"/\">Главная</a></li><li class=\"breadcrumb-item\"><a href=\"/admin/reports\">Отчеты студентов</a></li><li class=\"breadcrumb-item active\">Проверка отчета</li></ol></nav><div class=\"row mb-4\"><div class=\"col-md-8\"><h3><i class=\"fas fa-check-circle\"></i> Проверка и оценка отчета</h3><p class=\"text-muted\">Просмотр отчета студента и выставление оценки</p></div><div class=\"col-md-4 text-end\"><a href=\"/admin/reports\" class=\"btn btn-outline-secondary\"><i class=\"fas fa-arrow-left\"></i> Назад к списку</a></div></div><div class=\"row\"><!-- Левая колонка - Информация и файлы --><div class=\"col-lg-8\"><!-- Карточка с основной информацией --><div class=\"card mb-4\"><div class=\"card-header bg-light\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-info-circle\"></i> Основная информация</h5></div><div class=\"card-body\"><div class=\"row\"><div class=\"col-md-6\"><table class=\"table table-borderless\"><tr><th width=\"40%\">Студент:</th><td><strong>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container-fluid\"><!-- Хлебные крошки --><nav aria-label=\"breadcrumb\" class=\"mb-4\"><ol class=\"breadcrumb\"><li class=\"breadcrumb-item\"><a href=\"/\">Главная</a></li><li class=\"breadcrumb-item\"><a href=\"/admin/reports\">Отчеты студентов</a></li><li class=\"breadcrumb-item active\">Проверка отчета</li></ol></nav><div class=\"row mb-4\"><div class=\"col-md-8\"><h3><i class=\"fas fa-check-circle\"></i> Проверка и оценка отчета</h3><p class=\"text-muted\">Просмотр отчета студента и выставление оценки</p></div><div class=\"col-md-4 text-end\"><a href=\"/admin/reports\" class=\"btn btn-outline-secondary\"><i class=\"fas fa-arrow-left\"></i> Назад к списку</a></div></div><div class=\"row\"><!-- Левая колонка - Информация и файлы --><div class=\"col-lg-8\"><!-- Карточка с основной информацией --><div class=\"card mb-4\"><div class=\"card-header\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-info-circle\"></i> Основная информация</h5></div><div class=\"card-body\"><div class=\"row\"><div class=\"col-md-6\"><table class=\"table table-borderless\"><tr><th width=\"40%\">Студент:</th><td><strong>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -204,7 +204,7 @@ func reportReviewPage(report models.LabReport) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</small></td></tr></table></div></div></div></div><!-- Комментарии --><div class=\"card mb-4\"><div class=\"card-header bg-light\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-comments\"></i> Комментарии</h5></div><div class=\"card-body\"><div class=\"mb-3\"><label class=\"form-label fw-bold text-primary\"><i class=\"fas fa-user-graduate\"></i> Комментарий студента:</label><div class=\"border rounded p-3 bg-light\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</small></td></tr></table></div></div></div></div><!-- Комментарии --><div class=\"card mb-4\"><div class=\"card-header\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-comments\"></i> Комментарии</h5></div><div class=\"card-body\"><div class=\"mb-3\"><label class=\"form-label fw-bold text-primary\"><i class=\"fas fa-user-graduate\"></i> Комментарий студента:</label><div class=\"border rounded p-3\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -224,7 +224,7 @@ func reportReviewPage(report models.LabReport) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div></div></div></div><!-- Файлы отчета --><div class=\"card mb-4\"><div class=\"card-header bg-light\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-file-download\"></i> Файлы отчета</h5></div><div class=\"card-body\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div></div></div></div><!-- Файлы отчета --><div class=\"card mb-4\"><div class=\"card-header\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-file-download\"></i> Файлы отчета</h5></div><div class=\"card-body\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -416,7 +416,7 @@ func reportReviewPage(report models.LabReport) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</textarea><div class=\"form-text\">Этот комментарий будет виден студенту</div></div><!-- Кнопки действий --><div class=\"d-grid gap-2\"><button type=\"submit\" class=\"btn btn-primary btn-lg\"><i class=\"fas fa-save\"></i> Сохранить оценку</button> <a href=\"/admin/reports\" class=\"btn btn-outline-secondary\"><i class=\"fas fa-times\"></i> Отмена</a></div></form></div></div><!-- Быстрая статистика --><div class=\"card mt-4\"><div class=\"card-header bg-light\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-chart-bar\"></i> Статистика</h5></div><div class=\"card-body\"><div class=\"timeline\"><div class=\"timeline-item\"><div class=\"timeline-marker bg-primary\"></div><div class=\"timeline-content\"><h6>Отчет загружен</h6><p class=\"text-muted mb-0\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</textarea><div class=\"form-text\">Этот комментарий будет виден студенту</div></div><!-- Кнопки действий --><div class=\"d-grid gap-2\"><button type=\"submit\" class=\"btn btn-primary btn-lg\"><i class=\"fas fa-save\"></i> Сохранить оценку</button> <a href=\"/admin/reports\" class=\"btn btn-outline-secondary\"><i class=\"fas fa-times\"></i> Отмена</a></div></form></div></div><!-- Быстрая статистика --><div class=\"card mt-4\"><div class=\"card-header\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-chart-bar\"></i> Статистика</h5></div><div class=\"card-body\"><div class=\"timeline\"><div class=\"timeline-item\"><div class=\"timeline-marker bg-primary\"></div><div class=\"timeline-content\"><h6>Отчет загружен</h6><p class=\"text-muted mb-0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
