@@ -1,6 +1,5 @@
 server:
-    port: "1234"
-    upload_path: ./uploads
+    port: "8080"
 auth:
     session_secret: "123"
 database:
@@ -16,16 +15,3 @@ test_data:
       - username: admin
         name: Admin
         password: ghjgecr123
-    student:
-      СА-502:
-        - username: "sa502-ivanov"
-          name: Ivanov I.I.
-          password: 123
-      Ш-208:
-        - username: "sh208-petrov"
-          name: Petrov P.P.
-          password: 321
-
-        - username: "sh280-sidorova"
-          name: Sidorova S.S.
-          password: 123321
