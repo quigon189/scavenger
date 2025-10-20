@@ -1,7 +1,7 @@
 server:
     port: "8080"
 auth:
-    session_secret: "123"
+    session_secret: "your-secret-key"
 database:
     data_source: "scavanger.db"
     migrations_path: "./migrations"
@@ -12,6 +12,6 @@ filestorage:
 test_data:
   roles:
     admin:
-      - username: admin
-        name: Admin
-        password: ghjgecr123
+      - username: teacher
+        name: Teacher
+        password: teacher123
