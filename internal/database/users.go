@@ -211,7 +211,7 @@ func (d *Database) UpadateStudent(student *models.User) error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(UpdateUserQuery, student.Username, student.Name, student.PasswordHash, student.ID)
+	_, err = tx.Exec(UpdateUserQuery, student.Username, student.Name, student.PasswordHash, student.Theme, student.ID)
 	if err != nil {
 		tx.Rollback()
 		return err

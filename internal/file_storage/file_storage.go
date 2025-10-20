@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -54,7 +53,7 @@ func New(cfg models.FSConfig) (*FileStorage, error) {
 }
 
 func (fs *FileStorage) SaveLabFile(ft FileType, lab *models.Lab, file multipart.File, header *multipart.FileHeader) (*StoredFile, error) {
-	return fs.SaveFile(ft, strconv.Itoa(lab.DisciplineID), file, header)
+	return fs.SaveFile(ft, lab.ID, file, header)
 }
 
 func (fs *FileStorage) SaveReportFile(report *models.LabReport, file multipart.File, header *multipart.FileHeader) (*StoredFile, error) {

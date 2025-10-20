@@ -162,6 +162,9 @@ templ disciplinePage(discipline *models.Discipline) {
                         <strong>Срочных работ:</strong> 
                         <span class="badge bg-warning">{ countUrgentLabs(discipline.Labs) }</span>
                     </div>
+					<div class="mb-3">
+						<strong>Средний балл:</strong> { discipline.Avg() }
+					</div>
                 </div>
             </div>
         </div>

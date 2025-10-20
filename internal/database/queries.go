@@ -74,7 +74,12 @@ const (
 
 	// Lab
 	CreateDisciplineLabQuery = `INSERT INTO labs (name, description, md_id, deadline, discipline_id) VALUES (?, ?, ?, ?, ?)`
-	GetDisciplineLabsQuery = `SELECT id, name, description, md_id, deadline FROM labs WHERE discipline_id = ?`
+	GetDisciplineLabsQuery = `
+		SELECT id, name, description, md_id, deadline
+		FROM labs
+		WHERE discipline_id = ?
+		ORDER BY name ASC
+	`
 	GetLabByIDQuery = `SELECT id, name, description, md_id, deadline, discipline_id FROM labs WHERE id = ?`
 	UpdateLabQuery = `UPDATE labs SET name = ?, description = ?, md_id = ?, deadline = ? WHERE id = ?`
 	DeleteLabQuery = `DELETE FROM labs WHERE id = ?`

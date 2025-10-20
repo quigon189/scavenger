@@ -17,7 +17,7 @@ func New(cfg models.AuthConfig) *AuthService {
 	store := sessions.NewCookieStore([]byte(cfg.SessionSecret))
 	store.Options = &sessions.Options{
 		Path:     "/",
-		MaxAge:   86400 * 30,
+		MaxAge:   60 * 95,
 		HttpOnly: true,
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,

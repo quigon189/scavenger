@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"scavenger/internal/alerts"
 	"scavenger/views"
 	"strconv"
@@ -66,5 +68,31 @@ func (h *Handler) LabMarkdownPage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	htmlContent = h.matchImages(htmlContent, labID)
+
 	views.LabMarkdownPage(*lab, *disc, htmlContent).Render(r.Context(), w)
+}
+
+func (h *Handler) matchImages(content string, labID int) string {
+	re := regexp.MustCompile(`<img src="(.*?)" alt="(.*?)>`)
+
+	return re.ReplaceAllStringFunc(content, func(match string) string {
+		parts := re.FindStringSubmatch(match)
+
+		if len(parts) < 3 {
+			return match
+		}
+
+		altText := parts[2]
+		oldPath := parts[1]
+
+        if !strings.Contains(oldPath, "://") &&
+            !strings.HasPrefix(oldPath, "/") &&
+            !strings.HasPrefix(oldPath, "files/") {
+            
+			return fmt.Sprintf(`<img src="/files/material/%d/%s" alt="%s"`, labID, oldPath, altText)
+        }
+
+        return match
+	})
 }

@@ -42,8 +42,28 @@ func (g *Group) StudentCount() int {
 func (g *Group) IDtoStr() string {
 	return strconv.Itoa(g.ID)
 }
+
 func (d *Discipline) IDtoStr() string {
 	return strconv.Itoa(d.ID)
+}
+
+func (d *Discipline) Avg() string {
+	avg := 0
+	counter := 0
+	for _, lab := range d.Labs {
+		for _, report := range lab.Reports {
+			if report.Grade != 0 {
+				avg = avg + report.Grade
+				counter ++
+			}
+		}
+	}
+
+	if avg == 0 {
+		return "-"
+	}
+
+	return strconv.FormatFloat(float64(avg) / float64(counter), 'f', 2, 64)
 }
 
 func (l *Lab) FormatDeadline() string {
