@@ -412,14 +412,14 @@ func disciplinePage(discipline *models.Discipline) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "</span></div><div class=\"mb-3\"><strong>Средний балл</strong> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "</span></div><div class=\"mb-3\"><strong>Средний балл:</strong> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.Avg())
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.AvgMark())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipline.templ`, Line: 166, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/discipline.templ`, Line: 166, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {

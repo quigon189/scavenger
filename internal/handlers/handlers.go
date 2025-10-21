@@ -68,7 +68,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if h.authService.Login(w, r, user, password) {
-			log.Printf("Success login user :%v", user)
+			log.Printf("Success login user: %v", user.Username)
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		} else {

@@ -1,5 +1,5 @@
 server:
-    port: "8080"
+    port: "8081"
 auth:
     session_secret: "your-secret-key"
 database:
@@ -12,6 +12,6 @@ filestorage:
 test_data:
   roles:
     admin:
-      - username: teacher
-        name: Teacher
-        password: teacher123
+      - username: "admin"
+        name: "Admin"
+        password: "ghjgecr123"

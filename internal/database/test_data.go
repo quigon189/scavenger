@@ -15,18 +15,26 @@ func (db *Database) SetTestData(cfg *models.Config) {
 	}
 
 	if !slices.Contains(roles, string(models.AdminRole)) {
-		if err := db.CreateRole(string(models.AdminRole), "Admin role"); err != nil {
-			log.Fatalf("Failed to create admin role")
+		if err = db.CreateRole(string(models.AdminRole), "Admin role"); err != nil {
+			log.Fatalf("Failed to create admin role: %v", err)
 		} else {
-			log.Printf("Role admin created")
+			log.Printf("Role %s created", models.AdminRole)
 		}
 	}
 
 	if !slices.Contains(roles, string(models.StudentRole)) {
-		if err := db.CreateRole(string(models.StudentRole), "Student role"); err != nil {
-			log.Fatalf("Failed to create student role")
+		if err = db.CreateRole(string(models.StudentRole), "Student role"); err != nil {
+			log.Fatalf("Failed to create student role: %v", err)
 		} else {
-			log.Printf("Role student created")
+			log.Printf("Role %s created", models.StudentRole)
+		}
+	}
+
+	if !slices.Contains(roles, string(models.TeacherRole)) {
+		if err = db.CreateRole(string(models.TeacherRole), "Teacher role"); err != nil {
+			log.Fatalf("Failed to create teacher role: %v", err)
+		} else {
+			log.Printf("Role %s created", models.TeacherRole)
 		}
 	}
 
