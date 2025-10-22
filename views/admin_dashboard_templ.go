@@ -244,7 +244,7 @@ func adminDashboard(stats *models.AdminStats, reports []models.LabReport, discip
 			return templ_7745c5c3_Err
 		}
 		if len(disciplines) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>Дисциплина</th><th>Группа</th><th>Всего работ</th><th>На проверке</th><th>Действия</th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>Дисциплина</th><th>Группа</th><th>Всего работ</th><th>Действия</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -256,7 +256,7 @@ func adminDashboard(stats *models.AdminStats, reports []models.LabReport, discip
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_dashboard.templ`, Line: 140, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_dashboard.templ`, Line: 139, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -269,7 +269,7 @@ func adminDashboard(stats *models.AdminStats, reports []models.LabReport, discip
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.Group.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_dashboard.templ`, Line: 141, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_dashboard.templ`, Line: 140, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
@@ -282,20 +282,20 @@ func adminDashboard(stats *models.AdminStats, reports []models.LabReport, discip
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(len(discipline.Labs))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_dashboard.templ`, Line: 142, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_dashboard.templ`, Line: 141, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</td><td></td><td><div class=\"btn-group btn-group-sm\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</td><td><div class=\"btn-group btn-group-sm\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var18 templ.SafeURL
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/disciplines/" + discipline.IDtoStr())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_dashboard.templ`, Line: 146, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin_dashboard.templ`, Line: 144, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {

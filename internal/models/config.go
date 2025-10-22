@@ -6,7 +6,7 @@ type DatebaseConfig struct {
 }
 
 type ServerConfig struct {
-	Port       string `yaml:"port"`
+	Port string `yaml:"port"`
 }
 
 type AuthConfig struct {
@@ -27,6 +27,7 @@ type TestDataConfig struct {
 
 type Config struct {
 	Server   ServerConfig   `yaml:"server"`
+	Backup   BackupConfig   `yaml:"backup"`
 	Auth     AuthConfig     `yaml:"auth"`
 	DB       DatebaseConfig `yaml:"database"`
 	FS       FSConfig       `yaml:"filestorage"`

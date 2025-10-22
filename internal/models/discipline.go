@@ -33,3 +33,16 @@ func (d *Discipline) AvgMark() string {
 
 	return strconv.FormatFloat(float64(avg) / float64(counter), 'f', 2, 64)
 }
+
+func (d *Discipline) SubmittedWorks() int {
+	counter := 0
+	for _, lab := range d.Labs {
+		for _, report := range lab.Reports {
+			if report.Status == "submitted" {
+				counter ++
+			}
+		}
+	}
+
+	return counter
+}

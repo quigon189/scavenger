@@ -130,7 +130,6 @@ templ adminDashboard(stats *models.AdminStats, reports []models.LabReport, disci
 										<th>Дисциплина</th>
 										<th>Группа</th>
 										<th>Всего работ</th>
-										<th>На проверке</th>
 										<th>Действия</th>
 									</tr>
 								</thead>
@@ -140,7 +139,6 @@ templ adminDashboard(stats *models.AdminStats, reports []models.LabReport, disci
 											<td>{ discipline.Name }</td>
 											<td>{ discipline.Group.Name }</td>
 											<td>{ len(discipline.Labs) }</td>
-											<td></td>
 											<td>
 												<div class="btn-group btn-group-sm">
 													<a href={ "/admin/disciplines/" + discipline.IDtoStr() } 

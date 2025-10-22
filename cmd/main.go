@@ -10,6 +10,7 @@ import (
 	"scavenger/internal/database"
 	filestorage "scavenger/internal/file_storage"
 	"scavenger/internal/server"
+	"scavenger/internal/services"
 	"syscall"
 	"time"
 )
@@ -37,6 +38,11 @@ func main() {
 		log.Fatalf("Failed to start FileStorage: %v", err)
 	}
 
+	backupService := services.NewBackupService(cfg, db)
+	if err := backupService.Start(); err != nil {
+		log.Fatalf("Failed to start backup service: %v", err)
+	}
+
 	srv := server.New(cfg, db, fs)
 
 	go func() {
@@ -48,6 +54,8 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
+
+	backupService.Stop()
 
 	log.Println("Shutting down server...")
 

@@ -1,13 +1,22 @@
 server:
-    port: "8081"
+  port: "8081"
+
 auth:
-    session_secret: "your-secret-key"
+  session_secret: "your-secret-key"
+
+backup:
+  enabled: true
+  backup_dir: "./backups"
+  schedule: "* * * * *"
+  max_backups: 10
+
 database:
-    data_source: "scavanger.db"
-    migrations_path: "./migrations"
+  data_source: "scavanger.db"
+  migrations_path: "./migrations"
+
 filestorage:
-    base_path: "storage"
-    base_url: "files"
+  base_path: "storage"
+  base_url: "files"
 
 test_data:
   roles:

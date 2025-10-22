@@ -21,6 +21,23 @@ templ labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlCont
 
 		<div class="row">
 			<div class="col-md-3">
+				<!-- Блок для загрузки отчета -->
+				<div class="card mb-4 border-success">
+					<div class="card-header bg-success text-white">
+						<h5 class="card-title mb-0">
+							<i class="fas fa-upload"></i> Загрузка отчета
+						</h5>
+					</div>
+					<div class="card-body">
+						<p>После выполнения работы загрузитe отчет.</p>
+						<div class="d-grid gap-2">
+							<a href={ "/disciplines/" + discipline.IDtoStr() + "/labs/" + labWork.ID + "/reports" } class="btn btn-primary">
+								<i class="fas fa-upload"></i> Загрузить отчет
+							</a>
+						</div>
+					</div>
+				</div>
+
 				<!-- Боковая панель с информацией -->
 				<div class="sticky-top mb-4" style="top: 20px;">
 					<div class="card">
@@ -53,31 +70,14 @@ templ labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlCont
 									<strong>Дополнительные файлы:</strong><br>
 									<div class="d-grid gap-2">
 									for _, file := range labWork.StoredFiles {
-										<a href={ file.URL } class="btn btn-outline-danger btn-sm">
-											<i class="fas fa-file-pdf"></i> { file.Filename }
+										<a href={ file.URL } class="btn btn-sm btn-light">
+											<i class="fas fa-file"></i> { file.Filename }
 										</a>
 									}
 									</div>
 								</div>
 							}
 							</div>
-					</div>
-
-					<!-- Блок для загрузки отчета -->
-					<div class="card mt-4 border-success">
-						<div class="card-header bg-success text-white">
-							<h5 class="card-title mb-0">
-								<i class="fas fa-upload"></i> Загрузка отчета
-							</h5>
-						</div>
-						<div class="card-body">
-							<p>После выполнения работы загрузитe отчет.</p>
-							<div class="d-grid gap-2">
-								<a href={ "/disciplines/" + discipline.IDtoStr() + "/labs/" + labWork.ID + "/reports" } class="btn btn-primary">
-									<i class="fas fa-upload"></i> Загрузить отчет
-								</a>
-							</div>
-						</div>
 					</div>
 				</div>
 			</div>
