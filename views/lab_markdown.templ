@@ -9,6 +9,14 @@ templ LabMarkdownPage(lab models.Lab, discipline models.Discipline, htmlContent 
 }
 
 templ labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlContent string) {
+	{{ 
+		user := models.GetUserFromContext(ctx) 
+		btnStyle := "btn-outline-dark"
+		if user.Theme != "light" {
+			btnStyle = "btn-outline-light"
+		}
+
+	}}
 	<div class="container-lg mb-4">
 		<!-- Хлебные крошки -->
 		<nav aria-label="breadcrumb" class="mb-4">
@@ -70,7 +78,7 @@ templ labMarkdownPage(labWork models.Lab, discipline models.Discipline, htmlCont
 									<strong>Дополнительные файлы:</strong><br>
 									<div class="d-grid gap-2">
 									for _, file := range labWork.StoredFiles {
-										<a href={ file.URL } class="btn btn-sm btn-light">
+										<a href={ file.URL } class={"btn btn-sm " + btnStyle}>
 											<i class="fas fa-file"></i> { file.Filename }
 										</a>
 									}

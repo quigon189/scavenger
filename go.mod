@@ -9,11 +9,14 @@ require (
 	github.com/pressly/goose/v3 v3.25.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/yuin/goldmark v1.7.13
+	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
 	golang.org/x/crypto v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
+	github.com/alecthomas/chroma v0.10.0 // indirect
+	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect

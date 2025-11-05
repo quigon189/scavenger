@@ -11,6 +11,8 @@ import (
 	"strings"
 
 	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting"
+	"github.com/yuin/goldmark/extension"
 )
 
 func (h *Handler) LabMarkdownPage(w http.ResponseWriter, r *http.Request) {
@@ -54,12 +56,25 @@ func (h *Handler) LabMarkdownPage(w http.ResponseWriter, r *http.Request) {
 
 	if lab.MDFile.Path != "" {
 		content, err := h.fs.GetFile(lab.MDFile.Path)
+		user := h.authService.GetUser(r)
+		style := "github"
+		if user.Theme != "light" {
+			style = "dracula"
+		}
+		md := goldmark.New(
+			goldmark.WithExtensions(
+				extension.GFM,
+				highlighting.NewHighlighting(
+					highlighting.WithStyle(style),
+				),
+			),
+		)
 		if err != nil {
 			alerts.FlashWarning(w, r, "Не удалость прочитать markdown файл")
 		} else {
 			var buf strings.Builder
 
-			err := goldmark.Convert(content, &buf)
+			err := md.Convert(content, &buf)
 			if err != nil {
 				alerts.FlashWarning(w, r, "Не удалось конвертировать md файл")
 			} else {
@@ -86,13 +101,13 @@ func (h *Handler) matchImages(content string, labID int) string {
 		altText := parts[2]
 		oldPath := parts[1]
 
-        if !strings.Contains(oldPath, "://") &&
-            !strings.HasPrefix(oldPath, "/") &&
-            !strings.HasPrefix(oldPath, "files/") {
-            
-			return fmt.Sprintf(`<img src="/files/material/%d/%s" alt="%s"`, labID, oldPath, altText)
-        }
+		if !strings.Contains(oldPath, "://") &&
+			!strings.HasPrefix(oldPath, "/") &&
+			!strings.HasPrefix(oldPath, "files/") {
 
-        return match
+			return fmt.Sprintf(`<img src="/files/material/%d/%s" alt="%s"`, labID, oldPath, altText)
+		}
+
+		return match
 	})
 }

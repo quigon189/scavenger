@@ -60,14 +60,14 @@ func Base(title string, content templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\"><link href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><style>\n    :root {\n        --bs-body-font-size: 0.875rem;\n        --bs-border-radius: 0.375rem;\n        --bs-border-radius-sm: 0.25rem;\n        --bs-border-radius-lg: 0.5rem;\n        --bs-btn-padding-y: 0.25rem;\n        --bs-btn-padding-x: 0.5rem;\n        --bs-btn-font-size: 0.875rem;\n    }\n</style></head><body><nav class=\"navbar navbar-expand-lg navbar-dark bg-primary\"><div class=\"container\"><a class=\"navbar-brand\" href=\"/\"><i class=\"fas fa-graduation-cap\"></i> Сборщик работ</a><div class=\"navbar-nav\"><div class=\"nav-item dropdown\"><a class=\"nav-link dropdown-toggle d-flex align-items-center\" href=\"#\" role=\"button\" data-bs-toggle=\"dropdown\"><span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\"><link href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css\" rel=\"stylesheet\"><link href=\"/static/css/theme.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script></head><body><nav class=\"navbar navbar-expand-lg navbar-dark bg-primary\"><div class=\"container\"><a class=\"navbar-brand\" href=\"/\"><i class=\"fas fa-graduation-cap\"></i> Сборщик работ</a><div class=\"navbar-nav\"><div class=\"nav-item dropdown\"><a class=\"nav-link dropdown-toggle d-flex align-items-center\" href=\"#\" role=\"button\" data-bs-toggle=\"dropdown\"><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 41, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 31, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -80,7 +80,7 @@ func Base(title string, content templ.Component) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 46, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 36, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -93,7 +93,7 @@ func Base(title string, content templ.Component) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(user.RoleName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 47, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 37, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -111,7 +111,7 @@ func Base(title string, content templ.Component) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(user.GroupName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 49, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 39, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -211,7 +211,7 @@ func UserProfileModal(user *models.User) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 132, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 122, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -224,7 +224,7 @@ func UserProfileModal(user *models.User) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("@" + user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 133, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 123, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -237,7 +237,7 @@ func UserProfileModal(user *models.User) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 141, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 131, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -250,7 +250,7 @@ func UserProfileModal(user *models.User) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 145, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 135, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -263,7 +263,7 @@ func UserProfileModal(user *models.User) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(user.RoleName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 150, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 140, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -281,7 +281,7 @@ func UserProfileModal(user *models.User) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(user.GroupName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 157, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 147, Col: 93}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {

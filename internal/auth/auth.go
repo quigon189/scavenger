@@ -61,6 +61,11 @@ func (s *AuthService) IsAuthenticated(r *http.Request) bool {
 	return auth && ok
 }
 
+func (s *AuthService) RefreshCockie(w http.ResponseWriter, r *http.Request) {
+	sessions, _ := s.store.Get(r, "session")
+	sessions.Save(r, w)
+}
+
 func (s *AuthService) GetUser(r *http.Request) *models.User {
 	session, _ := s.store.Get(r, "session")
 	username, _ := session.Values["username"].(string)
@@ -72,13 +77,13 @@ func (s *AuthService) GetUser(r *http.Request) *models.User {
 	theme, _ := session.Values["theme"].(string)
 
 	return &models.User{
-		ID: id,
-		Username: username,
-		Name:     name,
-		RoleName: role,
+		ID:        id,
+		Username:  username,
+		Name:      name,
+		RoleName:  role,
 		GroupName: group,
-		GroupID: groupID,
-		Theme: theme,
+		GroupID:   groupID,
+		Theme:     theme,
 	}
 }
 

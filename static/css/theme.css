@@ -1,0 +1,9 @@
+:root {
+	--bs-body-font-size: 0.875rem;
+	--bs-border-radius: 0.375rem;
+	--bs-border-radius-sm: 0.25rem;
+	--bs-border-radius-lg: 0.5rem;
+	--bs-btn-padding-y: 0.25rem;
+	--bs-btn-padding-x: 0.5rem;
+	--bs-btn-font-size: 0.875rem;
+}
