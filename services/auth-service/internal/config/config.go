@@ -10,8 +10,7 @@ import (
 type Config struct {
 	DatabaseURL string
 	RedisURL    string
-	RedisTTL    string
-	JWTSecret   string
+	SessionTTL  string
 	Port        int
 }
 
@@ -25,8 +24,7 @@ func Load() *Config {
 	return &Config{
 		DatabaseURL: getEnv("DATABASE_URL", "postgresql://scavenger:scavenger123@localhost:5432/scavenger?sslmode=disable"),
 		RedisURL:    getEnv("REDIS_URL", "localhost:6379"),
-		RedisTTL:    getEnv("REDIS_TTL", "24h"),
-		JWTSecret:   getEnv("JWT_SECRET", "your-secret-jwt"),
+		SessionTTL:  getEnv("SESSION_TTL", "24h"),
 		Port:        port,
 	}
 }

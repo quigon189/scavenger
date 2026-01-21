@@ -9,9 +9,14 @@ type User struct {
 	Name         string    `json:"name"`
 	PasswordHash string    `json:"-"`
 	Role         string    `json:"role"`
-	Theme        string    `json:"theme,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type UserSession struct {
+	User      User      `json:"user"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 type LoginRequest struct {
@@ -27,10 +32,10 @@ type RegisterRequest struct {
 	Role     string `json:"role"`
 }
 
-type TokenRequest struct {
-	Token     string `json:"token"`
-	ExpiresAt int64  `json:"expires_at"`
-	User      User   `json:"user"`
+type AuthResponse struct {
+	User      User      `json:"user"`
+	SessionID string    `json:"session_id"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 type ChangePasswordRequest struct {
