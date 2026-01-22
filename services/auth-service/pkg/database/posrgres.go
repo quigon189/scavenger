@@ -34,6 +34,6 @@ func NewPostgresPool(dsn string) (*pgxpool.Pool, error) {
 		return nil, fmt.Errorf("failed to ping database: %v", err)
 	}
 
-	log.Panicln("Successfully connected to PostgreSQL")
+	log.Println("Successfully connected to PostgreSQL")
 	return pool, nil
 }
