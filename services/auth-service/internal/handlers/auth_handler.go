@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"auth-service/internal/models"
@@ -33,17 +34,20 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req models.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		log.Printf("Invalid request body: %v", err)
 		return
 	}
 
 	if err := req.Validate(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "validation error", http.StatusBadRequest)
+		log.Printf("Validation error: %v", err)
 		return
 	}
 
 	user, err := h.authService.Register(r.Context(), &req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "failed to register", http.StatusBadRequest)
+		log.Printf("Register error: %v", err)
 		return
 	}
 
@@ -56,6 +60,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req models.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		log.Printf("Invalid request body: %v", err)
 		return
 	}
 
@@ -63,9 +68,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err.Error() == "invalid credentials" {
 			http.Error(w, "invalid credentials", http.StatusUnauthorized)
+			log.Printf("Invalid credentials: %v", err)
 			return
 		}
 		http.Error(w, "internal server error", http.StatusInternalServerError)
+		log.Printf("Internal server error: %v", err)
 		return
 	}
 
@@ -83,11 +90,13 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	sessionID, ok := r.Context().Value("session_id").(string)
 	if !ok {
 		http.Error(w, "session not found", http.StatusBadRequest)
+		log.Printf("session not found")
 		return
 	}
 
 	if err := h.authService.Logout(r.Context(), sessionID); err != nil {
 		http.Error(w, "failed to logout", http.StatusInternalServerError)
+		log.Printf("Failed to logout: %v", err)
 		return
 	}
 

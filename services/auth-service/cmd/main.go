@@ -44,7 +44,7 @@ func main() {
 
 	server := &http.Server{
 		Addr: ":" + cfg.Port,
-		Handler: router,
+		Handler: handlers.LogginMiddleware(router),
 	}
 
 	go func() {
