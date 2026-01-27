@@ -63,6 +63,34 @@ services:
         condition: service_healthy
     restart: always
 
+  data-service:
+    build: ./services/data-service
+    ports:
+      - "8082:8082"
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=scavenger
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=scavenger
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=scavenger
+      - MINIO_SECRET_KEY=${MINIO_PASSWORD}
+      - MINIO_BUCKET=scavenger-files
+      - MINIO_USE_SSL=false
+      - REDIS_URL=redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=0
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - PORT=8082
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      auth-service:
+        condition: service_started
+
 volumes:
   postgres_data:
   minio_data:

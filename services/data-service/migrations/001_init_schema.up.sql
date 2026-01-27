@@ -15,7 +15,7 @@ CREATE TABLE data.groups (
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE data.teacher (
+CREATE TABLE data.teachers (
 	id SERIAL PRIMARY KEY,
 	user_id INT NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -72,7 +72,7 @@ CREATE TABLE data.labs (
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
 	FOREIGN KEY (discipline_id) REFERENCES data.disciplines(id) ON DELETE CASCADE,
-	FOREIGN KEY (file_id) REFERENCES data.files(id) ON DELETE RESTRICT
+	FOREIGN KEY (md_file_id) REFERENCES data.files(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE data.lab_reports (
