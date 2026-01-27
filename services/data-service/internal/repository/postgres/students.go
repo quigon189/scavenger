@@ -134,6 +134,7 @@ ORDER BY u.name
 		err := rows.Scan(
 			&student.ID,
 			&student.UserID,
+			&student.GroupID,
 			&student.CreatedAt,
 			&student.UpdatedAt,
 			&student.User.Username,
@@ -204,6 +205,7 @@ ORDER BY u.name
 		err := rows.Scan(
 			&student.ID,
 			&student.UserID,
+			&student.GroupID,
 			&student.CreatedAt,
 			&student.UpdatedAt,
 			&student.User.Username,

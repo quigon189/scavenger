@@ -69,7 +69,7 @@ SELECT t.id, t.user_id, t.created_at, t.updated_at,
        u.username, u.name, u.role
 FROM data.teachers t
 JOIN auth.users u ON u.id = t.user_id
-WHERE t.id = $1
+WHERE t.user_id = $1
 	`
 
 	teacher := &models.Teacher{}
@@ -95,12 +95,12 @@ WHERE t.id = $1
 	return teacher, nil
 }
 
-func (r *TeacherRepository) GetAllTeachers(ctx context.Context) ([]models.Teacher, error) {
+func (r *TeacherRepository) GetAll(ctx context.Context) ([]models.Teacher, error) {
 	query := `
 SELECT t.id, t.user_id, t.created_at, t.updated_at,
-       u.username, u.name, u.role,
+       u.username, u.name, u.role
 FROM data.teachers t
-JOIN auth.users u ON u.id = s.user_id
+JOIN auth.users u ON u.id = t.user_id
 ORDER BY u.name
 	`
 
@@ -137,4 +137,20 @@ ORDER BY u.name
 	}
 
 	return teachers, nil
+}
+
+func (r *TeacherRepository) GetWithDisciplines(ctx context.Context, id int) (*models.Teacher, error) {
+	teacher, err := r.GetByID(ctx, id)
+	if err != nil || teacher == nil {
+		return teacher, err
+	}
+
+	disciplineRepo := NewDisciplineRepository(r.db)
+	disciplines, err := disciplineRepo.GetByTeacherID(ctx, id)
+	if err != nil {
+		return teacher, fmt.Errorf("failed to get teacher disciplines: %v", err)
+	}
+
+	teacher.Disciplines = disciplines
+	return teacher, nil
 }

@@ -19,15 +19,16 @@ type Lab struct {
 }
 
 type LabReport struct {
-	ID          int       `json:"id"`
-	LabID       int       `json:"lab_id"`
-	StudentID   int       `json:"student_id"`
-	Status      string    `json:"status"`
-	Grade       int       `json:"grade"`
-	Comment     string    `json:"comment"`
-	TeacherNote string    `json:"teacher_note"`
-	SubmittedAt time.Time `json:"submitted_at"`
-	GradedAt    time.Time `json:"graded_at"`
+	ID          int        `json:"id"`
+	LabID       int        `json:"lab_id"`
+	StudentID   int        `json:"student_id"`
+	Status      string     `json:"status"`
+	Grade       int        `json:"grade"`
+	Comment     string     `json:"comment"`
+	TeacherNote string     `json:"teacher_note"`
+	GradedAt    *time.Time `json:"graded_at"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 
 	Lab     Lab     `json:"lab"`
 	Student Student `json:"student"`
