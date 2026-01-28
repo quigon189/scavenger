@@ -20,7 +20,6 @@ type Group struct {
 
 type Student struct {
 	ID        int       `json:"id"`
-	UserID    int       `json:"user_id"`
 	GroupID   int       `json:"group_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -31,7 +30,6 @@ type Student struct {
 
 type Teacher struct {
 	ID        int       `json:"id"`
-	UserID    int       `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 

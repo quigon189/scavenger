@@ -42,13 +42,13 @@ func (r *DisciplineRepository) GetByID(ctx context.Context, id int) (*models.Dis
 	query := `
 SELECT d.id, d.name, d.teacher_id, d.group_id, d.period_id, d.description, 
        d.created_at, d.updated_at,
-       t.id, t.user_id, t.created_at, t.updated_at,
+       t.id, t.created_at, t.updated_at,
        u.username, u.name, u.role,
        g.id, g.name, g.created_at,
        p.id, p.name, p.half_year, p.start_date, p.end_date, p.created_at
 FROM data.disciplines d
 LEFT JOIN data.teachers t ON t.id = d.teacher_id
-LEFT JOIN auth.users u ON u.id = t.user_id
+LEFT JOIN auth.users u ON u.id = t.id
 LEFT JOIN data.groups g ON g.id = d.group_id
 LEFT JOIN data.periods p ON p.id = d.period_id
 WHERE d.id = $1
@@ -69,7 +69,6 @@ WHERE d.id = $1
 		&discipline.CreatedAt,
 		&discipline.UpdatedAt,
 		&discipline.Teacher.ID,
-		&discipline.Teacher.UserID,
 		&teacherCreatedAt,
 		&teacherUpdatedAt,
 		&discipline.Teacher.User.Username,
@@ -95,7 +94,7 @@ WHERE d.id = $1
 
 	discipline.Teacher.CreatedAt = teacherCreatedAt
 	discipline.Teacher.UpdatedAt = teacherUpdatedAt
-	discipline.Teacher.User.ID = discipline.Teacher.UserID
+	discipline.Teacher.User.ID = discipline.Teacher.ID
 	discipline.Group.CreatedAt = groupCreatedAt
 	discipline.Period.CreatedAt = periodCreatedAt
 
@@ -164,12 +163,12 @@ func (r *DisciplineRepository) GetByGroupID(ctx context.Context, groupID int) ([
 	query := `
 SELECT d.id, d.name, d.teacher_id, d.group_id, d.period_id, d.description, 
        d.created_at, d.updated_at,
-       t.id, t.user_id, t.created_at, t.updated_at,
+       t.id, t.created_at, t.updated_at,
        u.username, u.name, u.role,
        p.id, p.name, p.half_year, p.start_date, p.end_date, p.created_at
 FROM data.disciplines d
 LEFT JOIN data.teachers t ON t.id = d.teacher_id
-LEFT JOIN auth.users u ON u.id = t.user_id
+LEFT JOIN auth.users u ON u.id = t.id
 LEFT JOIN data.periods p ON p.id = d.period_id
 WHERE d.group_id = $1
 ORDER BY d.name
@@ -198,7 +197,6 @@ ORDER BY d.name
 			&discipline.CreatedAt,
 			&discipline.UpdatedAt,
 			&discipline.Teacher.ID,
-			&discipline.Teacher.UserID,
 			&teacherCreatedAt,
 			&teacherUpdatedAt,
 			&discipline.Teacher.User.Username,
@@ -217,7 +215,7 @@ ORDER BY d.name
 
 		discipline.Teacher.CreatedAt = teacherCreatedAt
 		discipline.Teacher.UpdatedAt = teacherUpdatedAt
-		discipline.Teacher.User.ID = discipline.Teacher.UserID
+		discipline.Teacher.User.ID = discipline.Teacher.ID
 		discipline.Period.CreatedAt = periodCreatedAt
 
 		disciplines = append(disciplines, discipline)
@@ -258,13 +256,13 @@ func (r *DisciplineRepository) GetAll(ctx context.Context) ([]models.Discipline,
 	query := `
 SELECT d.id, d.name, d.teacher_id, d.group_id, d.period_id, d.description, 
        d.created_at, d.updated_at,
-       t.id, t.user_id, t.created_at, t.updated_at,
+       t.id, t.created_at, t.updated_at,
        u.username, u.name, u.role,
        g.id, g.name, g.created_at,
        p.id, p.name, p.half_year, p.start_date, p.end_date, p.created_at
 FROM data.disciplines d
 LEFT JOIN data.teachers t ON t.id = d.teacher_id
-LEFT JOIN auth.users u ON u.id = t.user_id
+LEFT JOIN auth.users u ON u.id = t.id
 LEFT JOIN data.groups g ON g.id = d.group_id
 LEFT JOIN data.periods p ON p.id = d.period_id
 ORDER BY d.name
@@ -294,7 +292,6 @@ ORDER BY d.name
 			&discipline.CreatedAt,
 			&discipline.UpdatedAt,
 			&discipline.Teacher.ID,
-			&discipline.Teacher.UserID,
 			&teacherCreatedAt,
 			&teacherUpdatedAt,
 			&discipline.Teacher.User.Username,
@@ -316,7 +313,7 @@ ORDER BY d.name
 
 		discipline.Teacher.CreatedAt = teacherCreatedAt
 		discipline.Teacher.UpdatedAt = teacherUpdatedAt
-		discipline.Teacher.User.ID = discipline.Teacher.UserID
+		discipline.Teacher.User.ID = discipline.Teacher.ID
 		discipline.Group.CreatedAt = groupCreatedAt
 		discipline.Period.CreatedAt = periodCreatedAt
 

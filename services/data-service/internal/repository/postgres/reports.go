@@ -41,12 +41,12 @@ SELECT lr.id, lr.lab_id, lr.student_id, lr.status, lr.grade,
        lr.comment, lr.teacher_note, lr.graded_at, lr.created_at, lr.updated_at,
        l.id, l.discipline_id, l.md_file_id, l.name, l.description, l.deadline,
        l.created_at, l.updated_at,
-       s.id, s.user_id, s.group_id, s.created_at, s.updated_at,
+       s.id, s.group_id, s.created_at, s.updated_at,
        u.username, u.name, u.role
 FROM data.lab_reports lr
 JOIN data.labs l ON l.id = lr.lab_id
 JOIN data.students s ON s.id = lr.student_id
-JOIN auth.users u ON u.id = s.user_id
+JOIN auth.users u ON u.id = s.id
 WHERE lr.id = $1
 	`
 
@@ -72,7 +72,6 @@ WHERE lr.id = $1
 		&report.Lab.CreatedAt,
 		&report.Lab.UpdatedAt,
 		&report.Student.ID,
-		&report.Student.UserID,
 		&report.Student.GroupID,
 		&report.Student.CreatedAt,
 		&report.Student.UpdatedAt,
@@ -88,7 +87,7 @@ WHERE lr.id = $1
 		return nil, fmt.Errorf("failed to get report: %v", err)
 	}
 
-	report.Student.User.ID = report.Student.UserID
+	report.Student.User.ID = report.Student.ID
 
 	return report, nil
 }
@@ -98,11 +97,11 @@ func (r *ReportRepository) GetByLabID(ctx context.Context, labID int) ([]models.
 SELECT lr.id, lr.lab_id, lr.student_id, lr.status, lr.grade, 
        lr.comment, lr.teacher_note, lr.graded_at,
 	   lr.created_at, lr.updated_at,
-       s.id, s.user_id, s.group_id, s.created_at, s.updated_at,
+       s.id, s.group_id, s.created_at, s.updated_at,
        u.username, u.name, u.role
 FROM data.lab_reports lr
 JOIN data.students s ON s.id = lr.student_id
-JOIN auth.users u ON u.id = s.user_id
+JOIN auth.users u ON u.id = s.id
 WHERE lr.lab_id = $1
 ORDER BY lr.created_at
 	`
@@ -130,7 +129,6 @@ ORDER BY lr.created_at
 			&report.CreatedAt,
 			&report.UpdatedAt,
 			&report.Student.ID,
-			&report.Student.UserID,
 			&report.Student.GroupID,
 			&report.Student.CreatedAt,
 			&report.Student.UpdatedAt,
@@ -142,7 +140,7 @@ ORDER BY lr.created_at
 			return nil, fmt.Errorf("failed to scan report: %v", err)
 		}
 
-		report.Student.User.ID = report.Student.UserID
+		report.Student.User.ID = report.Student.ID
 
 		reports = append(reports, report)
 	}

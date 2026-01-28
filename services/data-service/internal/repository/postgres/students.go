@@ -19,16 +19,15 @@ func NewStudentRepository(db *pgxpool.Pool) *StudentRepository {
 
 func (r *StudentRepository) Create(ctx context.Context, student *models.Student) error {
 	query := `
-INSERT INTO data.students (user_id, group_id)
+INSERT INTO data.students (id, group_id)
 VALUES ($1, $2)
-RETURNING id, created_at, updated_at
+RETURNING created_at, updated_at
 	`
 
 	return r.db.QueryRow(ctx, query,
-		student.UserID,
+		student.ID,
 		student.GroupID,
 	).Scan(
-		&student.ID,
 		&student.CreatedAt,
 		&student.UpdatedAt,
 	)
@@ -36,11 +35,11 @@ RETURNING id, created_at, updated_at
 
 func (r *StudentRepository) GetByID(ctx context.Context, id int) (*models.Student, error) {
 	query := `
-SELECT s.id, s.user_id, s.group_id, s.created_at, s.updated_at,
+SELECT s.id, s.group_id, s.created_at, s.updated_at,
        u.username, u.name, u.role,
 	   g.name, g.created_at
 FROM data.students s
-JOIN auth.users u ON u.id = s.user_id
+JOIN auth.users u ON u.id = s.id
 JOIN data.groups g ON g.id = s.group_id
 WHERE s.id = $1
 	`
@@ -49,7 +48,6 @@ WHERE s.id = $1
 
 	err := r.db.QueryRow(ctx, query, id).Scan(
 		&student.ID,
-		&student.UserID,
 		&student.CreatedAt,
 		&student.UpdatedAt,
 		&student.User.Username,
@@ -65,44 +63,7 @@ WHERE s.id = $1
 		return nil, fmt.Errorf("failed to get student: %v", err)
 	}
 
-	student.User.ID = student.UserID
-	student.Group.ID = student.GroupID
-
-	return student, nil
-}
-
-func (r *StudentRepository) GetByUserID(ctx context.Context, userID int) (*models.Student, error) {
-	query := `
-SELECT s.id, s.user_id, s.group_id, s.created_at, s.updated_at,
-       u.username, u.name, u.role,
-	   g.name, g.created_at
-FROM data.students s
-JOIN auth.users u ON u.id = s.user_id
-JOIN data.groups g ON g.id = s.group_id
-WHERE u.id = $1
-	`
-
-	student := &models.Student{}
-
-	err := r.db.QueryRow(ctx, query, userID).Scan(
-		&student.ID,
-		&student.UserID,
-		&student.CreatedAt,
-		&student.UpdatedAt,
-		&student.User.Username,
-		&student.User.Name,
-		&student.User.Role,
-		&student.Group.Name,
-		&student.Group.CreatedAt,
-	)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("failed to get student: %v", err)
-	}
-
-	student.User.ID = student.UserID
+	student.User.ID = student.ID
 	student.Group.ID = student.GroupID
 
 	return student, nil
@@ -110,11 +71,10 @@ WHERE u.id = $1
 
 func (r *StudentRepository) GetByGroupID(ctx context.Context, groupID int) ([]models.Student, error) {
 	query := `
-SELECT s.id, s.user_id, s.group_id, s.created_at, s.updated_at,
+SELECT s.id, s.group_id, s.created_at, s.updated_at,
        u.username, u.name, u.role,
-	   g.name, g.created_at
 FROM data.students s
-JOIN auth.users u ON u.id = s.user_id
+JOIN auth.users u ON u.id = s.id
 JOIN data.groups g ON g.id = s.group_id
 WHERE g.id = $1
 ORDER BY u.name
@@ -133,15 +93,12 @@ ORDER BY u.name
 
 		err := rows.Scan(
 			&student.ID,
-			&student.UserID,
 			&student.GroupID,
 			&student.CreatedAt,
 			&student.UpdatedAt,
 			&student.User.Username,
 			&student.User.Name,
 			&student.User.Role,
-			&student.Group.Name,
-			&student.Group.CreatedAt,
 		)
 		if err != nil {
 			if err == pgx.ErrNoRows {
@@ -150,8 +107,7 @@ ORDER BY u.name
 			return nil, fmt.Errorf("failed to scan student: %v", err)
 		}
 
-		student.User.ID = student.UserID
-		student.Group.ID = student.GroupID
+		student.User.ID = student.ID
 
 		students = append(students, student)
 	}
@@ -182,11 +138,11 @@ WHERE id = $1
 
 func (r *StudentRepository) GetAll(ctx context.Context) ([]models.Student, error) {
 	query := `
-SELECT s.id, s.user_id, s.group_id, s.created_at, s.updated_at,
+SELECT s.id, s.group_id, s.created_at, s.updated_at,
        u.username, u.name, u.role,
 	   g.name, g.created_at
 FROM data.students s
-JOIN auth.users u ON u.id = s.user_id
+JOIN auth.users u ON u.id = s.id
 JOIN data.groups g ON g.id = s.group_id
 ORDER BY u.name
 	`
@@ -204,7 +160,6 @@ ORDER BY u.name
 
 		err := rows.Scan(
 			&student.ID,
-			&student.UserID,
 			&student.GroupID,
 			&student.CreatedAt,
 			&student.UpdatedAt,
@@ -221,7 +176,7 @@ ORDER BY u.name
 			return nil, fmt.Errorf("failed to scan student: %v", err)
 		}
 
-		student.User.ID = student.UserID
+		student.User.ID = student.ID
 		student.Group.ID = student.GroupID
 
 		students = append(students, student)

@@ -16,22 +16,20 @@ CREATE TABLE data.groups (
 );
 
 CREATE TABLE data.teachers (
-	id SERIAL PRIMARY KEY,
-	user_id INT NOT NULL,
+	id INT PRIMARY KEY,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-	FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+	FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE data.students (
-	id SERIAL PRIMARY KEY,
-	user_id INT NOT NULL,
+	id INT PRIMARY KEY,
 	group_id INT NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-	FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
+	FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE,
 	FOREIGN KEY (group_id) REFERENCES data.groups(id) ON DELETE RESTRICT
 );
 
@@ -110,7 +108,7 @@ CREATE TABLE data.report_files (
 	FOREIGN KEY (file_id) REFERENCES data.files(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_students_user_id ON data.students(user_id);
+CREATE INDEX idx_students_id ON data.students(id);
 CREATE INDEX idx_students_group_id ON data.students(group_id);
 CREATE INDEX idx_disciplines_group_id ON data.disciplines(group_id);
 CREATE INDEX idx_disciplines_teacher_id ON data.disciplines(teacher_id);

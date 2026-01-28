@@ -81,6 +81,22 @@ WHERE name = $1
 	return group, nil
 }
 
+func (r *GroupRepository) GetWithStudents(ctx context.Context, id int) (*models.Group, error) {
+	group, err := r.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	sr := NewStudentRepository(r.db)
+	students, err := sr.GetByGroupID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	group.Students = append(group.Students, students...)
+
+	return group, nil
+}
+
 func (r *GroupRepository) Update(ctx context.Context, group *models.Group) error {
 	query := `
 UPDATE data.groups

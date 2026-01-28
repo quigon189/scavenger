@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"time"
 
 	"data-service/internal/models"
 
@@ -12,7 +11,6 @@ import (
 type StudentRepo interface {
 	Create(ctx context.Context, student *models.Student) error
 	GetByID(ctx context.Context, id int) (*models.Student, error)
-	GetByUserID(ctx context.Context, userID int) (*models.Student, error)
 	GetByGroupID(ctx context.Context, groupID int) ([]models.Student, error)
 	Update(ctx context.Context, student *models.Student) error
 	Delete(ctx context.Context, id int) error
@@ -22,7 +20,6 @@ type StudentRepo interface {
 type TeacherRepo interface {
 	Create(ctx context.Context, teacher *models.Teacher) error
 	GetByID(ctx context.Context, id int) (*models.Teacher, error)
-	GetByUserID(ctx context.Context, userID int) (*models.Teacher, error)
 	GetAll(ctx context.Context) ([]models.Teacher, error)
 }
 
@@ -72,6 +69,7 @@ type GroupRepo interface {
 	Create(ctx context.Context, group *models.Group) error
 	GetByID(ctx context.Context, id int) (*models.Group, error)
 	GetByName(ctx context.Context, name string) (*models.Group, error)
+	GetWithStudents(ctx context.Context, id int) (*models.Group, error)
 	Update(ctx context.Context, group *models.Group) error
 	Delete(ctx context.Context, id int) error
 	GetAll(ctx context.Context) ([]models.Group, error)

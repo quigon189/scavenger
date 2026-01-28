@@ -3,20 +3,19 @@ package services
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"data-service/internal/models"
 	"data-service/internal/repository/postgres"
-	"data-service/internal/services/session"
+	"data-service/internal/session"
 
 	"github.com/minio/minio-go/v7"
 )
 
 type Service struct {
-	repo         *postgres.Repository
-	session      *session.SessionService
-	minioClient  *minio.Client
-	bucketName   string
+	repo        *postgres.Repository
+	session     *session.SessionService
+	minioClient *minio.Client
+	bucketName  string
 }
 
 func NewService(
@@ -32,29 +31,35 @@ func NewService(
 		bucketName:  bucketName,
 	}
 }
-
-func (s *Service) Authenticate(ctx context.Context, sessionID string) (*models.User, error) {
-	session, err := s.session.GetSession(ctx, sessionID)
-	if err != nil {
-		return nil, fmt.Errorf("authentication failed: %v", err)
-	}
-
-	if time.Now().After(session.ExpiresAt) {
-		return nil, fmt.Errorf("session expired")
+func (s *Service) Authenticate(ctx context.Context) (*models.User, error) {
+	session, ok := ctx.Value("session").(session.UserSession)
+	if !ok {
+		return nil, fmt.Errorf("failed to get session")
 	}
 
 	return &session.User, nil
 }
 
-func (s *Service) RequireRole(ctx context.Context, sessionID string, requiredRole string) (*models.User, error) {
-	user, err := s.Authenticate(ctx, sessionID)
+func (s *Service) RequireRole(ctx context.Context, requiredRoles ...string) (*models.User, error) {
+	user, err := s.Authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if user.Role != requiredRole && user.Role != "admin" {
-		return nil, fmt.Errorf("access denied: required role %s", requiredRole)
+	if user.Role == "admin" {
+		return user, nil
 	}
 
-	return user, nil
+	access := false
+	for _, requiredRole := range requiredRoles {
+		if user.Role == requiredRole {
+			access = true
+			break
+		}
+	}
+
+	if access {
+		return user, nil
+	}
+	return nil, fmt.Errorf("access denied")
 }
