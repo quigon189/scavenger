@@ -11,6 +11,15 @@ CREATE TABLE auth.users (
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- admin admin123
+-- stud stud123
+-- teach teach123
+INSERT INTO auth.users (username, password_hash, name, email, role) VALUES
+    ('admin', '$2a$10$UeSM2lg6ALPQnjc/d2R3/Ou4xSZanVeBsIaxjkgYwMwDOvoGqD1bq', 'Admin', 'admin@localhost', 'admin'),
+    ('stud', '$2a$10$VZC0.fidHnzEqCqZeTDzSeYUfy4Rll9gZE/saEB9Mazkysfk/OTKe', 'Student', 'stud@localhost', 'student'),
+    ('teach', '$2a$10$9lo5QPzCXB/sIej/VLclHumVos6pifEkUmvKN13pyXtOAGogv3FT.', 'Teacher', 'teach@localhost', 'teacher');
+
+
 CREATE INDEX idx_users_username ON auth.users(username);
 CREATE INDEX idx_users_email ON auth.users(email);
 CREATE INDEX idx_users_role ON auth.users(role);
