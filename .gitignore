@@ -9,7 +9,7 @@
 *.db
 
 #хранилище файлов
-storage/
+#storage/
 
 main
 

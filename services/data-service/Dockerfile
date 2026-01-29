@@ -2,9 +2,6 @@ FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-# Установка зависимостей
-RUN apk add --no-cache git gcc musl-dev
-
 # Копирование go mod файлов
 COPY go.mod go.sum ./
 RUN go mod download

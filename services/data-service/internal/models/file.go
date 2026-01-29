@@ -11,6 +11,8 @@ type File struct {
 	Bucket      string    `json:"bucket"`
 	Path        string    `json:"path"`
 	CreatedAt   time.Time `json:"created_at"`
+
+	SignedURL string `json:"signed_url,omitempty"`
 }
 
 type LabFile struct {

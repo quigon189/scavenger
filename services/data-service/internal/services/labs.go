@@ -70,8 +70,8 @@ func (l *LabService) GetLab(ctx context.Context, id int) (*models.Lab, error) {
 	return lab, nil
 }
 
-func (l *LabService) GetLabsByDiscipline(ctx context.Context, sessionID string, disciplineID int) ([]models.Lab, error) {
-	user, err := l.service.Authenticate(ctx, sessionID)
+func (l *LabService) GetLabsByDiscipline(ctx context.Context, disciplineID int) ([]models.Lab, error) {
+	user, err := l.service.Authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -84,12 +84,12 @@ func (l *LabService) GetLabsByDiscipline(ctx context.Context, sessionID string, 
 
 	switch user.Role {
 	case "student":
-		student, err := l.service.repo.Students.GetByUserID(ctx, user.ID)
+		student, err := l.service.repo.Students.GetByID(ctx, user.ID)
 		if err != nil || student == nil || student.GroupID != discipline.GroupID {
 			return nil, fmt.Errorf("access denied")
 		}
 	case "teacher":
-		teacher, err := l.service.repo.Teachers.GetByUserID(ctx, user.ID)
+		teacher, err := l.service.repo.Teachers.GetByID(ctx, user.ID)
 		if err != nil || teacher == nil || teacher.ID != discipline.TeacherID {
 			return nil, fmt.Errorf("access denied")
 		}
@@ -111,8 +111,8 @@ func (l *LabService) GetLabsByDiscipline(ctx context.Context, sessionID string, 
 	return labs, nil
 }
 
-func (l *LabService) UpdateLab(ctx context.Context, sessionID string, lab *models.Lab) error {
-	user, err := l.service.RequireRole(ctx, sessionID, "teacher")
+func (l *LabService) UpdateLab(ctx context.Context, lab *models.Lab) error {
+	user, err := l.service.RequireRole(ctx, "teacher")
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (l *LabService) UpdateLab(ctx context.Context, sessionID string, lab *model
 		return fmt.Errorf("failed to get lab: %v", err)
 	}
 
-	teacher, err := l.service.repo.Teachers.GetByUserID(ctx, user.ID)
+	teacher, err := l.service.repo.Teachers.GetByID(ctx, user.ID)
 	if err != nil || teacher == nil || existingLab.Discipline.TeacherID != teacher.ID {
 		return fmt.Errorf("access denied: lab does not belong to teacher")
 	}
@@ -131,8 +131,8 @@ func (l *LabService) UpdateLab(ctx context.Context, sessionID string, lab *model
 	return l.service.repo.Labs.Update(ctx, lab)
 }
 
-func (l *LabService) DeleteLab(ctx context.Context, sessionID string, id int) error {
-	user, err := l.service.RequireRole(ctx, sessionID, "teacher")
+func (l *LabService) DeleteLab(ctx context.Context, id int) error {
+	user, err := l.service.RequireRole(ctx, "teacher")
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func (l *LabService) DeleteLab(ctx context.Context, sessionID string, id int) er
 		return fmt.Errorf("failed to get lab: %v", err)
 	}
 
-	teacher, err := l.service.repo.Teachers.GetByUserID(ctx, user.ID)
+	teacher, err := l.service.repo.Teachers.GetByID(ctx, user.ID)
 	if err != nil || teacher == nil || lab.Discipline.TeacherID != teacher.ID {
 		return fmt.Errorf("access denied: lab does not belong to teacher")
 	}
@@ -151,8 +151,8 @@ func (l *LabService) DeleteLab(ctx context.Context, sessionID string, id int) er
 	return l.service.repo.Labs.Delete(ctx, id)
 }
 
-func (l *LabService) AddFileToLab(ctx context.Context, sessionID string, labID, fileID int) error {
-	user, err := l.service.RequireRole(ctx, sessionID, "teacher")
+func (l *LabService) AddFileToLab(ctx context.Context, labID, fileID int) error {
+	user, err := l.service.RequireRole(ctx, "teacher")
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (l *LabService) AddFileToLab(ctx context.Context, sessionID string, labID, 
 		return fmt.Errorf("failed to get lab: %v", err)
 	}
 
-	teacher, err := l.service.repo.Teachers.GetByUserID(ctx, user.ID)
+	teacher, err := l.service.repo.Teachers.GetByID(ctx, user.ID)
 	if err != nil || teacher == nil || lab.Discipline.TeacherID != teacher.ID {
 		return fmt.Errorf("access denied: lab does not belong to teacher")
 	}

@@ -7,32 +7,31 @@ import (
 	"data-service/internal/models"
 	"data-service/internal/repository/postgres"
 	"data-service/internal/session"
-
-	"github.com/minio/minio-go/v7"
+	"data-service/internal/storage"
 )
 
 type Service struct {
-	repo        *postgres.Repository
-	session     *session.SessionService
-	minioClient *minio.Client
-	bucketName  string
+	repo       *postgres.Repository
+	session    *session.SessionService
+	storage    storage.Storage
+	bucketName string
 }
 
 func NewService(
 	repo *postgres.Repository,
 	sessionService *session.SessionService,
-	minioClient *minio.Client,
+	storage storage.Storage,
 	bucketName string,
 ) *Service {
 	return &Service{
-		repo:        repo,
-		session:     sessionService,
-		minioClient: minioClient,
-		bucketName:  bucketName,
+		repo:       repo,
+		session:    sessionService,
+		storage:    storage,
+		bucketName: bucketName,
 	}
 }
 func (s *Service) Authenticate(ctx context.Context) (*models.User, error) {
-	session, ok := ctx.Value("session").(session.UserSession)
+	session, ok := ctx.Value("session").(*session.UserSession)
 	if !ok {
 		return nil, fmt.Errorf("failed to get session")
 	}
@@ -44,10 +43,6 @@ func (s *Service) RequireRole(ctx context.Context, requiredRoles ...string) (*mo
 	user, err := s.Authenticate(ctx)
 	if err != nil {
 		return nil, err
-	}
-
-	if user.Role == "admin" {
-		return user, nil
 	}
 
 	access := false

@@ -9,7 +9,13 @@ import (
 	"syscall"
 	"time"
 
+	"data-service/internal/api"
 	"data-service/internal/config"
+	"data-service/internal/middlewares"
+	"data-service/internal/repository/postgres"
+	"data-service/internal/services"
+	"data-service/internal/session"
+	"data-service/internal/storage"
 	"data-service/pkg/database"
 	"data-service/pkg/minio"
 	"data-service/pkg/redisclient"
@@ -18,28 +24,48 @@ import (
 func main() {
 	cfg := config.Load()
 
-	_, err := redisclient.NewRedisClient(cfg.RedisURL, cfg.RedisPassword, cfg.RedisDB)
+	redisClient, err := redisclient.NewRedisClient(cfg.RedisURL, cfg.RedisPassword, cfg.RedisDB)
 	if err != nil {
 		log.Fatalf("ERR Failed to create Redis client: %v", err)
 	}
 
-	_, err = database.NewPostgresPool(cfg.DatabaseURL)
+	db, err := database.NewPostgresPool(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("ERR Failed to create Postgres Pool: %v", err)
 	}
 
-	_, err = minio.NewMinioClient(cfg.MinioEndpoint, cfg.MinioAccessKey, cfg.MinioSecretKey, cfg.MinioBucket, cfg.MinioUseSSL)
+	minioClient, err := minio.NewMinioClient(cfg.MinioEndpoint, cfg.MinioAccessKey, cfg.MinioSecretKey, cfg.MinioBucket, cfg.MinioUseSSL)
 	if err != nil {
 		log.Fatalf("ERR Failed to create MinIO client: %v", err)
 	}
 
+	fileStorage, err := storage.NewMinioStorage(minioClient, cfg.MinioBucket)
+	if err != nil {
+		log.Fatalf("ERR Failed to create File Storage")
+	}
+
+	sessionService := session.NewSessionService(redisClient, cfg.AuthServiceURL)
+
+	services := services.NewServices(
+		postgres.NewRepository(db),
+		sessionService,
+		fileStorage,
+		cfg.MinioBucket,
+	)
+
+	authMiddleware := middlewares.NewAuthMiddleware(sessionService)
+
 	router := http.NewServeMux()
 
-	// TODO: регистрация маршрутов
+	fileHandler := api.NewFileHandlers(services.Files, authMiddleware)
+	fileHandler.RegisterFileRoutes(router)
+
+	studentHandler := api.NewStudentHandlers(services.Students, authMiddleware)
+	studentHandler.RegisterStudentRoutes(router)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: router,
+		Handler: api.LoggingMiddleware(router),
 	}
 
 	go func() {

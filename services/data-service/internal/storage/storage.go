@@ -20,7 +20,7 @@ type FileInfo struct {
 // Storage интерфейс для работы с файловым хранилищем
 type Storage interface {
 	// Upload загружает файл в хранилище
-	Upload(ctx context.Context, filename string, contentType string, reader io.Reader, size int64) (*FileInfo, error)
+	Upload(ctx context.Context, filename string, fileType, contentType string, reader io.Reader, size int64) (*FileInfo, error)
 
 	// Download скачивает файл из хранилища
 	Download(ctx context.Context, path string) (io.ReadCloser, error)

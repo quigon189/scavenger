@@ -51,6 +51,7 @@ type ReportRepo interface {
 	GetByStudentID(ctx context.Context, studentID int) ([]models.LabReport, error)
 	Update(ctx context.Context, report *models.LabReport) error
 	UpdateStatus(ctx context.Context, id int, status string) error
+	UpdateGrade(ctx context.Context, id, grade int) error
 	Delete(ctx context.Context, id int) error
 	GetFiles(ctx context.Context, reportID int) ([]models.File, error)
 	AddFile(ctx context.Context, reportID, fileID int) error

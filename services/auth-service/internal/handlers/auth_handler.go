@@ -161,7 +161,7 @@ func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 
 func (h *AuthHandler) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		sessionID := r.Header.Get("session_id")
+		sessionID := r.Header.Get("X-Session-ID")
 		if sessionID != "" {
 			session, err := h.authService.ValidateSession(r.Context(), sessionID)
 			if err == nil {

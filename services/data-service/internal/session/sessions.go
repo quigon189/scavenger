@@ -2,11 +2,12 @@ package session
 
 import (
 	"context"
-	"data-service/internal/models"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
+
+	"data-service/internal/models"
 
 	"github.com/go-redis/redis/v8"
 )

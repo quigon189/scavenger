@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
