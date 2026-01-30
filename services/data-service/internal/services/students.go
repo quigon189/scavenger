@@ -16,6 +16,11 @@ func NewStudentService(service *Service) *StudentService {
 }
 
 func (s *StudentService) CreateStudent(ctx context.Context, student *models.Student) error {
+	_, err := s.service.RequireRole(ctx, "admin")
+	if err != nil {
+		return err
+	}
+
 	return s.service.repo.Students.Create(ctx, student)
 }
 

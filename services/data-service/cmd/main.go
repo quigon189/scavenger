@@ -11,7 +11,6 @@ import (
 
 	"data-service/internal/api"
 	"data-service/internal/config"
-	"data-service/internal/middlewares"
 	"data-service/internal/repository/postgres"
 	"data-service/internal/services"
 	"data-service/internal/session"
@@ -53,19 +52,11 @@ func main() {
 		cfg.MinioBucket,
 	)
 
-	authMiddleware := middlewares.NewAuthMiddleware(sessionService)
-
-	router := http.NewServeMux()
-
-	fileHandler := api.NewFileHandlers(services.Files, authMiddleware)
-	fileHandler.RegisterFileRoutes(router)
-
-	studentHandler := api.NewStudentHandlers(services.Students, authMiddleware)
-	studentHandler.RegisterStudentRoutes(router)
+	router := api.NewRouter(services, sessionService)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: api.LoggingMiddleware(router),
+		Handler: router.Handler(),
 	}
 
 	go func() {

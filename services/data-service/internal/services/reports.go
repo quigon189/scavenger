@@ -15,7 +15,7 @@ func NewReportService(service *Service) *ReportService {
 	return &ReportService{service: service}
 }
 
-func (r *ReportService) CreateReport(ctx context.Context, labID int) (*models.LabReport, error) {
+func (r *ReportService) CreateReport(ctx context.Context, labID int, comment string) (*models.LabReport, error) {
 	user, err := r.service.Authenticate(ctx)
 	if err != nil {
 		return nil, err
@@ -47,6 +47,7 @@ func (r *ReportService) CreateReport(ctx context.Context, labID int) (*models.La
 		LabID:     labID,
 		StudentID: student.ID,
 		Status:    "submitted",
+		Comment: comment,
 	}
 
 	err = r.service.repo.Reports.Create(ctx, report)
@@ -68,7 +69,6 @@ func (r *ReportService) GetReport(ctx context.Context, id int) (*models.LabRepor
 		return nil, err
 	}
 
-	// Проверка прав доступа
 	switch user.Role {
 	case "student":
 		if report.Student.ID != user.ID {
@@ -81,7 +81,6 @@ func (r *ReportService) GetReport(ctx context.Context, id int) (*models.LabRepor
 		}
 	}
 
-	// Загружаем файлы отчета
 	files, err := r.service.repo.Reports.GetFiles(ctx, id)
 	if err == nil {
 		report.Files = files

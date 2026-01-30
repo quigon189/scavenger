@@ -49,7 +49,7 @@ func (t *TeacherService) GetTeacherWithDisciplines(ctx context.Context, id int) 
 	return teacher, nil
 }
 
-func (t *TeacherService) GetAllTeachers(ctx context.Context, sessionID string) ([]models.Teacher, error) {
+func (t *TeacherService) GetAllTeachers(ctx context.Context) ([]models.Teacher, error) {
 	_, err := t.service.Authenticate(ctx)
 	if err != nil {
 		return nil, err
