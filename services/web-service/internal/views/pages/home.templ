@@ -1,0 +1,16 @@
+package pages
+
+import "web-service/internal/models"
+import "web-service/internal/views/layouts"
+import "web-service/internal/views/components"
+
+templ Home(user models.User) {
+@layouts.Base("Home page", home(user))
+}
+
+templ home(user models.User) {
+@components.Navbar(user)
+<div class="container mt-4">
+	<h1>Welcome, { user.Name }!</h1>
+</div>
+}

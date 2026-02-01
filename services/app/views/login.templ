@@ -1,50 +1,52 @@
 package views
 
 templ LoginPage() {
-	<!DOCTYPE html>
-    <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Вход в систему</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light">
-		@Alerts()
-        <div class="container vh-100 d-flex align-items-center justify-content-center">
-            <div class="card shadow" style="width: 400px;">
-                <div class="card-body p-4">
-                    <h3 class="card-title text-center mb-4">
-                        <i class="fas fa-graduation-cap text-primary"></i><br>
-                        Вход в систему
-                    </h3>
-                    <form action="/login" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Логин</label>
-                            <input type="text" class="form-control" name="username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Пароль</label>
-                            <input type="password" class="form-control" name="password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Войти</button>
-                    </form>
-                </div>
+<!DOCTYPE html>
+<html lang="ru">
 
-				<!-- Блок регистрации для студентов -->
-				<div class="my-4 pt-4 border-top">
-					<div class="text-center">
-						<p class="small text-muted mb-3">
-							Если у вас еще нет учетной записи, зарегистрируйтесь
-						</p>
-						<a href="/register" class="btn btn-outline-success btn-sm">
-							<i class="fas fa-user-graduate me-2"></i>
-							Зарегистрироваться
-						</a>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Вход в систему</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+	@Alerts()
+	<div class="container vh-100 d-flex align-items-center justify-content-center">
+		<div class="card shadow" style="width: 400px;">
+			<div class="card-body p-4">
+				<h3 class="card-title text-center mb-4">
+					<i class="fas fa-graduation-cap text-primary"></i><br>
+					Вход в систему
+				</h3>
+				<form action="/login" method="post">
+					<div class="mb-3">
+						<label class="form-label">Логин</label>
+						<input type="text" class="form-control" name="username" required>
 					</div>
+					<div class="mb-3">
+						<label class="form-label">Пароль</label>
+						<input type="password" class="form-control" name="password" required>
+					</div>
+					<button type="submit" class="btn btn-primary w-100">Войти</button>
+				</form>
+			</div>
+
+			<!-- Блок регистрации для студентов -->
+			<div class="my-4 pt-4 border-top">
+				<div class="text-center">
+					<p class="small text-muted mb-3">
+						Если у вас еще нет учетной записи, зарегистрируйтесь
+					</p>
+					<a href="/register" class="btn btn-outline-success btn-sm">
+						<i class="fas fa-user-graduate me-2"></i>
+						Зарегистрироваться
+					</a>
 				</div>
-            </div>
-        </div>
+			</div>
+		</div>
+	</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
@@ -57,12 +59,13 @@ templ LoginPage() {
 			return toast
 		})
 
-		toastElList.forEach(function(toastEl) {
-			toastEl.addEventListener('hidden.bs.toast', function() {
+		toastElList.forEach(function (toastEl) {
+			toastEl.addEventListener('hidden.bs.toast', function () {
 				this.remove()
 			})
 		})
 	</script>
-	</body>
-    </html>	
+</body>
+
+</html>
 }
