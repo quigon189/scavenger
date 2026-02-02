@@ -1,4 +1,4 @@
-package views
+package components
 
 import "web-service/internal/models"
 
@@ -7,18 +7,18 @@ if len(alerts) > 0 {
 <div aria-live="polite" aria-atomic="true" class="position-relative">
 	<div class="toast-container position-absolute top-0 start-50 translate-middle-x p-3">
 
-		for _, alert := range alertToasts {
+		for _, alert := range alerts {
 		<div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true"
 			data-bs-autohide="true" data-bs-delay="10000" autoshow>
 			<div class={"toast-header text-white bg-"+string(alert.Type)}>
 				switch alert.Type {
-				case alerts.AlertSuccess:
+				case models.AlertSuccess:
 				<strong class="me-auto">Успех</strong>
-				case alerts.AlertError:
+				case models.AlertError:
 				<strong class="me-auto">Ошибка</strong>
-				case alerts.AlertWarning:
+				case models.AlertWarning:
 				<strong class="me-auto">Предупреждение</strong>
-				case alerts.AlertInfo:
+				case models.AlertInfo:
 				<strong class="me-auto">Уведомление</strong>
 				default:
 				<strong class="me-auto">Уведомление</strong>
@@ -26,7 +26,7 @@ if len(alerts) > 0 {
 				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
 			</div>
 			<div class="toast-body">
-				{ alert.Message }
+				{ alert.Msg }
 			</div>
 		</div>
 

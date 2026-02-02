@@ -3,6 +3,8 @@ package config
 import (
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -21,6 +23,9 @@ type RedisConfig struct {
 }
 
 func Load() *Config {
+
+	_ = godotenv.Load()
+
 	serverConfig := ServerConfig{
 		Port: getEnv("PORT", "8080"),
 	}

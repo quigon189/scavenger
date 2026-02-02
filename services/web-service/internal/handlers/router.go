@@ -1,15 +1,20 @@
 package handlers
 
-import "net/http"
+import (
+	"net/http"
+	"web-service/internal/session"
+)
 
 type Router struct {
+	session *session.SessionService
 	handler http.Handler
 	mux     *http.ServeMux
 }
 
-func NewRouter() *Router {
+func NewRouter(session *session.SessionService) *Router {
 	router := &Router{
 		mux: http.NewServeMux(),
+		session: session,
 	}
 
 	router.registerRoutes()
@@ -20,7 +25,10 @@ func NewRouter() *Router {
 }
 
 func (r *Router) registerRoutes() {
-	r.mux.HandleFunc("/", Home)
+	authHandler := NewAuthHandler(*r.session)
+
+	r.mux.HandleFunc("/home", Home)
+	r.mux.HandleFunc("/login", authHandler.Login)
 }
 
 func (r *Router) Handler() http.Handler {
