@@ -91,6 +91,21 @@ services:
       auth-service:
         condition: service_started
 
+  web-service:
+    build: ./services/web-service
+    ports:
+      - "8080:8080"
+    environment:
+      - REDIS_URL=redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=0
+      - AUTH_URL=auth-service:8081
+      - TIMEOUT=30
+      - PORT=8080
+    depends_on:
+      auth-service:
+        condition: service_started
+
 volumes:
   postgres_data:
   minio_data:

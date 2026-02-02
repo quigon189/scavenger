@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Redis  RedisConfig
 	Server ServerConfig
+	Api    ApiConfig
 }
 
 type ServerConfig struct {
@@ -20,6 +21,12 @@ type RedisConfig struct {
 	URL      string
 	Password string
 	DB       int
+}
+
+type ApiConfig struct {
+	AuthURL string
+	DataURL string
+	Timeout int
 }
 
 func Load() *Config {
@@ -36,9 +43,16 @@ func Load() *Config {
 		DB:       getIntEnv("REDIS_DB", 0),
 	}
 
+	apiConfig := ApiConfig{
+		AuthURL: getEnv("AUTH_URL", "localhost:8081"),
+		DataURL: getEnv("DATA_URL", "localhost:8082"),
+		Timeout: getIntEnv("TIMEOUT", 30),
+	}
+
 	return &Config{
 		Server: serverConfig,
 		Redis:  redisConfig,
+		Api:    apiConfig,
 	}
 }
 

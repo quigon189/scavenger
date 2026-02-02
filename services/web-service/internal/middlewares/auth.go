@@ -2,15 +2,16 @@ package middlewares
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"web-service/internal/session"
 )
 
 type AuthMiddleware struct {
-	session session.SessionService
+	session *session.SessionService
 }
 
-func NewAuthMiddleware(session session.SessionService) *AuthMiddleware {
+func NewAuthMiddleware(session *session.SessionService) *AuthMiddleware {
 	return &AuthMiddleware{
 		session: session,
 	}
@@ -22,6 +23,7 @@ func (m *AuthMiddleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc 
 		if err != nil {
 			m.session.DeleteSession(w)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			log.Printf("WARN Failed to get session %s: %v", sessionID, err)
 			return
 		}
 

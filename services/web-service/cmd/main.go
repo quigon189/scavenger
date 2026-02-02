@@ -12,6 +12,7 @@ import (
 	"web-service/internal/config"
 	"web-service/internal/handlers"
 	"web-service/internal/session"
+	"web-service/pkg/apiclient"
 	"web-service/pkg/redisclient"
 )
 
@@ -23,9 +24,17 @@ func main() {
 		log.Fatalf("ERR Failed to create Redis client: %v", err)
 	}
 
-	sessionService := session.NewSessionService(redisClient, "http://auth-service:8081")
+	authClient := apiclient.NewAuthClient("http://"+cfg.Api.AuthURL, time.Duration(cfg.Api.Timeout) * time.Second)
 
-	router := handlers.NewRouter(sessionService)
+	sessionService := session.NewSessionService(
+		redisClient, 
+		authClient,
+	)
+
+	router := handlers.NewRouter(
+		sessionService,
+		authClient,
+	)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Server.Port,
