@@ -1,15 +1,6 @@
 package pages
 
-import "web-service/internal/views/layouts"
-import "web-service/internal/views/components"
-import "web-service/internal/models"
-
-templ Login(prevLogin string, alerts ...models.Alert) {
-@layouts.Base("Вход", login(prevLogin, alerts...))
-}
-
-templ login(prevLogin string, alerts ...models.Alert) {
-@components.Alerts(alerts...)
+templ Login(prevLogin string) {
 <div class="container vh-100 d-flex align-items-center justify-content-center">
 	<div class="card shadow" style="width: 400px;">
 		<div class="card-body p-4">

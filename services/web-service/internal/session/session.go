@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"web-service/internal/models"
 	"web-service/pkg/apiclient"
 
 	"github.com/go-redis/redis/v8"
@@ -30,8 +31,8 @@ func NewSessionService(redisClient *redis.Client, authClient *apiclient.AuthClie
 }
 
 type UserSession struct {
-	User      apiclient.User `json:"user"`
-	ExpiresAt time.Time      `json:"expires_at"`
+	User      models.User `json:"user"`
+	ExpiresAt time.Time   `json:"expires_at"`
 }
 
 func (s *SessionService) SetSession(w http.ResponseWriter, sessionID string, expires_at time.Time) {
@@ -91,5 +92,12 @@ func (s *SessionService) getSessionViaAuth(ctx context.Context, sessionID string
 		return nil, err
 	}
 
-	return &UserSession{User: authResp.User, ExpiresAt: authResp.ExpiresAt}, nil
+	user := models.User{
+		Name:     authResp.User.Name,
+		Username: authResp.User.Username,
+		Role:     authResp.User.Role,
+		Email:    authResp.User.Email,
+	}
+
+	return &UserSession{User: user, ExpiresAt: authResp.ExpiresAt}, nil
 }

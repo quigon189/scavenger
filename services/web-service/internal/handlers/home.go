@@ -2,18 +2,19 @@ package handlers
 
 import (
 	"net/http"
-	"web-service/internal/models"
+	"web-service/internal/session"
 	"web-service/internal/views/pages"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	user := models.User{
-		Username: "test",
-		Name: "Test",
-		Role: "test role",
-		Email: "test@test",
-		Group: "test123",
+	session, ok := r.Context().Value("session").(*session.UserSession)
+	if !ok {
+		http.Error(w,"Failed to get session", http.StatusInternalServerError)
+		return
 	}
 
-	Render(w,r,pages.Home(user))
+	err := BaseWithNavbar(w,r,"Home", pages.Home(session.User))	
+	if err != nil {
+		http.Error(w,"Failed to render page: " + err.Error(), http.StatusInternalServerError)
+	}
 }

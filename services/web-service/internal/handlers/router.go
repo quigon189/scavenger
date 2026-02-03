@@ -33,9 +33,10 @@ func NewRouter(session *session.SessionService, authClient *apiclient.AuthClient
 func (r *Router) registerRoutes() {
 	authHandler := NewAuthHandler(r.session, r.authClient)
 
-	r.mux.HandleFunc("/home", Home)
+	r.mux.HandleFunc("/", r.authMuddleware.SessionRequire(Home))
 	r.mux.HandleFunc("/login", authHandler.Login)
-	r.mux.HandleFunc("/logout", r.authMuddleware.SessionRequire(authHandler.Logout))
+	r.mux.HandleFunc("POST /logout", r.authMuddleware.SessionRequire(authHandler.Logout))
+	r.mux.HandleFunc("/register", authHandler.Register)
 }
 
 func (r *Router) Handler() http.Handler {

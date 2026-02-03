@@ -7,3 +7,8 @@ type User struct {
 	Email    string
 	Group    string
 }
+
+type Group struct {
+	ID   int
+	Name string
+}
