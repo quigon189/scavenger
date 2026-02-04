@@ -106,7 +106,7 @@ func (h *GroupHandlers) GetAllGroups(w http.ResponseWriter, r *http.Request) {
 
 func (h *GroupHandlers) RegisterGroupRoutes(router *http.ServeMux) {
 	router.HandleFunc("POST /api/groups", h.authMiddleware.RequireAuth(h.CreateGroup))
-	router.HandleFunc("GET /api/groups", h.authMiddleware.RequireAuth(h.GetAllGroups))
+	router.HandleFunc("GET /api/groups", h.GetAllGroups)
 	router.HandleFunc("GET /api/groups/{id}", h.authMiddleware.RequireAuth(h.GetGroup))
 	router.HandleFunc("PUT /api/groups/{id}", h.authMiddleware.RequireAuth(h.UpdateGroup))
 	router.HandleFunc("DELETE /api/groups/{id}", h.authMiddleware.RequireAuth(h.DeleteGroup))
