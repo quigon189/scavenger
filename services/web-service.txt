@@ -1,0 +1,4821 @@
+Текущий каталог: /home/quigon/scavenger/services/web-service
+├── Dockerfile
+├── cmd
+|   └── main.go
+├── go.mod
+├── go.sum
+├── internal
+|   ├── alerts
+|   |   └── alerts.go
+|   ├── config
+|   |   └── config.go
+|   ├── handlers
+|   |   ├── auth.go
+|   |   ├── home.go
+|   |   ├── render.go
+|   |   └── router.go
+|   ├── middlewares
+|   |   ├── alerts.go
+|   |   └── auth.go
+|   ├── models
+|   |   └── user.go
+|   ├── session
+|   |   └── session.go
+|   └── views
+|       ├── components
+|       |   ├── alerts.templ
+|       |   ├── alerts_templ.go
+|       |   ├── navbar.templ
+|       |   └── navbar_templ.go
+|       ├── layouts
+|       |   ├── base.templ
+|       |   └── base_templ.go
+|       └── pages
+|           ├── home.templ
+|           ├── home_templ.go
+|           ├── login.templ
+|           ├── login_templ.go
+|           ├── register.templ
+|           └── register_templ.go
+└── pkg
+    ├── apiclient
+    |   ├── auth.go
+    |   ├── base.go
+    |   └── data.go
+    └── redisclient
+        └── redis.go
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/cmd/main.go
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"web-service/internal/config"
+	"web-service/internal/handlers"
+	"web-service/internal/session"
+	"web-service/pkg/apiclient"
+	"web-service/pkg/redisclient"
+)
+
+func main() {
+	cfg := config.Load()
+
+	redisClient, err := redisclient.NewRedisClient(cfg.Redis.URL, cfg.Redis.Password, cfg.Redis.DB)
+	if err != nil {
+		log.Fatalf("ERR Failed to create Redis client: %v", err)
+	}
+
+	authClient := apiclient.NewAuthClient("http://"+cfg.Api.AuthURL, time.Duration(cfg.Api.Timeout) * time.Second)
+
+	sessionService := session.NewSessionService(
+		redisClient, 
+		authClient,
+	)
+
+	router := handlers.NewRouter(
+		sessionService,
+		authClient,
+	)
+
+	server := &http.Server{
+		Addr:    ":" + cfg.Server.Port,
+		Handler: router.Handler(),
+	}
+
+	go func() {
+		log.Printf("INFO Data service starting on port %s", cfg.Server.Port)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("ERR Server error: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("INFO Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("ERR Server forced to shutdown: %v", err)
+	}
+
+	log.Println("INFO Server stopped")
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/go.mod
+module web-service
+
+go 1.25.5
+
+require (
+	github.com/a-h/templ v0.3.977
+	github.com/go-redis/redis/v8 v8.11.5
+	github.com/joho/godotenv v1.5.1
+)
+
+require (
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+)
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/alerts/alerts.go
+package alerts
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"net/http"
+	"net/url"
+)
+
+type AlertType string
+
+const (
+	AlertSuccess AlertType = "success"
+	AlertError   AlertType = "danger"
+	AlertWarning AlertType = "warning"
+	AlertInfo    AlertType = "info"
+
+	AlertKey    string = "alerts"
+	AlertExpire int    = 300
+)
+
+type Alert struct {
+	Type AlertType
+	Msg  string
+}
+
+func ReadAlerts(w http.ResponseWriter, r *http.Request) context.Context {
+	alerts := []Alert{}
+	if r != nil {
+		cookie, err := r.Cookie(AlertKey)
+		if err == nil {
+			decoded, _ := url.QueryUnescape(cookie.Value)
+
+			json.Unmarshal([]byte(decoded), &alerts)
+
+			log.Printf("Read alerts: %v", alerts)
+		}
+	}
+
+	return context.WithValue(r.Context(), AlertKey, alerts)
+}
+
+func WriteAlerts(w http.ResponseWriter, r *http.Request) {
+	alerts, ok := r.Context().Value(AlertKey).([]Alert)
+	if !ok {
+		return
+	}
+
+	if len(alerts) == 0 {
+		http.SetCookie(w, &http.Cookie{
+			Name:     AlertKey,
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   false,
+			SameSite: http.SameSiteLaxMode,
+		})
+		return
+	}
+
+	jsonData, _ := json.Marshal(alerts)
+
+	encoded := url.QueryEscape(string(jsonData))
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     AlertKey,
+		Value:    string(encoded),
+		Path:     "/",
+		MaxAge:   AlertExpire,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+func GetAlerts(ctx context.Context) []Alert {
+	alerts, ok := ctx.Value(AlertKey).([]Alert)
+	if !ok {
+		alerts = []Alert{}
+		log.Printf("Failed to get alerts!")
+	}
+
+	log.Printf("Get alerts: %v", alerts)
+
+	return alerts
+}
+
+func SetAlert(ctx context.Context, w http.ResponseWriter, alert Alert) {
+	alerts := GetAlerts(ctx)
+	alerts = append(alerts, alert)
+
+	log.Printf("Set alerts: %v", alerts)
+}
+
+func FlashSuccess(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r.Context(), w, Alert{
+		Type: AlertSuccess,
+		Msg:  msg,
+	})
+}
+
+func FlashInfo(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r.Context(), w, Alert{
+		Type: AlertInfo,
+		Msg:  msg,
+	})
+}
+
+func FlashWarning(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r.Context(), w, Alert{
+		Type: AlertWarning,
+		Msg:  msg,
+	})
+}
+
+func FlashError(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r.Context(), w, Alert{
+		Type: AlertError,
+		Msg:  msg,
+	})
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/config/config.go
+package config
+
+import (
+	"os"
+	"strconv"
+
+	"github.com/joho/godotenv"
+)
+
+type Config struct {
+	Redis  RedisConfig
+	Server ServerConfig
+	Api    ApiConfig
+}
+
+type ServerConfig struct {
+	Port string
+}
+
+type RedisConfig struct {
+	URL      string
+	Password string
+	DB       int
+}
+
+type ApiConfig struct {
+	AuthURL string
+	DataURL string
+	Timeout int
+}
+
+func Load() *Config {
+
+	_ = godotenv.Load()
+
+	serverConfig := ServerConfig{
+		Port: getEnv("PORT", "8080"),
+	}
+
+	redisConfig := RedisConfig{
+		URL:      getEnv("REDIS_URL", "redis:6379"),
+		Password: getEnv("REDIS_PASSWORD", ""),
+		DB:       getIntEnv("REDIS_DB", 0),
+	}
+
+	apiConfig := ApiConfig{
+		AuthURL: getEnv("AUTH_URL", "localhost:8081"),
+		DataURL: getEnv("DATA_URL", "localhost:8082"),
+		Timeout: getIntEnv("TIMEOUT", 30),
+	}
+
+	return &Config{
+		Server: serverConfig,
+		Redis:  redisConfig,
+		Api:    apiConfig,
+	}
+}
+
+func getEnv(key, defaultValue string) string {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		value = defaultValue
+	}
+
+	return value
+}
+
+func getIntEnv(key string, defaultValue int) int {
+	strValue, exists := os.LookupEnv(key)
+	if !exists {
+		return defaultValue
+	}
+
+	value, err := strconv.Atoi(strValue)
+	if err != nil {
+		return defaultValue
+	}
+
+	return value
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/auth.go
+package handlers
+
+import (
+	"log"
+	"net/http"
+
+	"web-service/internal/alerts"
+	"web-service/internal/models"
+	"web-service/internal/session"
+	"web-service/internal/views/pages"
+	"web-service/pkg/apiclient"
+)
+
+type AuthHandler struct {
+	session    *session.SessionService
+	authClient *apiclient.AuthClient
+}
+
+func NewAuthHandler(session *session.SessionService, authClient *apiclient.AuthClient) *AuthHandler {
+	return &AuthHandler{
+		session: session,
+		authClient: authClient,
+	}
+}
+
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	_, sessionID, _ := h.session.GetSession(r)
+	if sessionID != "" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	var prevLogin string
+	if r.Method == http.MethodPost {
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+
+		resp, err := h.authClient.Login(
+			r.Context(),
+			apiclient.LoginRequest{
+				Username: username,
+				Password: password,
+			},
+		)
+		if err == nil && resp.SessionID != "" {
+			h.session.SetSession(w, resp.SessionID, resp.ExpiresAt)
+			http.Redirect(w, r, "/home", http.StatusSeeOther)
+			return
+		} else {
+			prevLogin = username
+			alerts.FlashError(w, r, "Не верный логин или пароль")
+			log.Printf("WARN Failed to login user %s: %v", username, err)
+		}
+	}
+
+	Base(w, r, "Login", pages.Login(prevLogin))
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	_, sessionID, err := h.session.GetSession(r)
+	if err == nil {
+		h.session.DeleteSession(w)
+		h.authClient.Logout(r.Context(), sessionID)
+	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		alerts.FlashSuccess(w,r,"Вы зарегистрированны!")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	groups := []models.Group{}
+	groups = append(groups, models.Group{ID: 1, Name: "Test1"})
+	groups = append(groups, models.Group{ID: 2, Name: "Test2"})
+
+	Base(w, r, "Регистрация", pages.StudentRegistrationPage(groups))
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/home.go
+package handlers
+
+import (
+	"net/http"
+	"web-service/internal/session"
+	"web-service/internal/views/pages"
+)
+
+func Home(w http.ResponseWriter, r *http.Request) {
+	session, ok := r.Context().Value("session").(*session.UserSession)
+	if !ok {
+		http.Error(w,"Failed to get session", http.StatusInternalServerError)
+		return
+	}
+
+	err := BaseWithNavbar(w,r,"Home", pages.Home(session.User))	
+	if err != nil {
+		http.Error(w,"Failed to render page: " + err.Error(), http.StatusInternalServerError)
+	}
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/render.go
+package handlers
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"net/http"
+
+	"web-service/internal/alerts"
+	"web-service/internal/session"
+	"web-service/internal/views/components"
+	"web-service/internal/views/layouts"
+
+	"github.com/a-h/templ"
+)
+
+func Base(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
+	als := alerts.GetAlerts(r.Context())
+	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		components.Alerts(als...).Render(r.Context(), w)
+		component.Render(r.Context(), w)
+		return nil
+	})
+
+	return layouts.Base(title, base).Render(r.Context(), w)
+}
+
+func BaseWithNavbar(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
+	session, ok := r.Context().Value("session").(*session.UserSession)
+	if !ok {
+		return fmt.Errorf("failed to get session")
+	}
+	
+	als := alerts.GetAlerts(r.Context())
+	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		components.Navbar(session.User).Render(r.Context(), w)
+		components.Alerts(als...).Render(r.Context(), w)
+		component.Render(r.Context(), w)
+		return nil
+	})
+
+	return layouts.Base(title, base).Render(r.Context(), w)
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/router.go
+package handlers
+
+import (
+	"net/http"
+	"web-service/internal/middlewares"
+	"web-service/internal/session"
+	"web-service/pkg/apiclient"
+)
+
+type Router struct {
+	session        *session.SessionService
+	authClient     *apiclient.AuthClient
+	authMuddleware *middlewares.AuthMiddleware
+	handler        http.Handler
+	mux            *http.ServeMux
+}
+
+func NewRouter(session *session.SessionService, authClient *apiclient.AuthClient) *Router {
+	router := &Router{
+		mux:            http.NewServeMux(),
+		session:        session,
+		authClient:     authClient,
+		authMuddleware: middlewares.NewAuthMiddleware(session),
+	}
+
+	router.registerRoutes()
+
+	router.handler = router.mux
+
+	return router
+}
+
+func (r *Router) registerRoutes() {
+	authHandler := NewAuthHandler(r.session, r.authClient)
+
+	r.mux.HandleFunc("/", r.authMuddleware.SessionRequire(Home))
+	r.mux.HandleFunc("/login", authHandler.Login)
+	r.mux.HandleFunc("POST /logout", r.authMuddleware.SessionRequire(authHandler.Logout))
+	r.mux.HandleFunc("/register", authHandler.Register)
+}
+
+func (r *Router) Handler() http.Handler {
+	return middlewares.ProccessAlerts(r.handler)
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/middlewares/alerts.go
+package middlewares
+
+import (
+	"net/http"
+	"web-service/internal/alerts"
+)
+
+func ProccessAlerts(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := alerts.ReadAlerts(w, r)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+
+		alerts.WriteAlerts(w,r)
+	})
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/middlewares/auth.go
+package middlewares
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"web-service/internal/session"
+)
+
+type AuthMiddleware struct {
+	session *session.SessionService
+}
+
+func NewAuthMiddleware(session *session.SessionService) *AuthMiddleware {
+	return &AuthMiddleware{
+		session: session,
+	}
+}
+
+func (m *AuthMiddleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, sessionID, err := m.session.GetSession(r)
+		if err != nil {
+			m.session.DeleteSession(w)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			log.Printf("WARN Failed to get session %s: %v", sessionID, err)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "session_id", sessionID)
+		ctx = context.WithValue(ctx, "session", session)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/models/user.go
+package models
+
+type User struct {
+	Username string
+	Name     string
+	Role     string
+	Email    string
+	Group    string
+}
+
+type Group struct {
+	ID   int
+	Name string
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/session/session.go
+package session
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"net/http"
+	"time"
+	"web-service/internal/models"
+	"web-service/pkg/apiclient"
+
+	"github.com/go-redis/redis/v8"
+)
+
+type SessionService struct {
+	redisClient   *redis.Client
+	authClient    *apiclient.AuthClient
+	sessionPrefix string
+	httpClent     *http.Client
+}
+
+func NewSessionService(redisClient *redis.Client, authClient *apiclient.AuthClient) *SessionService {
+	return &SessionService{
+		redisClient:   redisClient,
+		authClient:    authClient,
+		sessionPrefix: "session:",
+		httpClent: &http.Client{
+			Timeout: 5 * time.Second,
+		},
+	}
+}
+
+type UserSession struct {
+	User      models.User    `json:"user"`
+	ExpiresAt time.Time      `json:"expires_at"`
+}
+
+func (s *SessionService) SetSession(w http.ResponseWriter, sessionID string, expires_at time.Time) {
+	cookie := &http.Cookie{
+		Name:     "session_id",
+		Value:    sessionID,
+		Expires:  expires_at,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+	}
+
+	http.SetCookie(w, cookie)
+}
+
+func (s *SessionService) GetSession(r *http.Request) (*UserSession, string, error) {
+	sessionCookie, err := r.Cookie("session_id")
+	if err != nil {
+		return nil, "", err
+	}
+
+	sessionID := sessionCookie.Value
+
+	key := s.sessionPrefix + sessionID
+	data, err := s.redisClient.Get(r.Context(), key).Bytes()
+	if err == nil {
+		var session UserSession
+		if err := json.Unmarshal(data, &session); err == nil {
+			return &session, sessionID, nil
+		}
+	} else {
+		log.Printf("WARN Failed to get session from Redis")
+	}
+
+	session, err := s.getSessionViaAuth(r.Context(), sessionID)
+	if err == nil {
+		return session, sessionID, nil
+	}
+	return nil, "", err
+}
+
+func (s *SessionService) DeleteSession(w http.ResponseWriter) {
+	cookie := &http.Cookie{
+		Name:   "session_id",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	}
+
+	http.SetCookie(w, cookie)
+}
+
+func (s *SessionService) getSessionViaAuth(ctx context.Context, sessionID string) (*UserSession, error) {
+	authResp, err := s.authClient.ValidateSession(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	user := models.User{
+		Name:     authResp.User.Name,
+		Username: authResp.User.Username,
+		Role:     authResp.User.Role,
+		Email:    authResp.User.Email,
+	}
+
+	return &UserSession{User: user, ExpiresAt: authResp.ExpiresAt}, nil
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/components/alerts_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package components
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import "web-service/internal/alerts"
+
+func Alerts(als ...alerts.Alert) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		if len(als) > 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div aria-live=\"polite\" aria-atomic=\"true\" class=\"position-relative\"><div class=\"toast-container position-absolute top-0 start-50 translate-middle-x p-3\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, alert := range als {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"toast align-items-center\" role=\"alert\" aria-live=\"assertive\" aria-atomic=\"true\" data-bs-autohide=\"true\" data-bs-delay=\"10000\" autoshow>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var2 = []any{"toast-header text-white bg-" + string(alert.Type)}
+				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var2).String())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/alerts.templ`, Line: 1, Col: 0}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				switch alert.Type {
+				case alerts.AlertSuccess:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<strong class=\"me-auto\">Успех</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case alerts.AlertError:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<strong class=\"me-auto\">Ошибка</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case alerts.AlertWarning:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<strong class=\"me-auto\">Предупреждение</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case alerts.AlertInfo:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<strong class=\"me-auto\">Уведомление</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				default:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<strong class=\"me-auto\">Уведомление</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"toast\" aria-label=\"Close\"></button></div><div class=\"toast-body\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(alert.Msg)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/alerts.templ`, Line: 29, Col: 15}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/components/navbar_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package components
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import "web-service/internal/models"
+
+func Navbar(user models.User) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"navbar navbar-expand-lg navbar-dark bg-primary\"><div class=\"container\"><a class=\"navbar-brand\" href=\"/\"><i class=\"fas fa-graduation-cap\"></i> Сборщик работ</a><div class=\"navbar-nav\"><div class=\"nav-item dropdown\"><a class=\"nav-link dropdown-toggle d-flex align-items-center\" href=\"#\" role=\"button\" data-bs-toggle=\"dropdown\"><span>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 15, Col: 22}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span></a><ul class=\"dropdown-menu dropdown-menu-end\"><li><div class=\"dropdown-header text-muted small\"><div>Логин: ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 20, Col: 39}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div>Роль: ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Role)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 21, Col: 33}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if user.Group != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div>Группа: ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.Group)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 23, Col: 38}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></li><li><hr class=\"dropdown-divider\"></li><li><button class=\"dropdown-item\" data-bs-toggle=\"modal\" data-bs-target=\"#userProfileModal\"><i class=\"fas fa-user me-2\"></i>Профиль</button></li><li><button class=\"dropdown-item\" data-bs-toggle=\"modal\" data-bs-target=\"#changePasswordModal\"><i class=\"fas fa-key me-2\"></i>Сменить пароль</button></li><li><hr class=\"dropdown-divider\"></li><li><form method=\"POST\" action=\"/logout\" class=\"d-inline\"><button type=\"submit\" class=\"dropdown-item text-danger\"><i class=\"fas fa-sign-out-alt me-2\"></i>Выйти</button></form></li></ul></div></div></div></nav>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/layouts/base_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package layouts
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+func Base(title string, content templ.Component) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"ru\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/layouts/base.templ`, Line: 10, Col: 15}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\"><link href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css\" rel=\"stylesheet\"><link href=\"/static/css/theme.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script></head><body>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = content.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js\"></script><script>\n\t\tvar toastElList = [].slice.call(document.querySelectorAll('.toast[autoshow]'))\n\n\t\tvar toastList = toastElList.map(function (toastEl) {\n\t\t\ttoastEl.removeAttribute('autoshow');\n\t\t\tvar toast = new bootstrap.Toast(toastEl)\n\t\t\ttoast.show()\n\t\t\treturn toast\n\t\t})\n\n\t\ttoastElList.forEach(function (toastEl) {\n\t\t\ttoastEl.addEventListener('hidden.bs.toast', function () {\n\t\t\t\tthis.remove()\n\t\t\t})\n\t\t})\n\t</script></body></html>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/pages/home_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package pages
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import "web-service/internal/models"
+
+func Home(user models.User) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mt-4\"><h1>Welcome, ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/home.templ`, Line: 7, Col: 25}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "!</h1></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/pages/login_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package pages
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+func Login(prevLogin string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container vh-100 d-flex align-items-center justify-content-center\"><div class=\"card shadow\" style=\"width: 400px;\"><div class=\"card-body p-4\"><h3 class=\"card-title text-center mb-4\"><i class=\"fas fa-graduation-cap text-primary\"></i><br>Вход в систему</h3><form action=\"/login\" method=\"post\"><div class=\"mb-3\"><label class=\"form-label\">Логин</label> <input type=\"text\" class=\"form-control\" name=\"username\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(prevLogin)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/login.templ`, Line: 14, Col: 78}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" required></div><div class=\"mb-3\"><label class=\"form-label\">Пароль</label> <input type=\"password\" class=\"form-control\" name=\"password\" required></div><button type=\"submit\" class=\"btn btn-primary w-100\">Войти</button></form></div><!-- Блок регистрации для студентов --><div class=\"my-4 pt-4 border-top\"><div class=\"text-center\"><p class=\"small text-muted mb-3\">Если у вас еще нет учетной записи, зарегистрируйтесь</p><a href=\"/register\" class=\"btn btn-outline-success btn-sm\"><i class=\"fas fa-user-graduate me-2\"></i> Зарегистрироваться</a></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/pages/register_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package pages
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import (
+	"strconv"
+
+	"web-service/internal/models"
+)
+
+func StudentRegistrationPage(groups []models.Group) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mt-4 vh-100 d-flex justify-content-center\"><div class=\"card shadow-sm\"><div class=\"card-header bg-primary text-white text-center\"><h4 class=\"card-title mb-0\"><i class=\"fas fa-user-graduate me-2\"></i> Регистрация</h4></div><div class=\"card-body p-4\"><div class=\"alert alert-info mb-4\"><h6 class=\"alert-heading\"><i class=\"fas fa-info-circle me-2\"></i> Информация о регистрации</h6><p class=\"mb-0\">Заполните форму ниже для создания учетной записи студента. После регистрации вы сможете загружать лабораторные работы.</p></div><form method=\"POST\" action=\"/register\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Логин *</label> <input type=\"text\" class=\"form-control\" name=\"username\" required placeholder=\"Придумайте логин\"><div class=\"form-text\">Логин должен быть уникальным</div></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Пароль *</label> <input type=\"password\" class=\"form-control\" name=\"password\" required placeholder=\"Придумайте пароль\"><div class=\"form-text\">Минимум 6 символов</div></div></div></div><div class=\"mb-3\"><label class=\"form-label\">ФИО *</label> <input type=\"text\" class=\"form-control\" name=\"name\" required placeholder=\"Фамилия Имя Отчество\"></div><div class=\"mb-4\"><label class=\"form-label\">Группа *</label> <select class=\"form-select\" name=\"group_id\" required><option value=\"\">Выберите группу</option> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, group := range groups {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<option value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(group.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/register.templ`, Line: 64, Col: 44}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/register.templ`, Line: 65, Col: 19}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</option>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</select><div class=\"form-text\">Выберите свою учебную группу</div></div><div class=\"d-grid gap-2\"><button type=\"submit\" class=\"btn btn-primary btn-lg\"><i class=\"fas fa-user-plus me-2\"></i> Зарегистрироваться</button> <a href=\"/login\" class=\"btn btn-outline-secondary\"><i class=\"fas fa-arrow-left me-2\"></i> Вернуться к входу</a></div></form><!-- Дополнительная информация --><div class=\"mt-4 pt-4 border-top\"><h6 class=\"text-muted\">Что после регистрации?</h6><ul class=\"small text-muted\"><li>Вы сможете загружать лабораторные работы</li><li>Просматривать статус проверки работ</li><li>Получать комментарии преподавателя</li></ul></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/apiclient/auth.go
+package apiclient
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+)
+
+type AuthClient struct {
+	client *Client
+}
+
+func NewAuthClient(baseURL string, timeout time.Duration) *AuthClient {
+	return &AuthClient{
+		client: NewClient(baseURL, timeout),
+	}
+}
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type RegisterRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email,omitempty"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
+}
+
+type User struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email,omitempty"`
+	Name     string `json:"name"`
+	Role     string `json:"role"`
+}
+
+type AuthResponse struct {
+	User      User      `json:"user"`
+	SessionID string    `json:"session_id"`
+	ExpiresAt time.Time `json:"expires_at"`
+}
+
+func (a *AuthClient) Login(ctx context.Context, req LoginRequest) (*AuthResponse, error) {
+	var resp AuthResponse
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = a.client.doRequest(ctx, http.MethodPost, "/login", nil, bytes.NewReader(body), &resp)
+	if err != nil {
+		return nil, fmt.Errorf("login failed: %w", err)
+	}
+
+	return &resp, nil
+}
+
+func (a *AuthClient) Register(ctx context.Context, req RegisterRequest) (*User, error) {
+	var user User
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = a.client.doRequest(ctx, http.MethodPost, "/register", nil, bytes.NewReader(body), &user)
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (a *AuthClient) ValidateSession(ctx context.Context, sessionID string) (*AuthResponse, error) {
+	var resp AuthResponse
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := a.client.doRequest(ctx, http.MethodPost, "/validate", headers, nil, &resp)
+	if err != nil {
+		return nil, fmt.Errorf("session validation failed: %w", err)
+	}
+
+	return &resp, nil
+}
+
+func (a *AuthClient) Logout(ctx context.Context, sessionID string) error {
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := a.client.doRequest(ctx, http.MethodGet, "/logout", headers, nil, nil)
+	if err != nil {
+		return fmt.Errorf("logout failed: %w", err)
+	}
+
+	return nil
+}
+
+func (a *AuthClient) ChangePassword(ctx context.Context, sessionID, oldPassword, newPassword string) error {
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	req := map[string]string{
+		"old_password": oldPassword,
+		"new_password": newPassword,
+	}
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = a.client.doRequest(ctx, http.MethodPost, "/change_password", headers, bytes.NewReader(body), nil)
+	if err != nil {
+		return fmt.Errorf("change password failed: %w", err)
+	}
+
+	return nil
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/apiclient/base.go
+package apiclient
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+)
+
+type Client struct {
+	baseURL    string
+	httpClient *http.Client
+}
+
+func NewClient(baseURL string, timeout time.Duration) *Client {
+	return &Client{
+	 baseURL: baseURL,
+	 httpClient: &http.Client{
+	  Timeout: timeout,
+	 },
+	}
+}
+
+func (c *Client) doRequest(ctx context.Context, method, path string, headers map[string]string, body io.Reader, v any) error {
+	url := c.baseURL + path
+	
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+	 return fmt.Errorf("failed to create request: %w", err)
+	}
+	
+	req.Header.Set("Content-Type", "application/json")
+	for key, value := range headers {
+	 req.Header.Set(key, value)
+	}
+	
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+	 return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+	 bodyBytes, _ := io.ReadAll(resp.Body)
+	 return fmt.Errorf("API error: %s - %s", resp.Status, string(bodyBytes))
+	}
+	
+	if v != nil {
+	 if err := json.NewDecoder(resp.Body).Decode(v); err != nil {
+	  return fmt.Errorf("failed to decode response: %w", err)
+	 }
+	}
+	
+	return nil
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/apiclient/data.go
+package apiclient
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+)
+
+type DataClient struct {
+	client *Client
+}
+
+func NewDataClient(baseURL string, timeout time.Duration) *DataClient {
+	return &DataClient{
+		client: NewClient(baseURL, timeout),
+	}
+}
+
+type Discipline struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	TeacherID   int    `json:"teacher_id"`
+	GroupID     int    `json:"group_id"`
+	PeriodID    int    `json:"period_id"`
+	Description string `json:"description"`
+}
+
+type Lab struct {
+	ID           int    `json:"id"`
+	DisciplineID int    `json:"discipline_id"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	Deadline     string `json:"deadline"`
+}
+
+type LabReport struct {
+	ID        int    `json:"id"`
+	LabID     int    `json:"lab_id"`
+	StudentID int    `json:"student_id"`
+	Status    string `json:"status"`
+	Grade     int    `json:"grade"`
+	Comment   string `json:"comment"`
+}
+
+type Student struct {
+	ID      int    `json:"id"`
+	UserID  int    `json:"user_id"`
+	GroupID int    `json:"group_id"`
+	Name    string `json:"name"`
+}
+
+type Group struct {
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (d *DataClient) GetGroups(ctx context.Context) ([]Group, error) {
+	var groups []Group
+
+	err := d.client.doRequest(ctx, http.MethodGet, "/api/groups", nil, nil, &groups)	
+	if err != nil {
+		return nil, fmt.Errorf("failed to get groups: %w", err)
+	}
+
+	return groups, nil
+}
+
+func (d *DataClient) GetDisciplines(ctx context.Context, sessionID string) ([]Discipline, error) {
+	var disciplines []Discipline
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, "/api/disciplines", headers, nil, &disciplines)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get disciplines: %w", err)
+	}
+
+	return disciplines, nil
+}
+
+func (d *DataClient) GetDiscipline(ctx context.Context, sessionID string, id int) (*Discipline, error) {
+	var discipline Discipline
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, fmt.Sprintf("/api/disciplines/%d", id), headers, nil, &discipline)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get discipline: %w", err)
+	}
+
+	return &discipline, nil
+}
+
+func (d *DataClient) GetLabsByDiscipline(ctx context.Context, sessionID string, disciplineID int) ([]Lab, error) {
+	var labs []Lab
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, fmt.Sprintf("/api/labs/discipline/%d", disciplineID), headers, nil, &labs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get labs: %w", err)
+	}
+
+	return labs, nil
+}
+
+func (d *DataClient) CreateReport(ctx context.Context, sessionID string, labID int, comment string) (*LabReport, error) {
+	var report LabReport
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	req := map[string]any{
+		"lab_id":  labID,
+		"comment": comment,
+	}
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = d.client.doRequest(ctx, http.MethodPost, "/api/reports", headers, bytes.NewReader(body), &report)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create report: %w", err)
+	}
+
+	return &report, nil
+}
+
+func (d *DataClient) GetReportsByStudent(ctx context.Context, sessionID string, studentID int) ([]LabReport, error) {
+	var reports []LabReport
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, fmt.Sprintf("/api/reports/student/%d", studentID), headers, nil, &reports)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get reports: %w", err)
+	}
+
+	return reports, nil
+}
+
+// ... добавьте другие методы по мере необходимости
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/redisclient/redis.go
+package redisclient
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/go-redis/redis/v8"
+)
+
+func NewRedisClient(addr, password string, db int) (*redis.Client, error) {
+	client := redis.NewClient(&redis.Options{
+		Addr:         addr,
+		Password:     password,
+		DB:           db,
+		DialTimeout:  5 * time.Second,
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 3 * time.Second,
+		PoolSize:     50,
+		MinIdleConns: 10,
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Ping(ctx).Err(); err != nil {
+		client.Close()
+		return nil, fmt.Errorf("failed to connect to Redis: %v", err)
+	}
+
+	log.Println("INFO Successfully connected to Redis")
+	return client, nil
+}
+
+Текущий каталог: /home/quigon/scavenger/services/web-service
+├── ;q
+├── Dockerfile
+├── cmd
+|   └── main.go
+├── go.mod
+├── go.sum
+├── internal
+|   ├── alerts
+|   |   └── alerts.go
+|   ├── config
+|   |   └── config.go
+|   ├── handlers
+|   |   ├── auth.go
+|   |   ├── home.go
+|   |   ├── render.go
+|   |   └── router.go
+|   ├── middlewares
+|   |   ├── alerts.go
+|   |   └── auth.go
+|   ├── models
+|   |   └── user.go
+|   ├── session
+|   |   └── session.go
+|   └── views
+|       ├── components
+|       |   ├── alerts.templ
+|       |   ├── alerts_templ.go
+|       |   ├── navbar.templ
+|       |   └── navbar_templ.go
+|       ├── layouts
+|       |   ├── base.templ
+|       |   └── base_templ.go
+|       └── pages
+|           ├── home.templ
+|           ├── home_templ.go
+|           ├── login.templ
+|           ├── login_templ.go
+|           ├── register.templ
+|           └── register_templ.go
+└── pkg
+    ├── apiclient
+    |   ├── auth.go
+    |   ├── base.go
+    |   └── data.go
+    └── redisclient
+        └── redis.go
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/cmd/main.go
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"web-service/internal/config"
+	"web-service/internal/handlers"
+	"web-service/internal/session"
+	"web-service/pkg/apiclient"
+	"web-service/pkg/redisclient"
+)
+
+func main() {
+	cfg := config.Load()
+
+	redisClient, err := redisclient.NewRedisClient(cfg.Redis.URL, cfg.Redis.Password, cfg.Redis.DB)
+	if err != nil {
+		log.Fatalf("ERR Failed to create Redis client: %v", err)
+	}
+
+	authClient := apiclient.NewAuthClient("http://"+cfg.Api.AuthURL, time.Duration(cfg.Api.Timeout) * time.Second)
+
+	sessionService := session.NewSessionService(
+		redisClient, 
+		authClient,
+	)
+
+	router := handlers.NewRouter(
+		sessionService,
+		authClient,
+	)
+
+	server := &http.Server{
+		Addr:    ":" + cfg.Server.Port,
+		Handler: router.Handler(),
+	}
+
+	go func() {
+		log.Printf("INFO Data service starting on port %s", cfg.Server.Port)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("ERR Server error: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("INFO Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("ERR Server forced to shutdown: %v", err)
+	}
+
+	log.Println("INFO Server stopped")
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/go.mod
+module web-service
+
+go 1.25.5
+
+require (
+	github.com/a-h/templ v0.3.977
+	github.com/go-redis/redis/v8 v8.11.5
+	github.com/joho/godotenv v1.5.1
+)
+
+require (
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+)
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/alerts/alerts.go
+package alerts
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"net/http"
+	"net/url"
+	"time"
+)
+
+type AlertType string
+
+const (
+	AlertSuccess AlertType = "success"
+	AlertError   AlertType = "danger"
+	AlertWarning AlertType = "warning"
+	AlertInfo    AlertType = "info"
+
+	AlertKey    string = "alerts"
+	AlertExpire int    = 300
+)
+
+type Alert struct {
+	Type AlertType
+	Msg  string
+}
+
+func ReadAlerts(w http.ResponseWriter, r *http.Request) context.Context {
+	alerts := []Alert{}
+	if r != nil {
+		cookie, err := r.Cookie(AlertKey)
+		if err == nil {
+			decoded, _ := url.QueryUnescape(cookie.Value)
+
+			json.Unmarshal([]byte(decoded), &alerts)
+
+		}
+	}
+
+	log.Printf("Read alerts: %v", alerts)
+	return context.WithValue(r.Context(), AlertKey, alerts)
+}
+
+func WriteAlerts(w http.ResponseWriter, r *http.Request) {
+	alerts, ok := r.Context().Value(AlertKey).([]Alert)
+	if !ok {
+		return
+	}
+
+	log.Printf("Write alerts: %v", alerts)
+
+	if len(alerts) == 0 {
+		http.SetCookie(w, &http.Cookie{
+			Name:     AlertKey,
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   false,
+			SameSite: http.SameSiteLaxMode,
+		})
+		return
+	}
+
+	jsonData, _ := json.Marshal(alerts)
+
+	encoded := url.QueryEscape(string(jsonData))
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     AlertKey,
+		Value:    string(encoded),
+		Path:     "/",
+		Expires: time.Now().Add(time.Duration(AlertExpire)),
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+func GetAlerts(ctx context.Context) []Alert {
+	alerts, ok := ctx.Value(AlertKey).([]Alert)
+	if !ok {
+		alerts = []Alert{}
+		log.Printf("Failed to get alerts!")
+	}
+
+	log.Printf("Get alerts: %v", alerts)
+
+	return alerts
+}
+
+func SetAlert(r *http.Request, alert Alert) {
+	alerts := GetAlerts(r.Context())
+	alerts = append(alerts, alert)
+
+	log.Printf("Set alerts: %v", alerts)
+
+	ctx := context.WithValue(r.Context(), AlertKey, alerts)
+	*r = *r.WithContext(ctx)
+}
+
+func FlashSuccess(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r, Alert{
+		Type: AlertSuccess,
+		Msg:  msg,
+	})
+}
+
+func FlashInfo(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r, Alert{
+		Type: AlertInfo,
+		Msg:  msg,
+	})
+}
+
+func FlashWarning(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r, Alert{
+		Type: AlertWarning,
+		Msg:  msg,
+	})
+}
+
+func FlashError(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r, Alert{
+		Type: AlertError,
+		Msg:  msg,
+	})
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/config/config.go
+package config
+
+import (
+	"os"
+	"strconv"
+
+	"github.com/joho/godotenv"
+)
+
+type Config struct {
+	Redis  RedisConfig
+	Server ServerConfig
+	Api    ApiConfig
+}
+
+type ServerConfig struct {
+	Port string
+}
+
+type RedisConfig struct {
+	URL      string
+	Password string
+	DB       int
+}
+
+type ApiConfig struct {
+	AuthURL string
+	DataURL string
+	Timeout int
+}
+
+func Load() *Config {
+
+	_ = godotenv.Load()
+
+	serverConfig := ServerConfig{
+		Port: getEnv("PORT", "8080"),
+	}
+
+	redisConfig := RedisConfig{
+		URL:      getEnv("REDIS_URL", "redis:6379"),
+		Password: getEnv("REDIS_PASSWORD", ""),
+		DB:       getIntEnv("REDIS_DB", 0),
+	}
+
+	apiConfig := ApiConfig{
+		AuthURL: getEnv("AUTH_URL", "localhost:8081"),
+		DataURL: getEnv("DATA_URL", "localhost:8082"),
+		Timeout: getIntEnv("TIMEOUT", 30),
+	}
+
+	return &Config{
+		Server: serverConfig,
+		Redis:  redisConfig,
+		Api:    apiConfig,
+	}
+}
+
+func getEnv(key, defaultValue string) string {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		value = defaultValue
+	}
+
+	return value
+}
+
+func getIntEnv(key string, defaultValue int) int {
+	strValue, exists := os.LookupEnv(key)
+	if !exists {
+		return defaultValue
+	}
+
+	value, err := strconv.Atoi(strValue)
+	if err != nil {
+		return defaultValue
+	}
+
+	return value
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/auth.go
+package handlers
+
+import (
+	"log"
+	"net/http"
+
+	"web-service/internal/alerts"
+	"web-service/internal/models"
+	"web-service/internal/session"
+	"web-service/internal/views/pages"
+	"web-service/pkg/apiclient"
+)
+
+type AuthHandler struct {
+	session    *session.SessionService
+	authClient *apiclient.AuthClient
+}
+
+func NewAuthHandler(session *session.SessionService, authClient *apiclient.AuthClient) *AuthHandler {
+	return &AuthHandler{
+		session: session,
+		authClient: authClient,
+	}
+}
+
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	_, sessionID, _ := h.session.GetSession(r)
+	if sessionID != "" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	var prevLogin string
+	if r.Method == http.MethodPost {
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+
+		resp, err := h.authClient.Login(
+			r.Context(),
+			apiclient.LoginRequest{
+				Username: username,
+				Password: password,
+			},
+		)
+		if err == nil && resp.SessionID != "" {
+			h.session.SetSession(w, resp.SessionID, resp.ExpiresAt)
+			http.Redirect(w, r, "/home", http.StatusSeeOther)
+			return
+		} else {
+			prevLogin = username
+			alerts.FlashError(w, r, "Не верный логин или пароль")
+			log.Printf("WARN Failed to login user %s: %v", username, err)
+		}
+	}
+
+	Base(w, r, "Login", pages.Login(prevLogin))
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	_, sessionID, err := h.session.GetSession(r)
+	if err == nil {
+		h.session.DeleteSession(w)
+		h.authClient.Logout(r.Context(), sessionID)
+	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		alerts.FlashSuccess(w,r,"Вы зарегистрированны!")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	groups := []models.Group{}
+	groups = append(groups, models.Group{ID: 1, Name: "Test1"})
+	groups = append(groups, models.Group{ID: 2, Name: "Test2"})
+
+	Base(w, r, "Регистрация", pages.StudentRegistrationPage(groups))
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/home.go
+package handlers
+
+import (
+	"net/http"
+	"web-service/internal/session"
+	"web-service/internal/views/pages"
+)
+
+func Home(w http.ResponseWriter, r *http.Request) {
+	session, ok := r.Context().Value("session").(*session.UserSession)
+	if !ok {
+		http.Error(w,"Failed to get session", http.StatusInternalServerError)
+		return
+	}
+
+	err := BaseWithNavbar(w,r,"Home", pages.Home(session.User))	
+	if err != nil {
+		http.Error(w,"Failed to render page: " + err.Error(), http.StatusInternalServerError)
+	}
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/render.go
+package handlers
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"net/http"
+
+	"web-service/internal/alerts"
+	"web-service/internal/session"
+	"web-service/internal/views/components"
+	"web-service/internal/views/layouts"
+
+	"github.com/a-h/templ"
+)
+
+func Base(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
+	als := alerts.GetAlerts(r.Context())
+	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		components.Alerts(als...).Render(r.Context(), w)
+		component.Render(r.Context(), w)
+		return nil
+	})
+
+	return layouts.Base(title, base).Render(r.Context(), w)
+}
+
+func BaseWithNavbar(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
+	session, ok := r.Context().Value("session").(*session.UserSession)
+	if !ok {
+		return fmt.Errorf("failed to get session")
+	}
+	
+	als := alerts.GetAlerts(r.Context())
+	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		components.Navbar(session.User).Render(r.Context(), w)
+		components.Alerts(als...).Render(r.Context(), w)
+		component.Render(r.Context(), w)
+		return nil
+	})
+
+	return layouts.Base(title, base).Render(r.Context(), w)
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/router.go
+package handlers
+
+import (
+	"net/http"
+	"web-service/internal/middlewares"
+	"web-service/internal/session"
+	"web-service/pkg/apiclient"
+)
+
+type Router struct {
+	session        *session.SessionService
+	authClient     *apiclient.AuthClient
+	authMuddleware *middlewares.AuthMiddleware
+	handler        http.Handler
+	mux            *http.ServeMux
+}
+
+func NewRouter(session *session.SessionService, authClient *apiclient.AuthClient) *Router {
+	router := &Router{
+		mux:            http.NewServeMux(),
+		session:        session,
+		authClient:     authClient,
+		authMuddleware: middlewares.NewAuthMiddleware(session),
+	}
+
+	router.registerRoutes()
+
+	router.handler = router.mux
+
+	return router
+}
+
+func (r *Router) registerRoutes() {
+	authHandler := NewAuthHandler(r.session, r.authClient)
+
+	r.mux.HandleFunc("/", r.authMuddleware.SessionRequire(Home))
+	r.mux.HandleFunc("/login", authHandler.Login)
+	r.mux.HandleFunc("POST /logout", r.authMuddleware.SessionRequire(authHandler.Logout))
+	r.mux.HandleFunc("/register", authHandler.Register)
+}
+
+func (r *Router) Handler() http.Handler {
+	return middlewares.ProccessAlerts(r.handler)
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/middlewares/alerts.go
+package middlewares
+
+import (
+	"net/http"
+	"web-service/internal/alerts"
+)
+
+func ProccessAlerts(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := alerts.ReadAlerts(w, r)
+
+		*r = *r.WithContext(ctx)
+
+		next.ServeHTTP(w, r)
+
+		alerts.WriteAlerts(w,r)
+	})
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/middlewares/auth.go
+package middlewares
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"web-service/internal/session"
+)
+
+type AuthMiddleware struct {
+	session *session.SessionService
+}
+
+func NewAuthMiddleware(session *session.SessionService) *AuthMiddleware {
+	return &AuthMiddleware{
+		session: session,
+	}
+}
+
+func (m *AuthMiddleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, sessionID, err := m.session.GetSession(r)
+		if err != nil {
+			m.session.DeleteSession(w)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			log.Printf("WARN Failed to get session %s: %v", sessionID, err)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "session_id", sessionID)
+		ctx = context.WithValue(ctx, "session", session)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/models/user.go
+package models
+
+type User struct {
+	Username string
+	Name     string
+	Role     string
+	Email    string
+	Group    string
+}
+
+type Group struct {
+	ID   int
+	Name string
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/session/session.go
+package session
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"net/http"
+	"time"
+	"web-service/internal/models"
+	"web-service/pkg/apiclient"
+
+	"github.com/go-redis/redis/v8"
+)
+
+type SessionService struct {
+	redisClient   *redis.Client
+	authClient    *apiclient.AuthClient
+	sessionPrefix string
+	httpClent     *http.Client
+}
+
+func NewSessionService(redisClient *redis.Client, authClient *apiclient.AuthClient) *SessionService {
+	return &SessionService{
+		redisClient:   redisClient,
+		authClient:    authClient,
+		sessionPrefix: "session:",
+		httpClent: &http.Client{
+			Timeout: 5 * time.Second,
+		},
+	}
+}
+
+type UserSession struct {
+	User      models.User    `json:"user"`
+	ExpiresAt time.Time      `json:"expires_at"`
+}
+
+func (s *SessionService) SetSession(w http.ResponseWriter, sessionID string, expires_at time.Time) {
+	cookie := &http.Cookie{
+		Name:     "session_id",
+		Value:    sessionID,
+		Expires:  expires_at,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+	}
+
+	http.SetCookie(w, cookie)
+}
+
+func (s *SessionService) GetSession(r *http.Request) (*UserSession, string, error) {
+	sessionCookie, err := r.Cookie("session_id")
+	if err != nil {
+		return nil, "", err
+	}
+
+	sessionID := sessionCookie.Value
+
+	key := s.sessionPrefix + sessionID
+	data, err := s.redisClient.Get(r.Context(), key).Bytes()
+	if err == nil {
+		var session UserSession
+		if err := json.Unmarshal(data, &session); err == nil {
+			return &session, sessionID, nil
+		}
+	} else {
+		log.Printf("WARN Failed to get session from Redis")
+	}
+
+	session, err := s.getSessionViaAuth(r.Context(), sessionID)
+	if err == nil {
+		return session, sessionID, nil
+	}
+	return nil, "", err
+}
+
+func (s *SessionService) DeleteSession(w http.ResponseWriter) {
+	cookie := &http.Cookie{
+		Name:   "session_id",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	}
+
+	http.SetCookie(w, cookie)
+}
+
+func (s *SessionService) getSessionViaAuth(ctx context.Context, sessionID string) (*UserSession, error) {
+	authResp, err := s.authClient.ValidateSession(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	user := models.User{
+		Name:     authResp.User.Name,
+		Username: authResp.User.Username,
+		Role:     authResp.User.Role,
+		Email:    authResp.User.Email,
+	}
+
+	return &UserSession{User: user, ExpiresAt: authResp.ExpiresAt}, nil
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/components/alerts_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package components
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import "web-service/internal/alerts"
+
+func Alerts(als ...alerts.Alert) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		if len(als) > 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div aria-live=\"polite\" aria-atomic=\"true\" class=\"position-relative\"><div class=\"toast-container position-absolute top-0 start-50 translate-middle-x p-3\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, alert := range als {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"toast align-items-center\" role=\"alert\" aria-live=\"assertive\" aria-atomic=\"true\" data-bs-autohide=\"true\" data-bs-delay=\"10000\" autoshow>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var2 = []any{"toast-header text-white bg-" + string(alert.Type)}
+				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var2).String())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/alerts.templ`, Line: 1, Col: 0}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				switch alert.Type {
+				case alerts.AlertSuccess:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<strong class=\"me-auto\">Успех</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case alerts.AlertError:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<strong class=\"me-auto\">Ошибка</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case alerts.AlertWarning:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<strong class=\"me-auto\">Предупреждение</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case alerts.AlertInfo:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<strong class=\"me-auto\">Уведомление</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				default:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<strong class=\"me-auto\">Уведомление</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"toast\" aria-label=\"Close\"></button></div><div class=\"toast-body\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(alert.Msg)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/alerts.templ`, Line: 29, Col: 15}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/components/navbar_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package components
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import "web-service/internal/models"
+
+func Navbar(user models.User) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"navbar navbar-expand-lg navbar-dark bg-primary\"><div class=\"container\"><a class=\"navbar-brand\" href=\"/\"><i class=\"fas fa-graduation-cap\"></i> Сборщик работ</a><div class=\"navbar-nav\"><div class=\"nav-item dropdown\"><a class=\"nav-link dropdown-toggle d-flex align-items-center\" href=\"#\" role=\"button\" data-bs-toggle=\"dropdown\"><span>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 15, Col: 22}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span></a><ul class=\"dropdown-menu dropdown-menu-end\"><li><div class=\"dropdown-header text-muted small\"><div>Логин: ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 20, Col: 39}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div>Роль: ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Role)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 21, Col: 33}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if user.Group != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div>Группа: ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.Group)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 23, Col: 38}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></li><li><hr class=\"dropdown-divider\"></li><li><button class=\"dropdown-item\" data-bs-toggle=\"modal\" data-bs-target=\"#userProfileModal\"><i class=\"fas fa-user me-2\"></i>Профиль</button></li><li><button class=\"dropdown-item\" data-bs-toggle=\"modal\" data-bs-target=\"#changePasswordModal\"><i class=\"fas fa-key me-2\"></i>Сменить пароль</button></li><li><hr class=\"dropdown-divider\"></li><li><form method=\"POST\" action=\"/logout\" class=\"d-inline\"><button type=\"submit\" class=\"dropdown-item text-danger\"><i class=\"fas fa-sign-out-alt me-2\"></i>Выйти</button></form></li></ul></div></div></div></nav>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/layouts/base_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package layouts
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+func Base(title string, content templ.Component) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"ru\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/layouts/base.templ`, Line: 10, Col: 15}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\"><link href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css\" rel=\"stylesheet\"><link href=\"/static/css/theme.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script></head><body>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = content.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js\"></script><script>\n\t\tvar toastElList = [].slice.call(document.querySelectorAll('.toast[autoshow]'))\n\n\t\tvar toastList = toastElList.map(function (toastEl) {\n\t\t\ttoastEl.removeAttribute('autoshow');\n\t\t\tvar toast = new bootstrap.Toast(toastEl)\n\t\t\ttoast.show()\n\t\t\treturn toast\n\t\t})\n\n\t\ttoastElList.forEach(function (toastEl) {\n\t\t\ttoastEl.addEventListener('hidden.bs.toast', function () {\n\t\t\t\tthis.remove()\n\t\t\t})\n\t\t})\n\t</script></body></html>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/pages/home_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package pages
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import "web-service/internal/models"
+
+func Home(user models.User) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mt-4\"><h1>Welcome, ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/home.templ`, Line: 7, Col: 25}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "!</h1></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/pages/login_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package pages
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+func Login(prevLogin string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container vh-100 d-flex align-items-center justify-content-center\"><div class=\"card shadow\" style=\"width: 400px;\"><div class=\"card-body p-4\"><h3 class=\"card-title text-center mb-4\"><i class=\"fas fa-graduation-cap text-primary\"></i><br>Вход в систему</h3><form action=\"/login\" method=\"post\"><div class=\"mb-3\"><label class=\"form-label\">Логин</label> <input type=\"text\" class=\"form-control\" name=\"username\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(prevLogin)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/login.templ`, Line: 14, Col: 78}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" required></div><div class=\"mb-3\"><label class=\"form-label\">Пароль</label> <input type=\"password\" class=\"form-control\" name=\"password\" required></div><button type=\"submit\" class=\"btn btn-primary w-100\">Войти</button></form></div><!-- Блок регистрации для студентов --><div class=\"my-4 pt-4 border-top\"><div class=\"text-center\"><p class=\"small text-muted mb-3\">Если у вас еще нет учетной записи, зарегистрируйтесь</p><a href=\"/register\" class=\"btn btn-outline-success btn-sm\"><i class=\"fas fa-user-graduate me-2\"></i> Зарегистрироваться</a></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/pages/register_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package pages
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import (
+	"strconv"
+
+	"web-service/internal/models"
+)
+
+func StudentRegistrationPage(groups []models.Group) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mt-4 vh-100 d-flex justify-content-center\"><div class=\"card shadow-sm\"><div class=\"card-header bg-primary text-white text-center\"><h4 class=\"card-title mb-0\"><i class=\"fas fa-user-graduate me-2\"></i> Регистрация</h4></div><div class=\"card-body p-4\"><div class=\"alert alert-info mb-4\"><h6 class=\"alert-heading\"><i class=\"fas fa-info-circle me-2\"></i> Информация о регистрации</h6><p class=\"mb-0\">Заполните форму ниже для создания учетной записи студента. После регистрации вы сможете загружать лабораторные работы.</p></div><form method=\"POST\" action=\"/register\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Логин *</label> <input type=\"text\" class=\"form-control\" name=\"username\" required placeholder=\"Придумайте логин\"><div class=\"form-text\">Логин должен быть уникальным</div></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Пароль *</label> <input type=\"password\" class=\"form-control\" name=\"password\" required placeholder=\"Придумайте пароль\"><div class=\"form-text\">Минимум 6 символов</div></div></div></div><div class=\"mb-3\"><label class=\"form-label\">ФИО *</label> <input type=\"text\" class=\"form-control\" name=\"name\" required placeholder=\"Фамилия Имя Отчество\"></div><div class=\"mb-4\"><label class=\"form-label\">Группа *</label> <select class=\"form-select\" name=\"group_id\" required><option value=\"\">Выберите группу</option> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, group := range groups {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<option value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(group.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/register.templ`, Line: 64, Col: 44}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/register.templ`, Line: 65, Col: 19}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</option>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</select><div class=\"form-text\">Выберите свою учебную группу</div></div><div class=\"d-grid gap-2\"><button type=\"submit\" class=\"btn btn-primary btn-lg\"><i class=\"fas fa-user-plus me-2\"></i> Зарегистрироваться</button> <a href=\"/login\" class=\"btn btn-outline-secondary\"><i class=\"fas fa-arrow-left me-2\"></i> Вернуться к входу</a></div></form><!-- Дополнительная информация --><div class=\"mt-4 pt-4 border-top\"><h6 class=\"text-muted\">Что после регистрации?</h6><ul class=\"small text-muted\"><li>Вы сможете загружать лабораторные работы</li><li>Просматривать статус проверки работ</li><li>Получать комментарии преподавателя</li></ul></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/apiclient/auth.go
+package apiclient
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+)
+
+type AuthClient struct {
+	client *Client
+}
+
+func NewAuthClient(baseURL string, timeout time.Duration) *AuthClient {
+	return &AuthClient{
+		client: NewClient(baseURL, timeout),
+	}
+}
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type RegisterRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email,omitempty"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
+}
+
+type User struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email,omitempty"`
+	Name     string `json:"name"`
+	Role     string `json:"role"`
+}
+
+type AuthResponse struct {
+	User      User      `json:"user"`
+	SessionID string    `json:"session_id"`
+	ExpiresAt time.Time `json:"expires_at"`
+}
+
+func (a *AuthClient) Login(ctx context.Context, req LoginRequest) (*AuthResponse, error) {
+	var resp AuthResponse
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = a.client.doRequest(ctx, http.MethodPost, "/login", nil, bytes.NewReader(body), &resp)
+	if err != nil {
+		return nil, fmt.Errorf("login failed: %w", err)
+	}
+
+	return &resp, nil
+}
+
+func (a *AuthClient) Register(ctx context.Context, req RegisterRequest) (*User, error) {
+	var user User
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = a.client.doRequest(ctx, http.MethodPost, "/register", nil, bytes.NewReader(body), &user)
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (a *AuthClient) ValidateSession(ctx context.Context, sessionID string) (*AuthResponse, error) {
+	var resp AuthResponse
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := a.client.doRequest(ctx, http.MethodPost, "/validate", headers, nil, &resp)
+	if err != nil {
+		return nil, fmt.Errorf("session validation failed: %w", err)
+	}
+
+	return &resp, nil
+}
+
+func (a *AuthClient) Logout(ctx context.Context, sessionID string) error {
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := a.client.doRequest(ctx, http.MethodGet, "/logout", headers, nil, nil)
+	if err != nil {
+		return fmt.Errorf("logout failed: %w", err)
+	}
+
+	return nil
+}
+
+func (a *AuthClient) ChangePassword(ctx context.Context, sessionID, oldPassword, newPassword string) error {
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	req := map[string]string{
+		"old_password": oldPassword,
+		"new_password": newPassword,
+	}
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = a.client.doRequest(ctx, http.MethodPost, "/change_password", headers, bytes.NewReader(body), nil)
+	if err != nil {
+		return fmt.Errorf("change password failed: %w", err)
+	}
+
+	return nil
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/apiclient/base.go
+package apiclient
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+)
+
+type Client struct {
+	baseURL    string
+	httpClient *http.Client
+}
+
+func NewClient(baseURL string, timeout time.Duration) *Client {
+	return &Client{
+	 baseURL: baseURL,
+	 httpClient: &http.Client{
+	  Timeout: timeout,
+	 },
+	}
+}
+
+func (c *Client) doRequest(ctx context.Context, method, path string, headers map[string]string, body io.Reader, v any) error {
+	url := c.baseURL + path
+	
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+	 return fmt.Errorf("failed to create request: %w", err)
+	}
+	
+	req.Header.Set("Content-Type", "application/json")
+	for key, value := range headers {
+	 req.Header.Set(key, value)
+	}
+	
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+	 return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+	 bodyBytes, _ := io.ReadAll(resp.Body)
+	 return fmt.Errorf("API error: %s - %s", resp.Status, string(bodyBytes))
+	}
+	
+	if v != nil {
+	 if err := json.NewDecoder(resp.Body).Decode(v); err != nil {
+	  return fmt.Errorf("failed to decode response: %w", err)
+	 }
+	}
+	
+	return nil
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/apiclient/data.go
+package apiclient
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+)
+
+type DataClient struct {
+	client *Client
+}
+
+func NewDataClient(baseURL string, timeout time.Duration) *DataClient {
+	return &DataClient{
+		client: NewClient(baseURL, timeout),
+	}
+}
+
+type Discipline struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	TeacherID   int    `json:"teacher_id"`
+	GroupID     int    `json:"group_id"`
+	PeriodID    int    `json:"period_id"`
+	Description string `json:"description"`
+}
+
+type Lab struct {
+	ID           int    `json:"id"`
+	DisciplineID int    `json:"discipline_id"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	Deadline     string `json:"deadline"`
+}
+
+type LabReport struct {
+	ID        int    `json:"id"`
+	LabID     int    `json:"lab_id"`
+	StudentID int    `json:"student_id"`
+	Status    string `json:"status"`
+	Grade     int    `json:"grade"`
+	Comment   string `json:"comment"`
+}
+
+type Student struct {
+	ID      int    `json:"id"`
+	UserID  int    `json:"user_id"`
+	GroupID int    `json:"group_id"`
+	Name    string `json:"name"`
+}
+
+type Group struct {
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (d *DataClient) GetGroups(ctx context.Context) ([]Group, error) {
+	var groups []Group
+
+	err := d.client.doRequest(ctx, http.MethodGet, "/api/groups", nil, nil, &groups)	
+	if err != nil {
+		return nil, fmt.Errorf("failed to get groups: %w", err)
+	}
+
+	return groups, nil
+}
+
+func (d *DataClient) GetDisciplines(ctx context.Context, sessionID string) ([]Discipline, error) {
+	var disciplines []Discipline
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, "/api/disciplines", headers, nil, &disciplines)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get disciplines: %w", err)
+	}
+
+	return disciplines, nil
+}
+
+func (d *DataClient) GetDiscipline(ctx context.Context, sessionID string, id int) (*Discipline, error) {
+	var discipline Discipline
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, fmt.Sprintf("/api/disciplines/%d", id), headers, nil, &discipline)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get discipline: %w", err)
+	}
+
+	return &discipline, nil
+}
+
+func (d *DataClient) GetLabsByDiscipline(ctx context.Context, sessionID string, disciplineID int) ([]Lab, error) {
+	var labs []Lab
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, fmt.Sprintf("/api/labs/discipline/%d", disciplineID), headers, nil, &labs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get labs: %w", err)
+	}
+
+	return labs, nil
+}
+
+func (d *DataClient) CreateReport(ctx context.Context, sessionID string, labID int, comment string) (*LabReport, error) {
+	var report LabReport
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	req := map[string]any{
+		"lab_id":  labID,
+		"comment": comment,
+	}
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = d.client.doRequest(ctx, http.MethodPost, "/api/reports", headers, bytes.NewReader(body), &report)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create report: %w", err)
+	}
+
+	return &report, nil
+}
+
+func (d *DataClient) GetReportsByStudent(ctx context.Context, sessionID string, studentID int) ([]LabReport, error) {
+	var reports []LabReport
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, fmt.Sprintf("/api/reports/student/%d", studentID), headers, nil, &reports)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get reports: %w", err)
+	}
+
+	return reports, nil
+}
+
+// ... добавьте другие методы по мере необходимости
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/redisclient/redis.go
+package redisclient
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/go-redis/redis/v8"
+)
+
+func NewRedisClient(addr, password string, db int) (*redis.Client, error) {
+	client := redis.NewClient(&redis.Options{
+		Addr:         addr,
+		Password:     password,
+		DB:           db,
+		DialTimeout:  5 * time.Second,
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 3 * time.Second,
+		PoolSize:     50,
+		MinIdleConns: 10,
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Ping(ctx).Err(); err != nil {
+		client.Close()
+		return nil, fmt.Errorf("failed to connect to Redis: %v", err)
+	}
+
+	log.Println("INFO Successfully connected to Redis")
+	return client, nil
+}
+
+Текущий каталог: /home/quigon/scavenger/services/web-service
+├── Dockerfile
+├── cmd
+|   └── main.go
+├── go.mod
+├── go.sum
+├── internal
+|   ├── alerts
+|   |   └── alerts.go
+|   ├── config
+|   |   └── config.go
+|   ├── handlers
+|   |   ├── auth.go
+|   |   ├── home.go
+|   |   ├── render.go
+|   |   └── router.go
+|   ├── middlewares
+|   |   ├── alerts.go
+|   |   └── auth.go
+|   ├── models
+|   |   └── user.go
+|   ├── session
+|   |   └── session.go
+|   └── views
+|       ├── components
+|       |   ├── alerts.templ
+|       |   ├── alerts_templ.go
+|       |   ├── navbar.templ
+|       |   └── navbar_templ.go
+|       ├── layouts
+|       |   ├── base.templ
+|       |   └── base_templ.go
+|       └── pages
+|           ├── home.templ
+|           ├── home_templ.go
+|           ├── login.templ
+|           ├── login_templ.go
+|           ├── register.templ
+|           └── register_templ.go
+└── pkg
+    ├── apiclient
+    |   ├── auth.go
+    |   ├── base.go
+    |   └── data.go
+    └── redisclient
+        └── redis.go
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/cmd/main.go
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"web-service/internal/config"
+	"web-service/internal/handlers"
+	"web-service/internal/session"
+	"web-service/pkg/apiclient"
+	"web-service/pkg/redisclient"
+)
+
+func main() {
+	cfg := config.Load()
+
+	redisClient, err := redisclient.NewRedisClient(cfg.Redis.URL, cfg.Redis.Password, cfg.Redis.DB)
+	if err != nil {
+		log.Fatalf("ERR Failed to create Redis client: %v", err)
+	}
+
+	authClient := apiclient.NewAuthClient("http://"+cfg.Api.AuthURL, time.Duration(cfg.Api.Timeout) * time.Second)
+
+	sessionService := session.NewSessionService(
+		redisClient, 
+		authClient,
+	)
+
+	router := handlers.NewRouter(
+		sessionService,
+		authClient,
+	)
+
+	server := &http.Server{
+		Addr:    ":" + cfg.Server.Port,
+		Handler: router.Handler(),
+	}
+
+	go func() {
+		log.Printf("INFO Data service starting on port %s", cfg.Server.Port)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("ERR Server error: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("INFO Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("ERR Server forced to shutdown: %v", err)
+	}
+
+	log.Println("INFO Server stopped")
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/go.mod
+module web-service
+
+go 1.25.5
+
+require (
+	github.com/a-h/templ v0.3.977
+	github.com/go-redis/redis/v8 v8.11.5
+	github.com/joho/godotenv v1.5.1
+)
+
+require (
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+)
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/alerts/alerts.go
+package alerts
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"net/http"
+	"net/url"
+)
+
+type AlertType string
+
+const (
+	AlertSuccess AlertType = "success"
+	AlertError   AlertType = "danger"
+	AlertWarning AlertType = "warning"
+	AlertInfo    AlertType = "info"
+
+	AlertKey    string = "alerts"
+	AlertExpire int    = 300
+)
+
+type Alert struct {
+	Type AlertType
+	Msg  string
+}
+
+func ReadAlerts(w http.ResponseWriter, r *http.Request) context.Context {
+	alerts := []Alert{}
+	if r != nil {
+		cookie, err := r.Cookie(AlertKey)
+		if err == nil {
+			decoded, _ := url.QueryUnescape(cookie.Value)
+
+			json.Unmarshal([]byte(decoded), &alerts)
+
+		}
+	}
+
+	log.Printf("Read alerts: %v", alerts)
+	return context.WithValue(r.Context(), AlertKey, alerts)
+}
+
+func WriteAlerts(w http.ResponseWriter, r *http.Request) {
+	alerts, ok := r.Context().Value(AlertKey).([]Alert)
+	if !ok {
+		return
+	}
+
+	log.Printf("Write alerts: %v", alerts)
+
+	if len(alerts) == 0 {
+		http.SetCookie(w, &http.Cookie{
+			Name:     AlertKey,
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteLaxMode,
+		})
+		return
+	}
+
+	jsonData, _ := json.Marshal(alerts)
+
+	encoded := url.QueryEscape(string(jsonData))
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     AlertKey,
+		Value:    encoded,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+func GetAlerts(ctx context.Context) []Alert {
+	alerts, ok := ctx.Value(AlertKey).([]Alert)
+	if !ok {
+		alerts = []Alert{}
+		log.Printf("Failed to get alerts!")
+	}
+
+	log.Printf("Get alerts: %v", alerts)
+
+	return alerts
+}
+
+func SetAlert(r *http.Request, alert Alert) {
+	alerts := GetAlerts(r.Context())
+	alerts = append(alerts, alert)
+
+	log.Printf("Set alerts: %v", alerts)
+
+	ctx := context.WithValue(r.Context(), AlertKey, alerts)
+	*r = *r.WithContext(ctx)
+}
+
+func FlashSuccess(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r, Alert{
+		Type: AlertSuccess,
+		Msg:  msg,
+	})
+}
+
+func FlashInfo(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r, Alert{
+		Type: AlertInfo,
+		Msg:  msg,
+	})
+}
+
+func FlashWarning(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r, Alert{
+		Type: AlertWarning,
+		Msg:  msg,
+	})
+}
+
+func FlashError(w http.ResponseWriter, r *http.Request, msg string) {
+	SetAlert(r, Alert{
+		Type: AlertError,
+		Msg:  msg,
+	})
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/config/config.go
+package config
+
+import (
+	"os"
+	"strconv"
+
+	"github.com/joho/godotenv"
+)
+
+type Config struct {
+	Redis  RedisConfig
+	Server ServerConfig
+	Api    ApiConfig
+}
+
+type ServerConfig struct {
+	Port string
+}
+
+type RedisConfig struct {
+	URL      string
+	Password string
+	DB       int
+}
+
+type ApiConfig struct {
+	AuthURL string
+	DataURL string
+	Timeout int
+}
+
+func Load() *Config {
+
+	_ = godotenv.Load()
+
+	serverConfig := ServerConfig{
+		Port: getEnv("PORT", "8080"),
+	}
+
+	redisConfig := RedisConfig{
+		URL:      getEnv("REDIS_URL", "redis:6379"),
+		Password: getEnv("REDIS_PASSWORD", ""),
+		DB:       getIntEnv("REDIS_DB", 0),
+	}
+
+	apiConfig := ApiConfig{
+		AuthURL: getEnv("AUTH_URL", "localhost:8081"),
+		DataURL: getEnv("DATA_URL", "localhost:8082"),
+		Timeout: getIntEnv("TIMEOUT", 30),
+	}
+
+	return &Config{
+		Server: serverConfig,
+		Redis:  redisConfig,
+		Api:    apiConfig,
+	}
+}
+
+func getEnv(key, defaultValue string) string {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		value = defaultValue
+	}
+
+	return value
+}
+
+func getIntEnv(key string, defaultValue int) int {
+	strValue, exists := os.LookupEnv(key)
+	if !exists {
+		return defaultValue
+	}
+
+	value, err := strconv.Atoi(strValue)
+	if err != nil {
+		return defaultValue
+	}
+
+	return value
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/auth.go
+package handlers
+
+import (
+	"log"
+	"net/http"
+
+	"web-service/internal/alerts"
+	"web-service/internal/models"
+	"web-service/internal/session"
+	"web-service/internal/views/pages"
+	"web-service/pkg/apiclient"
+)
+
+type AuthHandler struct {
+	session    *session.SessionService
+	authClient *apiclient.AuthClient
+}
+
+func NewAuthHandler(session *session.SessionService, authClient *apiclient.AuthClient) *AuthHandler {
+	return &AuthHandler{
+		session: session,
+		authClient: authClient,
+	}
+}
+
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	_, sessionID, _ := h.session.GetSession(r)
+	if sessionID != "" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	var prevLogin string
+	if r.Method == http.MethodPost {
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+
+		resp, err := h.authClient.Login(
+			r.Context(),
+			apiclient.LoginRequest{
+				Username: username,
+				Password: password,
+			},
+		)
+		if err == nil && resp.SessionID != "" {
+			h.session.SetSession(w, resp.SessionID, resp.ExpiresAt)
+			http.Redirect(w, r, "/home", http.StatusSeeOther)
+			return
+		} else {
+			prevLogin = username
+			alerts.FlashError(w, r, "Не верный логин или пароль")
+			log.Printf("WARN Failed to login user %s: %v", username, err)
+		}
+	}
+
+	Base(w, r, "Login", pages.Login(prevLogin))
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	_, sessionID, err := h.session.GetSession(r)
+	if err == nil {
+		h.session.DeleteSession(w)
+		h.authClient.Logout(r.Context(), sessionID)
+	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		alerts.FlashSuccess(w,r,"Вы зарегистрированны!")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	groups := []models.Group{}
+	groups = append(groups, models.Group{ID: 1, Name: "Test1"})
+	groups = append(groups, models.Group{ID: 2, Name: "Test2"})
+
+	Base(w, r, "Регистрация", pages.StudentRegistrationPage(groups))
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/home.go
+package handlers
+
+import (
+	"net/http"
+	"web-service/internal/session"
+	"web-service/internal/views/pages"
+)
+
+func Home(w http.ResponseWriter, r *http.Request) {
+	session, ok := r.Context().Value("session").(*session.UserSession)
+	if !ok {
+		http.Error(w,"Failed to get session", http.StatusInternalServerError)
+		return
+	}
+
+	err := BaseWithNavbar(w,r,"Home", pages.Home(session.User))	
+	if err != nil {
+		http.Error(w,"Failed to render page: " + err.Error(), http.StatusInternalServerError)
+	}
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/render.go
+package handlers
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"net/http"
+
+	"web-service/internal/alerts"
+	"web-service/internal/session"
+	"web-service/internal/views/components"
+	"web-service/internal/views/layouts"
+
+	"github.com/a-h/templ"
+)
+
+func Base(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
+	als := alerts.GetAlerts(r.Context())
+	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		components.Alerts(als...).Render(r.Context(), w)
+		component.Render(r.Context(), w)
+		return nil
+	})
+
+	return layouts.Base(title, base).Render(r.Context(), w)
+}
+
+func BaseWithNavbar(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
+	session, ok := r.Context().Value("session").(*session.UserSession)
+	if !ok {
+		return fmt.Errorf("failed to get session")
+	}
+	
+	als := alerts.GetAlerts(r.Context())
+	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		components.Navbar(session.User).Render(r.Context(), w)
+		components.Alerts(als...).Render(r.Context(), w)
+		component.Render(r.Context(), w)
+		return nil
+	})
+
+	return layouts.Base(title, base).Render(r.Context(), w)
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/handlers/router.go
+package handlers
+
+import (
+	"net/http"
+	"web-service/internal/middlewares"
+	"web-service/internal/session"
+	"web-service/pkg/apiclient"
+)
+
+type Router struct {
+	session        *session.SessionService
+	authClient     *apiclient.AuthClient
+	authMuddleware *middlewares.AuthMiddleware
+	handler        http.Handler
+	mux            *http.ServeMux
+}
+
+func NewRouter(session *session.SessionService, authClient *apiclient.AuthClient) *Router {
+	router := &Router{
+		mux:            http.NewServeMux(),
+		session:        session,
+		authClient:     authClient,
+		authMuddleware: middlewares.NewAuthMiddleware(session),
+	}
+
+	router.registerRoutes()
+
+	router.handler = router.mux
+
+	return router
+}
+
+func (r *Router) registerRoutes() {
+	authHandler := NewAuthHandler(r.session, r.authClient)
+
+	r.mux.HandleFunc("/", r.authMuddleware.SessionRequire(Home))
+	r.mux.HandleFunc("/login", authHandler.Login)
+	r.mux.HandleFunc("POST /logout", r.authMuddleware.SessionRequire(authHandler.Logout))
+	r.mux.HandleFunc("/register", authHandler.Register)
+}
+
+func (r *Router) Handler() http.Handler {
+	return middlewares.ProccessAlerts(r.handler)
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/middlewares/alerts.go
+package middlewares
+
+import (
+	"log"
+	"net/http"
+	"web-service/internal/alerts"
+)
+
+func ProccessAlerts(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := alerts.ReadAlerts(w, r)
+
+		*r = *r.WithContext(ctx)
+
+		next.ServeHTTP(w, r)
+
+		alerts.WriteAlerts(w,r)
+
+		log.Printf("Headers: %v", w.Header())
+	})
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/middlewares/auth.go
+package middlewares
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"web-service/internal/session"
+)
+
+type AuthMiddleware struct {
+	session *session.SessionService
+}
+
+func NewAuthMiddleware(session *session.SessionService) *AuthMiddleware {
+	return &AuthMiddleware{
+		session: session,
+	}
+}
+
+func (m *AuthMiddleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, sessionID, err := m.session.GetSession(r)
+		if err != nil {
+			m.session.DeleteSession(w)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			log.Printf("WARN Failed to get session %s: %v", sessionID, err)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "session_id", sessionID)
+		ctx = context.WithValue(ctx, "session", session)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/models/user.go
+package models
+
+type User struct {
+	Username string
+	Name     string
+	Role     string
+	Email    string
+	Group    string
+}
+
+type Group struct {
+	ID   int
+	Name string
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/session/session.go
+package session
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"net/http"
+	"time"
+	"web-service/internal/models"
+	"web-service/pkg/apiclient"
+
+	"github.com/go-redis/redis/v8"
+)
+
+type SessionService struct {
+	redisClient   *redis.Client
+	authClient    *apiclient.AuthClient
+	sessionPrefix string
+	httpClent     *http.Client
+}
+
+func NewSessionService(redisClient *redis.Client, authClient *apiclient.AuthClient) *SessionService {
+	return &SessionService{
+		redisClient:   redisClient,
+		authClient:    authClient,
+		sessionPrefix: "session:",
+		httpClent: &http.Client{
+			Timeout: 5 * time.Second,
+		},
+	}
+}
+
+type UserSession struct {
+	User      models.User    `json:"user"`
+	ExpiresAt time.Time      `json:"expires_at"`
+}
+
+func (s *SessionService) SetSession(w http.ResponseWriter, sessionID string, expires_at time.Time) {
+	cookie := &http.Cookie{
+		Name:     "session_id",
+		Value:    sessionID,
+		Expires:  expires_at,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+	}
+
+	http.SetCookie(w, cookie)
+}
+
+func (s *SessionService) GetSession(r *http.Request) (*UserSession, string, error) {
+	sessionCookie, err := r.Cookie("session_id")
+	if err != nil {
+		return nil, "", err
+	}
+
+	sessionID := sessionCookie.Value
+
+	key := s.sessionPrefix + sessionID
+	data, err := s.redisClient.Get(r.Context(), key).Bytes()
+	if err == nil {
+		var session UserSession
+		if err := json.Unmarshal(data, &session); err == nil {
+			return &session, sessionID, nil
+		}
+	} else {
+		log.Printf("WARN Failed to get session from Redis")
+	}
+
+	session, err := s.getSessionViaAuth(r.Context(), sessionID)
+	if err == nil {
+		return session, sessionID, nil
+	}
+	return nil, "", err
+}
+
+func (s *SessionService) DeleteSession(w http.ResponseWriter) {
+	cookie := &http.Cookie{
+		Name:   "session_id",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	}
+
+	http.SetCookie(w, cookie)
+}
+
+func (s *SessionService) getSessionViaAuth(ctx context.Context, sessionID string) (*UserSession, error) {
+	authResp, err := s.authClient.ValidateSession(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	user := models.User{
+		Name:     authResp.User.Name,
+		Username: authResp.User.Username,
+		Role:     authResp.User.Role,
+		Email:    authResp.User.Email,
+	}
+
+	return &UserSession{User: user, ExpiresAt: authResp.ExpiresAt}, nil
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/components/alerts_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package components
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import "web-service/internal/alerts"
+
+func Alerts(als ...alerts.Alert) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		if len(als) > 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div aria-live=\"polite\" aria-atomic=\"true\" class=\"position-relative\"><div class=\"toast-container position-absolute top-0 start-50 translate-middle-x p-3\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, alert := range als {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"toast align-items-center\" role=\"alert\" aria-live=\"assertive\" aria-atomic=\"true\" data-bs-autohide=\"true\" data-bs-delay=\"10000\" autoshow>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var2 = []any{"toast-header text-white bg-" + string(alert.Type)}
+				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var2).String())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/alerts.templ`, Line: 1, Col: 0}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				switch alert.Type {
+				case alerts.AlertSuccess:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<strong class=\"me-auto\">Успех</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case alerts.AlertError:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<strong class=\"me-auto\">Ошибка</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case alerts.AlertWarning:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<strong class=\"me-auto\">Предупреждение</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case alerts.AlertInfo:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<strong class=\"me-auto\">Уведомление</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				default:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<strong class=\"me-auto\">Уведомление</strong> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"toast\" aria-label=\"Close\"></button></div><div class=\"toast-body\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(alert.Msg)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/alerts.templ`, Line: 29, Col: 15}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/components/navbar_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package components
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import "web-service/internal/models"
+
+func Navbar(user models.User) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"navbar navbar-expand-lg navbar-dark bg-primary\"><div class=\"container\"><a class=\"navbar-brand\" href=\"/\"><i class=\"fas fa-graduation-cap\"></i> Сборщик работ</a><div class=\"navbar-nav\"><div class=\"nav-item dropdown\"><a class=\"nav-link dropdown-toggle d-flex align-items-center\" href=\"#\" role=\"button\" data-bs-toggle=\"dropdown\"><span>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 15, Col: 22}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span></a><ul class=\"dropdown-menu dropdown-menu-end\"><li><div class=\"dropdown-header text-muted small\"><div>Логин: ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 20, Col: 39}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div>Роль: ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Role)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 21, Col: 33}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if user.Group != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div>Группа: ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.Group)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar.templ`, Line: 23, Col: 38}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></li><li><hr class=\"dropdown-divider\"></li><li><button class=\"dropdown-item\" data-bs-toggle=\"modal\" data-bs-target=\"#userProfileModal\"><i class=\"fas fa-user me-2\"></i>Профиль</button></li><li><button class=\"dropdown-item\" data-bs-toggle=\"modal\" data-bs-target=\"#changePasswordModal\"><i class=\"fas fa-key me-2\"></i>Сменить пароль</button></li><li><hr class=\"dropdown-divider\"></li><li><form method=\"POST\" action=\"/logout\" class=\"d-inline\"><button type=\"submit\" class=\"dropdown-item text-danger\"><i class=\"fas fa-sign-out-alt me-2\"></i>Выйти</button></form></li></ul></div></div></div></nav>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/layouts/base_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package layouts
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+func Base(title string, content templ.Component) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"ru\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/layouts/base.templ`, Line: 10, Col: 15}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\"><link href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css\" rel=\"stylesheet\"><link href=\"/static/css/theme.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script></head><body>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = content.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js\"></script><script>\n\t\tvar toastElList = [].slice.call(document.querySelectorAll('.toast[autoshow]'))\n\n\t\tvar toastList = toastElList.map(function (toastEl) {\n\t\t\ttoastEl.removeAttribute('autoshow');\n\t\t\tvar toast = new bootstrap.Toast(toastEl)\n\t\t\ttoast.show()\n\t\t\treturn toast\n\t\t})\n\n\t\ttoastElList.forEach(function (toastEl) {\n\t\t\ttoastEl.addEventListener('hidden.bs.toast', function () {\n\t\t\t\tthis.remove()\n\t\t\t})\n\t\t})\n\t</script></body></html>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/pages/home_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package pages
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import "web-service/internal/models"
+
+func Home(user models.User) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mt-4\"><h1>Welcome, ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/home.templ`, Line: 7, Col: 25}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "!</h1></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/pages/login_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package pages
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+func Login(prevLogin string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container vh-100 d-flex align-items-center justify-content-center\"><div class=\"card shadow\" style=\"width: 400px;\"><div class=\"card-body p-4\"><h3 class=\"card-title text-center mb-4\"><i class=\"fas fa-graduation-cap text-primary\"></i><br>Вход в систему</h3><form action=\"/login\" method=\"post\"><div class=\"mb-3\"><label class=\"form-label\">Логин</label> <input type=\"text\" class=\"form-control\" name=\"username\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(prevLogin)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/login.templ`, Line: 14, Col: 78}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" required></div><div class=\"mb-3\"><label class=\"form-label\">Пароль</label> <input type=\"password\" class=\"form-control\" name=\"password\" required></div><button type=\"submit\" class=\"btn btn-primary w-100\">Войти</button></form></div><!-- Блок регистрации для студентов --><div class=\"my-4 pt-4 border-top\"><div class=\"text-center\"><p class=\"small text-muted mb-3\">Если у вас еще нет учетной записи, зарегистрируйтесь</p><a href=\"/register\" class=\"btn btn-outline-success btn-sm\"><i class=\"fas fa-user-graduate me-2\"></i> Зарегистрироваться</a></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/internal/views/pages/register_templ.go
+// Code generated by templ - DO NOT EDIT.
+
+// templ: version: v0.3.977
+package pages
+
+//lint:file-ignore SA4006 This context is only used if a nested component is present.
+
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import (
+	"strconv"
+
+	"web-service/internal/models"
+)
+
+func StudentRegistrationPage(groups []models.Group) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mt-4 vh-100 d-flex justify-content-center\"><div class=\"card shadow-sm\"><div class=\"card-header bg-primary text-white text-center\"><h4 class=\"card-title mb-0\"><i class=\"fas fa-user-graduate me-2\"></i> Регистрация</h4></div><div class=\"card-body p-4\"><div class=\"alert alert-info mb-4\"><h6 class=\"alert-heading\"><i class=\"fas fa-info-circle me-2\"></i> Информация о регистрации</h6><p class=\"mb-0\">Заполните форму ниже для создания учетной записи студента. После регистрации вы сможете загружать лабораторные работы.</p></div><form method=\"POST\" action=\"/register\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Логин *</label> <input type=\"text\" class=\"form-control\" name=\"username\" required placeholder=\"Придумайте логин\"><div class=\"form-text\">Логин должен быть уникальным</div></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Пароль *</label> <input type=\"password\" class=\"form-control\" name=\"password\" required placeholder=\"Придумайте пароль\"><div class=\"form-text\">Минимум 6 символов</div></div></div></div><div class=\"mb-3\"><label class=\"form-label\">ФИО *</label> <input type=\"text\" class=\"form-control\" name=\"name\" required placeholder=\"Фамилия Имя Отчество\"></div><div class=\"mb-4\"><label class=\"form-label\">Группа *</label> <select class=\"form-select\" name=\"group_id\" required><option value=\"\">Выберите группу</option> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, group := range groups {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<option value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(group.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/register.templ`, Line: 64, Col: 44}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/register.templ`, Line: 65, Col: 19}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</option>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</select><div class=\"form-text\">Выберите свою учебную группу</div></div><div class=\"d-grid gap-2\"><button type=\"submit\" class=\"btn btn-primary btn-lg\"><i class=\"fas fa-user-plus me-2\"></i> Зарегистрироваться</button> <a href=\"/login\" class=\"btn btn-outline-secondary\"><i class=\"fas fa-arrow-left me-2\"></i> Вернуться к входу</a></div></form><!-- Дополнительная информация --><div class=\"mt-4 pt-4 border-top\"><h6 class=\"text-muted\">Что после регистрации?</h6><ul class=\"small text-muted\"><li>Вы сможете загружать лабораторные работы</li><li>Просматривать статус проверки работ</li><li>Получать комментарии преподавателя</li></ul></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+var _ = templruntime.GeneratedTemplate
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/apiclient/auth.go
+package apiclient
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+)
+
+type AuthClient struct {
+	client *Client
+}
+
+func NewAuthClient(baseURL string, timeout time.Duration) *AuthClient {
+	return &AuthClient{
+		client: NewClient(baseURL, timeout),
+	}
+}
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type RegisterRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email,omitempty"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
+}
+
+type User struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email,omitempty"`
+	Name     string `json:"name"`
+	Role     string `json:"role"`
+}
+
+type AuthResponse struct {
+	User      User      `json:"user"`
+	SessionID string    `json:"session_id"`
+	ExpiresAt time.Time `json:"expires_at"`
+}
+
+func (a *AuthClient) Login(ctx context.Context, req LoginRequest) (*AuthResponse, error) {
+	var resp AuthResponse
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = a.client.doRequest(ctx, http.MethodPost, "/login", nil, bytes.NewReader(body), &resp)
+	if err != nil {
+		return nil, fmt.Errorf("login failed: %w", err)
+	}
+
+	return &resp, nil
+}
+
+func (a *AuthClient) Register(ctx context.Context, req RegisterRequest) (*User, error) {
+	var user User
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = a.client.doRequest(ctx, http.MethodPost, "/register", nil, bytes.NewReader(body), &user)
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (a *AuthClient) ValidateSession(ctx context.Context, sessionID string) (*AuthResponse, error) {
+	var resp AuthResponse
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := a.client.doRequest(ctx, http.MethodPost, "/validate", headers, nil, &resp)
+	if err != nil {
+		return nil, fmt.Errorf("session validation failed: %w", err)
+	}
+
+	return &resp, nil
+}
+
+func (a *AuthClient) Logout(ctx context.Context, sessionID string) error {
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := a.client.doRequest(ctx, http.MethodGet, "/logout", headers, nil, nil)
+	if err != nil {
+		return fmt.Errorf("logout failed: %w", err)
+	}
+
+	return nil
+}
+
+func (a *AuthClient) ChangePassword(ctx context.Context, sessionID, oldPassword, newPassword string) error {
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	req := map[string]string{
+		"old_password": oldPassword,
+		"new_password": newPassword,
+	}
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = a.client.doRequest(ctx, http.MethodPost, "/change_password", headers, bytes.NewReader(body), nil)
+	if err != nil {
+		return fmt.Errorf("change password failed: %w", err)
+	}
+
+	return nil
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/apiclient/base.go
+package apiclient
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+)
+
+type Client struct {
+	baseURL    string
+	httpClient *http.Client
+}
+
+func NewClient(baseURL string, timeout time.Duration) *Client {
+	return &Client{
+	 baseURL: baseURL,
+	 httpClient: &http.Client{
+	  Timeout: timeout,
+	 },
+	}
+}
+
+func (c *Client) doRequest(ctx context.Context, method, path string, headers map[string]string, body io.Reader, v any) error {
+	url := c.baseURL + path
+	
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+	 return fmt.Errorf("failed to create request: %w", err)
+	}
+	
+	req.Header.Set("Content-Type", "application/json")
+	for key, value := range headers {
+	 req.Header.Set(key, value)
+	}
+	
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+	 return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+	 bodyBytes, _ := io.ReadAll(resp.Body)
+	 return fmt.Errorf("API error: %s - %s", resp.Status, string(bodyBytes))
+	}
+	
+	if v != nil {
+	 if err := json.NewDecoder(resp.Body).Decode(v); err != nil {
+	  return fmt.Errorf("failed to decode response: %w", err)
+	 }
+	}
+	
+	return nil
+}
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/apiclient/data.go
+package apiclient
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+)
+
+type DataClient struct {
+	client *Client
+}
+
+func NewDataClient(baseURL string, timeout time.Duration) *DataClient {
+	return &DataClient{
+		client: NewClient(baseURL, timeout),
+	}
+}
+
+type Discipline struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	TeacherID   int    `json:"teacher_id"`
+	GroupID     int    `json:"group_id"`
+	PeriodID    int    `json:"period_id"`
+	Description string `json:"description"`
+}
+
+type Lab struct {
+	ID           int    `json:"id"`
+	DisciplineID int    `json:"discipline_id"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	Deadline     string `json:"deadline"`
+}
+
+type LabReport struct {
+	ID        int    `json:"id"`
+	LabID     int    `json:"lab_id"`
+	StudentID int    `json:"student_id"`
+	Status    string `json:"status"`
+	Grade     int    `json:"grade"`
+	Comment   string `json:"comment"`
+}
+
+type Student struct {
+	ID      int    `json:"id"`
+	UserID  int    `json:"user_id"`
+	GroupID int    `json:"group_id"`
+	Name    string `json:"name"`
+}
+
+type Group struct {
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (d *DataClient) GetGroups(ctx context.Context) ([]Group, error) {
+	var groups []Group
+
+	err := d.client.doRequest(ctx, http.MethodGet, "/api/groups", nil, nil, &groups)	
+	if err != nil {
+		return nil, fmt.Errorf("failed to get groups: %w", err)
+	}
+
+	return groups, nil
+}
+
+func (d *DataClient) GetDisciplines(ctx context.Context, sessionID string) ([]Discipline, error) {
+	var disciplines []Discipline
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, "/api/disciplines", headers, nil, &disciplines)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get disciplines: %w", err)
+	}
+
+	return disciplines, nil
+}
+
+func (d *DataClient) GetDiscipline(ctx context.Context, sessionID string, id int) (*Discipline, error) {
+	var discipline Discipline
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, fmt.Sprintf("/api/disciplines/%d", id), headers, nil, &discipline)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get discipline: %w", err)
+	}
+
+	return &discipline, nil
+}
+
+func (d *DataClient) GetLabsByDiscipline(ctx context.Context, sessionID string, disciplineID int) ([]Lab, error) {
+	var labs []Lab
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, fmt.Sprintf("/api/labs/discipline/%d", disciplineID), headers, nil, &labs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get labs: %w", err)
+	}
+
+	return labs, nil
+}
+
+func (d *DataClient) CreateReport(ctx context.Context, sessionID string, labID int, comment string) (*LabReport, error) {
+	var report LabReport
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	req := map[string]any{
+		"lab_id":  labID,
+		"comment": comment,
+	}
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = d.client.doRequest(ctx, http.MethodPost, "/api/reports", headers, bytes.NewReader(body), &report)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create report: %w", err)
+	}
+
+	return &report, nil
+}
+
+func (d *DataClient) GetReportsByStudent(ctx context.Context, sessionID string, studentID int) ([]LabReport, error) {
+	var reports []LabReport
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodGet, fmt.Sprintf("/api/reports/student/%d", studentID), headers, nil, &reports)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get reports: %w", err)
+	}
+
+	return reports, nil
+}
+
+// ... добавьте другие методы по мере необходимости
+
+--------------------------
+Файл: /home/quigon/scavenger/services/web-service/pkg/redisclient/redis.go
+package redisclient
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/go-redis/redis/v8"
+)
+
+func NewRedisClient(addr, password string, db int) (*redis.Client, error) {
+	client := redis.NewClient(&redis.Options{
+		Addr:         addr,
+		Password:     password,
+		DB:           db,
+		DialTimeout:  5 * time.Second,
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 3 * time.Second,
+		PoolSize:     50,
+		MinIdleConns: 10,
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Ping(ctx).Err(); err != nil {
+		client.Close()
+		return nil, fmt.Errorf("failed to connect to Redis: %v", err)
+	}
+
+	log.Println("INFO Successfully connected to Redis")
+	return client, nil
+}
+

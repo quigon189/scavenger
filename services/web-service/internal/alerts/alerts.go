@@ -16,7 +16,7 @@ const (
 	AlertWarning AlertType = "warning"
 	AlertInfo    AlertType = "info"
 
-	AlertKey    string = "alerts"
+	AlertKey    string = "sc_alerts"
 	AlertExpire int    = 300
 )
 
@@ -34,21 +34,44 @@ func ReadAlerts(w http.ResponseWriter, r *http.Request) context.Context {
 
 			json.Unmarshal([]byte(decoded), &alerts)
 
-			log.Printf("Read alerts: %v", alerts)
-
-			http.SetCookie(w, &http.Cookie{
-				Name:     AlertKey,
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-				Secure:   false,
-				SameSite: http.SameSiteLaxMode,
-			})
 		}
 	}
 
+	log.Printf("Read alerts: %v", alerts)
 	return context.WithValue(r.Context(), AlertKey, alerts)
+}
+
+func WriteAlerts(w http.ResponseWriter, r *http.Request) {
+	alerts, ok := r.Context().Value(AlertKey).([]Alert)
+	if !ok {
+		return
+	}
+
+	log.Printf("Write alerts: %v", alerts)
+
+	if len(alerts) == 0 {
+		http.SetCookie(w, &http.Cookie{
+			Name:     AlertKey,
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+		})
+		return
+	}
+
+	jsonData, _ := json.Marshal(alerts)
+
+	encoded := url.QueryEscape(string(jsonData))
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     AlertKey,
+		Value:    encoded,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
 }
 
 func GetAlerts(ctx context.Context) []Alert {
@@ -63,50 +86,39 @@ func GetAlerts(ctx context.Context) []Alert {
 	return alerts
 }
 
-func SetAlert(ctx context.Context, w http.ResponseWriter, alert Alert) {
-	alerts := GetAlerts(ctx)
+func SetAlert(r *http.Request, alert Alert) {
+	alerts := GetAlerts(r.Context())
 	alerts = append(alerts, alert)
 
 	log.Printf("Set alerts: %v", alerts)
 
-	jsonData, _ := json.Marshal(alerts)
-
-	encoded := url.QueryEscape(string(jsonData))
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     AlertKey,
-		Value:    string(encoded),
-		Path:     "/",
-		MaxAge:   AlertExpire,
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-	})
+	ctx := context.WithValue(r.Context(), AlertKey, alerts)
+	*r = *r.WithContext(ctx)
 }
 
 func FlashSuccess(w http.ResponseWriter, r *http.Request, msg string) {
-	SetAlert(r.Context(), w, Alert{
+	SetAlert(r, Alert{
 		Type: AlertSuccess,
 		Msg:  msg,
 	})
 }
 
 func FlashInfo(w http.ResponseWriter, r *http.Request, msg string) {
-	SetAlert(r.Context(), w, Alert{
+	SetAlert(r, Alert{
 		Type: AlertInfo,
 		Msg:  msg,
 	})
 }
 
 func FlashWarning(w http.ResponseWriter, r *http.Request, msg string) {
-	SetAlert(r.Context(), w, Alert{
+	SetAlert(r, Alert{
 		Type: AlertWarning,
 		Msg:  msg,
 	})
 }
 
 func FlashError(w http.ResponseWriter, r *http.Request, msg string) {
-	SetAlert(r.Context(), w, Alert{
+	SetAlert(r, Alert{
 		Type: AlertError,
 		Msg:  msg,
 	})

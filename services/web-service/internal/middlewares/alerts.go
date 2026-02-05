@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log"
 	"net/http"
 	"web-service/internal/alerts"
 )
@@ -8,6 +9,13 @@ import (
 func ProccessAlerts(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := alerts.ReadAlerts(w, r)
-		next.ServeHTTP(w, r.WithContext(ctx))
+
+		*r = *r.WithContext(ctx)
+
+		next.ServeHTTP(w, r)
+
+		alerts.WriteAlerts(w,r)
+
+		log.Printf("Headers: %v", w.Header())
 	})
 }
