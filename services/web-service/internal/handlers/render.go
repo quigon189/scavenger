@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"web-service/internal/alerts"
 	"web-service/internal/session"
 	"web-service/internal/views/components"
 	"web-service/internal/views/layouts"
@@ -14,9 +15,9 @@ import (
 )
 
 func Base(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
-	alerts := GetAlerts(w,r)
+	als := alerts.GetAlerts(r.Context())
 	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		components.Alerts(alerts...).Render(r.Context(), w)
+		components.Alerts(als...).Render(r.Context(), w)
 		component.Render(r.Context(), w)
 		return nil
 	})
@@ -29,12 +30,11 @@ func BaseWithNavbar(w http.ResponseWriter, r *http.Request, title string, compon
 	if !ok {
 		return fmt.Errorf("failed to get session")
 	}
-
-	alerts := GetAlerts(w,r)
+	
+	als := alerts.GetAlerts(r.Context())
 	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 		components.Navbar(session.User).Render(r.Context(), w)
-		components.Alerts(alerts...).Render(r.Context(), w)
-
+		components.Alerts(als...).Render(r.Context(), w)
 		component.Render(r.Context(), w)
 		return nil
 	})

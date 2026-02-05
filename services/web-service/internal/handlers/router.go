@@ -17,9 +17,9 @@ type Router struct {
 
 func NewRouter(session *session.SessionService, authClient *apiclient.AuthClient) *Router {
 	router := &Router{
-		mux:        http.NewServeMux(),
-		session:    session,
-		authClient: authClient,
+		mux:            http.NewServeMux(),
+		session:        session,
+		authClient:     authClient,
 		authMuddleware: middlewares.NewAuthMiddleware(session),
 	}
 
@@ -40,5 +40,5 @@ func (r *Router) registerRoutes() {
 }
 
 func (r *Router) Handler() http.Handler {
-	return r.handler
+	return middlewares.ProccessAlerts(r.handler)
 }

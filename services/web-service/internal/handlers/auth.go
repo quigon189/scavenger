@@ -3,6 +3,8 @@ package handlers
 import (
 	"log"
 	"net/http"
+
+	"web-service/internal/alerts"
 	"web-service/internal/models"
 	"web-service/internal/session"
 	"web-service/internal/views/pages"
@@ -15,7 +17,10 @@ type AuthHandler struct {
 }
 
 func NewAuthHandler(session *session.SessionService, authClient *apiclient.AuthClient) *AuthHandler {
-	return &AuthHandler{session: session, authClient: authClient}
+	return &AuthHandler{
+		session: session,
+		authClient: authClient,
+	}
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +30,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var prevLogin string
-	alerts := []models.Alert{}
 	if r.Method == http.MethodPost {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
@@ -43,18 +47,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			prevLogin = username
-			alert := models.Alert{
-				Type: models.AlertError,
-				Msg:  "Неверно введен логин или пароль",
-			}
-
-			alerts = append(alerts, alert)
+			alerts.FlashError(w, r, "Не верный логин или пароль")
 			log.Printf("WARN Failed to login user %s: %v", username, err)
 		}
 	}
 
 	Base(w, r, "Login", pages.Login(prevLogin))
-	SetAlerts(w, alerts...)
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
@@ -67,14 +65,8 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	alerts := []models.Alert{}
 	if r.Method == http.MethodPost {
-		alerts = append(alerts, models.Alert{
-			Type: models.AlertSuccess,
-			Msg: "You registred!",
-		})	
-
-		SetAlerts(w, alerts...)
+		alerts.FlashSuccess(w,r,"Вы зарегистрированны!")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}

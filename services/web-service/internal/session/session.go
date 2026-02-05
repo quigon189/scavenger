@@ -31,8 +31,8 @@ func NewSessionService(redisClient *redis.Client, authClient *apiclient.AuthClie
 }
 
 type UserSession struct {
-	User      models.User `json:"user"`
-	ExpiresAt time.Time   `json:"expires_at"`
+	User      models.User    `json:"user"`
+	ExpiresAt time.Time      `json:"expires_at"`
 }
 
 func (s *SessionService) SetSession(w http.ResponseWriter, sessionID string, expires_at time.Time) {

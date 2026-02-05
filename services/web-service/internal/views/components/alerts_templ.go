@@ -8,9 +8,9 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "web-service/internal/models"
+import "web-service/internal/alerts"
 
-func Alerts(alerts ...models.Alert) templ.Component {
+func Alerts(als ...alerts.Alert) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -31,12 +31,12 @@ func Alerts(alerts ...models.Alert) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if len(alerts) > 0 {
+		if len(als) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div aria-live=\"polite\" aria-atomic=\"true\" class=\"position-relative\"><div class=\"toast-container position-absolute top-0 start-50 translate-middle-x p-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, alert := range alerts {
+			for _, alert := range als {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"toast align-items-center\" role=\"alert\" aria-live=\"assertive\" aria-atomic=\"true\" data-bs-autohide=\"true\" data-bs-delay=\"10000\" autoshow>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -64,22 +64,22 @@ func Alerts(alerts ...models.Alert) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				switch alert.Type {
-				case models.AlertSuccess:
+				case alerts.AlertSuccess:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<strong class=\"me-auto\">Успех</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case models.AlertError:
+				case alerts.AlertError:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<strong class=\"me-auto\">Ошибка</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case models.AlertWarning:
+				case alerts.AlertWarning:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<strong class=\"me-auto\">Предупреждение</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case models.AlertInfo:
+				case alerts.AlertInfo:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<strong class=\"me-auto\">Уведомление</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
