@@ -1,24 +1,24 @@
 package components
 
-import "web-service/internal/alerts"
+import "web-service/internal/session"
 
-templ Alerts(als ...alerts.Alert) {
-if len(als) > 0 {
+templ Alerts(flashes ...session.Flash) {
+if len(flashes) > 0 {
 <div aria-live="polite" aria-atomic="true" class="position-relative">
 	<div class="toast-container position-absolute top-0 start-50 translate-middle-x p-3">
 
-		for _, alert := range als {
+		for _, flash := range flashes {
 		<div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true"
 			data-bs-autohide="true" data-bs-delay="10000" autoshow>
-			<div class={"toast-header text-white bg-"+string(alert.Type)}>
-				switch alert.Type {
-				case alerts.AlertSuccess:
+			<div class={"toast-header text-white bg-"+string(flash.Type)}>
+				switch flash.Type {
+				case session.SuccessFlash:
 				<strong class="me-auto">Успех</strong>
-				case alerts.AlertError:
+				case session.ErrorFlash:
 				<strong class="me-auto">Ошибка</strong>
-				case alerts.AlertWarning:
+				case session.WarningFlash:
 				<strong class="me-auto">Предупреждение</strong>
-				case alerts.AlertInfo:
+				case session.InfoFlash:
 				<strong class="me-auto">Уведомление</strong>
 				default:
 				<strong class="me-auto">Уведомление</strong>
@@ -26,7 +26,7 @@ if len(als) > 0 {
 				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
 			</div>
 			<div class="toast-body">
-				{ alert.Msg }
+				{ flash.Message }
 			</div>
 		</div>
 

@@ -14,6 +14,8 @@ import (
 	"web-service/internal/session"
 	"web-service/pkg/apiclient"
 	"web-service/pkg/redisclient"
+
+	"github.com/gorilla/sessions"
 )
 
 func main() {
@@ -29,6 +31,7 @@ func main() {
 	sessionService := session.NewSessionService(
 		redisClient, 
 		authClient,
+		sessions.NewCookieStore([]byte("secret-key")),
 	)
 
 	router := handlers.NewRouter(

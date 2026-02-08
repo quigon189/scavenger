@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+
 	"web-service/internal/session"
 )
 
@@ -21,7 +22,7 @@ func (m *AuthMiddleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc 
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, sessionID, err := m.session.GetSession(r)
 		if err != nil {
-			m.session.DeleteSession(w)
+			m.session.DeleteSession(w, r)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			log.Printf("WARN Failed to get session %s: %v", sessionID, err)
 			return
@@ -32,4 +33,12 @@ func (m *AuthMiddleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc 
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
+}
+
+func (m *AuthMiddleware) FlashHandler(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		flashes := m.session.GetFlashes(w, r)
+		ctx := context.WithValue(r.Context(), "flashes", flashes)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }

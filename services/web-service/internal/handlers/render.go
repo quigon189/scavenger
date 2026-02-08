@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
-	"web-service/internal/alerts"
 	"web-service/internal/session"
 	"web-service/internal/views/components"
 	"web-service/internal/views/layouts"
@@ -15,9 +15,12 @@ import (
 )
 
 func Base(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
-	als := alerts.GetAlerts(r.Context())
+	flashes, ok := r.Context().Value("flashes").([]session.Flash)
+	if !ok {
+		log.Printf("WARN Failed to get flashes from context")
+	}
 	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		components.Alerts(als...).Render(r.Context(), w)
+		components.Alerts(flashes...).Render(r.Context(), w)
 		component.Render(r.Context(), w)
 		return nil
 	})
@@ -26,15 +29,18 @@ func Base(w http.ResponseWriter, r *http.Request, title string, component templ.
 }
 
 func BaseWithNavbar(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
-	session, ok := r.Context().Value("session").(*session.UserSession)
+	userSession, ok := r.Context().Value("session").(*session.UserSession)
 	if !ok {
 		return fmt.Errorf("failed to get session")
 	}
 	
-	als := alerts.GetAlerts(r.Context())
+	flashes, ok := r.Context().Value("flashes").([]session.Flash)
+	if !ok {
+		log.Printf("WARN Failed to get flashes from context")
+	}
 	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		components.Navbar(session.User).Render(r.Context(), w)
-		components.Alerts(als...).Render(r.Context(), w)
+		components.Navbar(userSession.User).Render(r.Context(), w)
+		components.Alerts(flashes...).Render(r.Context(), w)
 		component.Render(r.Context(), w)
 		return nil
 	})

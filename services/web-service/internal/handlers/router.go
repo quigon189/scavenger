@@ -40,5 +40,5 @@ func (r *Router) registerRoutes() {
 }
 
 func (r *Router) Handler() http.Handler {
-	return middlewares.ProccessAlerts(r.handler)
+	return r.authMuddleware.FlashHandler(r.handler)
 }

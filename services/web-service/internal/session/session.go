@@ -3,6 +3,7 @@ package session
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -10,17 +11,22 @@ import (
 	"web-service/pkg/apiclient"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/gorilla/sessions"
 )
 
 type SessionService struct {
+	sm            *sessions.CookieStore
 	redisClient   *redis.Client
 	authClient    *apiclient.AuthClient
 	sessionPrefix string
 	httpClent     *http.Client
 }
 
-func NewSessionService(redisClient *redis.Client, authClient *apiclient.AuthClient) *SessionService {
+const sessionKey = "session"
+
+func NewSessionService(redisClient *redis.Client, authClient *apiclient.AuthClient, cookieStore *sessions.CookieStore) *SessionService {
 	return &SessionService{
+		sm:            cookieStore,
 		redisClient:   redisClient,
 		authClient:    authClient,
 		sessionPrefix: "session:",
@@ -31,31 +37,31 @@ func NewSessionService(redisClient *redis.Client, authClient *apiclient.AuthClie
 }
 
 type UserSession struct {
-	User      models.User    `json:"user"`
-	ExpiresAt time.Time      `json:"expires_at"`
+	User      models.User `json:"user"`
+	ExpiresAt time.Time   `json:"expires_at"`
 }
 
-func (s *SessionService) SetSession(w http.ResponseWriter, sessionID string, expires_at time.Time) {
-	cookie := &http.Cookie{
-		Name:     "session_id",
-		Value:    sessionID,
-		Expires:  expires_at,
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
-		Path:     "/",
+func (s *SessionService) SetSession(w http.ResponseWriter, r *http.Request, sessionID string, expires_at time.Time) {
+	session, err := s.sm.Get(r, sessionKey)
+	if err != nil {
+		log.Printf("WARN Failed to get session: %v", err)
+		return
 	}
 
-	http.SetCookie(w, cookie)
+	session.Values["session_id"] = sessionID
+	session.Save(r, w)
 }
 
 func (s *SessionService) GetSession(r *http.Request) (*UserSession, string, error) {
-	sessionCookie, err := r.Cookie("session_id")
+	session, err := s.sm.Get(r, sessionKey)
 	if err != nil {
 		return nil, "", err
 	}
 
-	sessionID := sessionCookie.Value
+	sessionID, ok := session.Values["session_id"].(string)
+	if !ok {
+		return nil, "", fmt.Errorf("Failed to get session_id from cookie session")
+	}
 
 	key := s.sessionPrefix + sessionID
 	data, err := s.redisClient.Get(r.Context(), key).Bytes()
@@ -68,22 +74,21 @@ func (s *SessionService) GetSession(r *http.Request) (*UserSession, string, erro
 		log.Printf("WARN Failed to get session from Redis")
 	}
 
-	session, err := s.getSessionViaAuth(r.Context(), sessionID)
+	userSession, err := s.getSessionViaAuth(r.Context(), sessionID)
 	if err == nil {
-		return session, sessionID, nil
+		return userSession, sessionID, nil
 	}
 	return nil, "", err
 }
 
-func (s *SessionService) DeleteSession(w http.ResponseWriter) {
-	cookie := &http.Cookie{
-		Name:   "session_id",
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
+func (s *SessionService) DeleteSession(w http.ResponseWriter, r *http.Request) {
+	session, err := s.sm.Get(r, sessionKey)
+	if err != nil {
+		log.Println("WARN Failed to get session to delete")
 	}
 
-	http.SetCookie(w, cookie)
+	session.Options.MaxAge = -1
+	session.Save(r, w)
 }
 
 func (s *SessionService) getSessionViaAuth(ctx context.Context, sessionID string) (*UserSession, error) {

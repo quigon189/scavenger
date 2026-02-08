@@ -8,9 +8,9 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "web-service/internal/alerts"
+import "web-service/internal/session"
 
-func Alerts(als ...alerts.Alert) templ.Component {
+func Alerts(flashes ...session.Flash) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -31,17 +31,17 @@ func Alerts(als ...alerts.Alert) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if len(als) > 0 {
+		if len(flashes) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div aria-live=\"polite\" aria-atomic=\"true\" class=\"position-relative\"><div class=\"toast-container position-absolute top-0 start-50 translate-middle-x p-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, alert := range als {
+			for _, flash := range flashes {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"toast align-items-center\" role=\"alert\" aria-live=\"assertive\" aria-atomic=\"true\" data-bs-autohide=\"true\" data-bs-delay=\"10000\" autoshow>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var2 = []any{"toast-header text-white bg-" + string(alert.Type)}
+				var templ_7745c5c3_Var2 = []any{"toast-header text-white bg-" + string(flash.Type)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -63,23 +63,23 @@ func Alerts(als ...alerts.Alert) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				switch alert.Type {
-				case alerts.AlertSuccess:
+				switch flash.Type {
+				case session.SuccessFlash:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<strong class=\"me-auto\">Успех</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case alerts.AlertError:
+				case session.ErrorFlash:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<strong class=\"me-auto\">Ошибка</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case alerts.AlertWarning:
+				case session.WarningFlash:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<strong class=\"me-auto\">Предупреждение</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case alerts.AlertInfo:
+				case session.InfoFlash:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<strong class=\"me-auto\">Уведомление</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -95,9 +95,9 @@ func Alerts(als ...alerts.Alert) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(alert.Msg)
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(flash.Message)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/alerts.templ`, Line: 29, Col: 15}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/alerts.templ`, Line: 29, Col: 19}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {

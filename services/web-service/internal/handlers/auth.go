@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"web-service/internal/alerts"
 	"web-service/internal/models"
 	"web-service/internal/session"
 	"web-service/internal/views/pages"
@@ -18,7 +17,7 @@ type AuthHandler struct {
 
 func NewAuthHandler(session *session.SessionService, authClient *apiclient.AuthClient) *AuthHandler {
 	return &AuthHandler{
-		session: session,
+		session:    session,
 		authClient: authClient,
 	}
 }
@@ -42,23 +41,25 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			},
 		)
 		if err == nil && resp.SessionID != "" {
-			h.session.SetSession(w, resp.SessionID, resp.ExpiresAt)
+			h.session.SetSession(w, r, resp.SessionID, resp.ExpiresAt)
 			http.Redirect(w, r, "/home", http.StatusSeeOther)
 			return
 		} else {
 			prevLogin = username
-			alerts.FlashError(w, r, "Не верный логин или пароль")
+			h.session.FlashError(w, r, "Не верный логин или пароль")
 			log.Printf("WARN Failed to login user %s: %v", username, err)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
 		}
 	}
 
-	Base(w, r, "Login", pages.Login(prevLogin))
+	Base(w, r, "Вход", pages.Login(prevLogin))
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	_, sessionID, err := h.session.GetSession(r)
 	if err == nil {
-		h.session.DeleteSession(w)
+		h.session.DeleteSession(w, r)
 		h.authClient.Logout(r.Context(), sessionID)
 	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -66,7 +67,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		alerts.FlashSuccess(w,r,"Вы зарегистрированны!")
+		h.session.FlashSuccess(w, r, "Вы зарегистрированны!")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
