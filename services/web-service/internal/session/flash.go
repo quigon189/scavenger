@@ -24,7 +24,7 @@ const (
 	InfoFlash    FlashType = "info"
 )
 
-func (s *SessionService) addFlash(w http.ResponseWriter, r *http.Request, flash Flash) error {
+func (s *SessionService) AddFlash(w http.ResponseWriter, r *http.Request, flash Flash) error {
 	session, err := s.sm.Get(r, sessionKey)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func (s *SessionService) addFlash(w http.ResponseWriter, r *http.Request, flash 
 }
 
 func (s *SessionService) FlashSuccess(w http.ResponseWriter, r *http.Request, message string) {
-	err := s.addFlash(w, r, Flash{
+	err := s.AddFlash(w, r, Flash{
 		Type:    SuccessFlash,
 		Message: message,
 	})
@@ -49,7 +49,7 @@ func (s *SessionService) FlashSuccess(w http.ResponseWriter, r *http.Request, me
 }
 
 func (s *SessionService) FlashError(w http.ResponseWriter, r *http.Request, message string) {
-	err := s.addFlash(w, r, Flash{
+	err := s.AddFlash(w, r, Flash{
 		Type:    ErrorFlash,
 		Message: message,
 	})
@@ -69,7 +69,6 @@ func (s *SessionService) GetFlashes(w http.ResponseWriter, r *http.Request) []Fl
 	flashes := session.Flashes()
 	session.Save(r, w)
 
-
 	var fls []Flash
 	for _, flash := range flashes {
 		if f, ok := flash.(Flash); ok {
@@ -78,7 +77,6 @@ func (s *SessionService) GetFlashes(w http.ResponseWriter, r *http.Request) []Fl
 	}
 
 	log.Printf("DEBUG Get flashes: %v", fls)
-	log.Printf("DEBUG Get flashes interfaces: %v", flashes)
 
 	return fls
 }

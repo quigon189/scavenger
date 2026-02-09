@@ -15,10 +15,15 @@ import (
 )
 
 func Base(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
-	flashes, ok := r.Context().Value("flashes").([]session.Flash)
+	fls, ok := r.Context().Value("flashes").([]session.Flash)
 	if !ok {
 		log.Printf("WARN Failed to get flashes from context")
 	}
+
+	var flashes []session.Flash
+	flashes = append(flashes, fls...)
+	fls = []session.Flash{}
+
 	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 		components.Alerts(flashes...).Render(r.Context(), w)
 		component.Render(r.Context(), w)
@@ -33,11 +38,16 @@ func BaseWithNavbar(w http.ResponseWriter, r *http.Request, title string, compon
 	if !ok {
 		return fmt.Errorf("failed to get session")
 	}
-	
-	flashes, ok := r.Context().Value("flashes").([]session.Flash)
+
+	fls, ok := r.Context().Value("flashes").([]session.Flash)
 	if !ok {
 		log.Printf("WARN Failed to get flashes from context")
 	}
+
+	var flashes []session.Flash
+	flashes = append(flashes, fls...)
+	fls = []session.Flash{}
+
 	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 		components.Navbar(userSession.User).Render(r.Context(), w)
 		components.Alerts(flashes...).Render(r.Context(), w)

@@ -13,12 +13,14 @@ import (
 type AuthHandler struct {
 	session    *session.SessionService
 	authClient *apiclient.AuthClient
+	dataClient *apiclient.DataClient
 }
 
-func NewAuthHandler(session *session.SessionService, authClient *apiclient.AuthClient) *AuthHandler {
+func NewAuthHandler(session *session.SessionService, authClient *apiclient.AuthClient, dataClient *apiclient.DataClient) *AuthHandler {
 	return &AuthHandler{
 		session:    session,
 		authClient: authClient,
+		dataClient: dataClient,
 	}
 }
 
@@ -68,13 +70,20 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		h.session.FlashSuccess(w, r, "Вы зарегистрированны!")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
 	groups := []models.Group{}
-	groups = append(groups, models.Group{ID: 1, Name: "Test1"})
-	groups = append(groups, models.Group{ID: 2, Name: "Test2"})
+	gs, err := h.dataClient.GetGroups(r.Context())
+	if err == nil {
+		for _, group := range gs {
+			groups = append(groups, models.Group{
+				ID:   group.ID,
+				Name: group.Name,
+			})
+		}
+	}
 
 	Base(w, r, "Регистрация", pages.StudentRegistrationPage(groups))
 }

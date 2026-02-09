@@ -8,17 +8,17 @@ import (
 	"web-service/internal/session"
 )
 
-type AuthMiddleware struct {
+type Middleware struct {
 	session *session.SessionService
 }
 
-func NewAuthMiddleware(session *session.SessionService) *AuthMiddleware {
-	return &AuthMiddleware{
+func NewMiddleware(session *session.SessionService) *Middleware {
+	return &Middleware{
 		session: session,
 	}
 }
 
-func (m *AuthMiddleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc {
+func (m *Middleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, sessionID, err := m.session.GetSession(r)
 		if err != nil {
@@ -35,10 +35,11 @@ func (m *AuthMiddleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc 
 	}
 }
 
-func (m *AuthMiddleware) FlashHandler(next http.Handler) http.Handler {
+func (m *Middleware) FlashHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		flashes := m.session.GetFlashes(w, r)
 		ctx := context.WithValue(r.Context(), "flashes", flashes)
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

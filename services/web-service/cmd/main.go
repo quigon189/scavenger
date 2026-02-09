@@ -27,6 +27,7 @@ func main() {
 	}
 
 	authClient := apiclient.NewAuthClient("http://"+cfg.Api.AuthURL, time.Duration(cfg.Api.Timeout) * time.Second)
+	dataClient := apiclient.NewDataClient("http://"+cfg.Api.DataURL, time.Duration(cfg.Api.Timeout) * time.Second)
 
 	sessionService := session.NewSessionService(
 		redisClient, 
@@ -37,6 +38,7 @@ func main() {
 	router := handlers.NewRouter(
 		sessionService,
 		authClient,
+		dataClient,
 	)
 
 	server := &http.Server{

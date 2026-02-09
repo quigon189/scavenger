@@ -100,6 +100,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_DB=0
       - AUTH_URL=auth-service:8081
+      - DATA_URL=data-service:8082
       - TIMEOUT=30
       - PORT=8080
     depends_on:
