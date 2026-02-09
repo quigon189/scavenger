@@ -20,9 +20,9 @@ func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 
 func (r *UserRepository) CreateUser(ctx context.Context, user *models.User) error {
 	query := `
-		INSERT INTO auth.users (username, email, name, password_hash, role)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, created_at, updated_at
+		INSERT INTO auth.users (username, email, name, password_hash, role, group_id)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id, status, created_at, updated_at
 	`
 
 	return r.db.QueryRow(ctx, query,
@@ -31,12 +31,13 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *models.User) erro
 		user.Name,
 		user.PasswordHash,
 		user.Role,
-	).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
+		user.GroupID,
+	).Scan(&user.ID, &user.Status, &user.CreatedAt, &user.UpdatedAt)
 }
 
 func (r *UserRepository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
 	query := `
-		SELECT id, username, email, name, password_hash, role, created_at, updated_at
+		SELECT id, username, email, name, password_hash, role, status, group_id, created_at, updated_at
 		FROM auth.users
 		WHERE username = $1
 	`
@@ -49,6 +50,8 @@ func (r *UserRepository) GetUserByUsername(ctx context.Context, username string)
 		&user.Name,
 		&user.PasswordHash,
 		&user.Role,
+		&user.Status,
+		&user.GroupID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -66,7 +69,7 @@ func (r *UserRepository) GetUserByUsername(ctx context.Context, username string)
 
 func (r *UserRepository) GetUserByID(ctx context.Context, userID int) (*models.User, error) {
 	query := `
-		SELECT id, username, email, name, password_hash, role, created_at, updated_at
+		SELECT id, username, email, name, password_hash, role, status, group_id, created_at, updated_at
 		FROM auth.users
 		WHERE id = $1
 	`
@@ -79,6 +82,8 @@ func (r *UserRepository) GetUserByID(ctx context.Context, userID int) (*models.U
 		&user.Name,
 		&user.PasswordHash,
 		&user.Role,
+		&user.Status,
+		&user.GroupID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -97,8 +102,8 @@ func (r *UserRepository) GetUserByID(ctx context.Context, userID int) (*models.U
 func (r *UserRepository) UpdateUser(ctx context.Context, user *models.User) error {
 	query := `
 		UPDATE auth.users
-		SET username = $1, email = $2, name = $3, password_hash = $4, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $5
+		SET username = $1, email = $2, name = $3, password_hash = $4, status = $5, group_id = $6, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $7
 		RETURNING updated_at
 	`
 
@@ -107,6 +112,8 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user *models.User) erro
 		user.Email,
 		user.Name,
 		user.PasswordHash,
+		user.Status,
+		user.GroupID,
 		user.ID,
 	).Scan(&user.UpdatedAt)
 }

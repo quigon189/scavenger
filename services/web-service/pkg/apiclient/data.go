@@ -56,17 +56,28 @@ type Group struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
+
+	Students    []Student    `json:"students"`
+	Disciplines []Discipline `json:"disciplines"`
 }
 
 func (d *DataClient) GetGroups(ctx context.Context) ([]Group, error) {
-	var groups []Group
+	var r struct {
+		Data    []Group `json:"data"`
+		Success bool    `json:"success"`
+		Error   string  `json:"error"`
+	}
 
-	err := d.client.doRequest(ctx, http.MethodGet, "/api/groups", nil, nil, &groups)	
+	err := d.client.doRequest(ctx, http.MethodGet, "/api/groups", nil, nil, &r)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get groups: %w", err)
 	}
 
-	return groups, nil
+	if !r.Success {
+		return nil, fmt.Errorf("failed to get groups data-service error: %s", r.Error)
+	}
+
+	return r.Data, nil
 }
 
 func (d *DataClient) GetDisciplines(ctx context.Context, sessionID string) ([]Discipline, error) {

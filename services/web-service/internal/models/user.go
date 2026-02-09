@@ -6,6 +6,8 @@ type User struct {
 	Role     string
 	Email    string
 	Group    string
+	Status   string
+	GroupID  *int
 }
 
 type Group struct {

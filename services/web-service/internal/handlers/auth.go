@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
-	"web-service/internal/models"
+	"web-service/internal/services"
 	"web-service/internal/session"
 	"web-service/internal/views/pages"
 	"web-service/pkg/apiclient"
@@ -13,14 +15,15 @@ import (
 type AuthHandler struct {
 	session    *session.SessionService
 	authClient *apiclient.AuthClient
-	dataClient *apiclient.DataClient
+	services   *services.Services
 }
 
 func NewAuthHandler(session *session.SessionService, authClient *apiclient.AuthClient, dataClient *apiclient.DataClient) *AuthHandler {
+	services := services.NewServices(dataClient)
 	return &AuthHandler{
 		session:    session,
 		authClient: authClient,
-		dataClient: dataClient,
+		services:   services,
 	}
 }
 
@@ -68,21 +71,42 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	_, sessionID, _ := h.session.GetSession(r)
+	if sessionID != "" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 	if r.Method == http.MethodPost {
-		h.session.FlashSuccess(w, r, "Вы зарегистрированны!")
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+		name := r.FormValue("name")
+		groupID, _ := strconv.Atoi(r.FormValue("group_id"))
+
+		req := apiclient.RegisterRequest{
+			Username: username,
+			Password: password,
+			Name:     name,
+			GroupID:  &groupID,
+			Role:     "student",
+		}
+
+		user, err := h.authClient.Register(r.Context(), req)
+		if err != nil {
+			h.session.FlashError(w, r, "Ошибка при создании пользователя")
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
+			return
+		}
+
+		h.session.FlashSuccess(w, r, fmt.Sprintf("Добро пожаловать, %s!\nТеперь вы можете выполнить вход.", user.Name))
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	groups := []models.Group{}
-	gs, err := h.dataClient.GetGroups(r.Context())
-	if err == nil {
-		for _, group := range gs {
-			groups = append(groups, models.Group{
-				ID:   group.ID,
-				Name: group.Name,
-			})
-		}
+	groups, err := h.services.Data.GetGroups(r.Context())
+	if err != nil {
+		h.session.FlashError(w, r, "Ошибка при загрузке групп")
+		log.Printf("ERR Failed to get groups: %v", err)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
 	Base(w, r, "Регистрация", pages.StudentRegistrationPage(groups))

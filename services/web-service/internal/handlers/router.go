@@ -35,7 +35,8 @@ func NewRouter(session *session.SessionService, authClient *apiclient.AuthClient
 func (r *Router) registerRoutes() {
 	authHandler := NewAuthHandler(r.session, r.authClient, r.dataClient)
 
-	r.mux.HandleFunc("/", r.middleware.SessionRequire(Home))
+	r.mux.HandleFunc("/", r.middleware.ActiveRequire(Home))
+	r.mux.HandleFunc("/pending", r.middleware.SessionRequire(PendingPage))
 	r.mux.HandleFunc("/login", authHandler.Login)
 	r.mux.HandleFunc("POST /logout", r.middleware.SessionRequire(authHandler.Logout))
 	r.mux.HandleFunc("/register", authHandler.Register)

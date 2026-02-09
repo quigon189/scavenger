@@ -13,8 +13,11 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := BaseWithNavbar(w,r,"Home", pages.Home(session.User))	
-	if err != nil {
-		http.Error(w,"Failed to render page: " + err.Error(), http.StatusInternalServerError)
-	}
+	BaseWithNavbar(w,r,"Home", pages.Home(session.User))	
+}
+
+func PendingPage(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value("session").(*session.UserSession)
+
+	BaseWithNavbar(w,r,"Home", pages.PendingPage(session.User))
 }

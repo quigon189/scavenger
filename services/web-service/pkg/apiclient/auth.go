@@ -30,6 +30,7 @@ type RegisterRequest struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
 	Role     string `json:"role"`
+	GroupID  *int   `json:"group_id,omitempty"`
 }
 
 type User struct {
@@ -38,6 +39,8 @@ type User struct {
 	Email    string `json:"email,omitempty"`
 	Name     string `json:"name"`
 	Role     string `json:"role"`
+	GroupID  *int   `json:"group_id"`
+	Status   string `json:"status"`
 }
 
 type AuthResponse struct {

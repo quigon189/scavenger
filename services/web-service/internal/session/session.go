@@ -102,6 +102,8 @@ func (s *SessionService) getSessionViaAuth(ctx context.Context, sessionID string
 		Username: authResp.User.Username,
 		Role:     authResp.User.Role,
 		Email:    authResp.User.Email,
+		Status:   authResp.User.Status,
+		GroupID:  authResp.User.GroupID,
 	}
 
 	return &UserSession{User: user, ExpiresAt: authResp.ExpiresAt}, nil

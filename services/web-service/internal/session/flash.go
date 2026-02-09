@@ -33,7 +33,6 @@ func (s *SessionService) AddFlash(w http.ResponseWriter, r *http.Request, flash 
 	session.AddFlash(flash)
 	session.Save(r, w)
 
-	log.Printf("DEBUG Flash added: %v", flash)
 	return nil
 }
 
@@ -75,8 +74,6 @@ func (s *SessionService) GetFlashes(w http.ResponseWriter, r *http.Request) []Fl
 			fls = append(fls, f)
 		}
 	}
-
-	log.Printf("DEBUG Get flashes: %v", fls)
 
 	return fls
 }
