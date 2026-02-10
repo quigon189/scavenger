@@ -38,6 +38,7 @@ func NewSessionService(redisClient *redis.Client, authClient *apiclient.AuthClie
 
 type UserSession struct {
 	User      models.User `json:"user"`
+	ID        string      `json:"-"`
 	ExpiresAt time.Time   `json:"expires_at"`
 }
 
@@ -52,15 +53,15 @@ func (s *SessionService) SetSession(w http.ResponseWriter, r *http.Request, sess
 	session.Save(r, w)
 }
 
-func (s *SessionService) GetSession(r *http.Request) (*UserSession, string, error) {
+func (s *SessionService) GetSession(r *http.Request) (*UserSession, error) {
 	session, err := s.sm.Get(r, sessionKey)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
 	sessionID, ok := session.Values["session_id"].(string)
 	if !ok {
-		return nil, "", fmt.Errorf("Failed to get session_id from cookie session")
+		return nil, fmt.Errorf("Failed to get session_id from cookie session")
 	}
 
 	key := s.sessionPrefix + sessionID
@@ -68,7 +69,8 @@ func (s *SessionService) GetSession(r *http.Request) (*UserSession, string, erro
 	if err == nil {
 		var session UserSession
 		if err := json.Unmarshal(data, &session); err == nil {
-			return &session, sessionID, nil
+			session.ID = sessionID
+			return &session, nil
 		}
 	} else {
 		log.Printf("WARN Failed to get session from Redis")
@@ -76,9 +78,10 @@ func (s *SessionService) GetSession(r *http.Request) (*UserSession, string, erro
 
 	userSession, err := s.getSessionViaAuth(r.Context(), sessionID)
 	if err == nil {
-		return userSession, sessionID, nil
+		userSession.ID = sessionID
+		return userSession, nil
 	}
-	return nil, "", err
+	return nil, err
 }
 
 func (s *SessionService) DeleteSession(w http.ResponseWriter, r *http.Request) {

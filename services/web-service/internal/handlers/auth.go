@@ -9,27 +9,23 @@ import (
 	"web-service/internal/services"
 	"web-service/internal/session"
 	"web-service/internal/views/pages"
-	"web-service/pkg/apiclient"
 )
 
 type AuthHandler struct {
-	session    *session.SessionService
-	authClient *apiclient.AuthClient
-	services   *services.Services
+	session  *session.SessionService
+	services *services.Services
 }
 
-func NewAuthHandler(session *session.SessionService, authClient *apiclient.AuthClient, dataClient *apiclient.DataClient) *AuthHandler {
-	services := services.NewServices(dataClient)
+func NewAuthHandler(session *session.SessionService, services *services.Services) *AuthHandler {
 	return &AuthHandler{
-		session:    session,
-		authClient: authClient,
-		services:   services,
+		session:  session,
+		services: services,
 	}
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	_, sessionID, _ := h.session.GetSession(r)
-	if sessionID != "" {
+	session, _ := h.session.GetSession(r)
+	if session != nil && session.ID != "" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -38,15 +34,9 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 
-		resp, err := h.authClient.Login(
-			r.Context(),
-			apiclient.LoginRequest{
-				Username: username,
-				Password: password,
-			},
-		)
-		if err == nil && resp.SessionID != "" {
-			h.session.SetSession(w, r, resp.SessionID, resp.ExpiresAt)
+		userSession, err := h.services.Auth.Login(r.Context(), username, password)
+		if err == nil {
+			h.session.SetSession(w, r, userSession.ID, userSession.ExpiresAt)
 			http.Redirect(w, r, "/home", http.StatusSeeOther)
 			return
 		} else {
@@ -62,17 +52,17 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	_, sessionID, err := h.session.GetSession(r)
+	session, err := h.session.GetSession(r)
 	if err == nil {
 		h.session.DeleteSession(w, r)
-		h.authClient.Logout(r.Context(), sessionID)
+		h.services.Auth.Logout(r.Context(), session.ID)
 	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	_, sessionID, _ := h.session.GetSession(r)
-	if sessionID != "" {
+	session, _ := h.session.GetSession(r)
+	if session != nil && session.ID != "" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -80,26 +70,27 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 		name := r.FormValue("name")
+		email := r.FormValue("email")
 		groupID, _ := strconv.Atoi(r.FormValue("group_id"))
 
-		req := apiclient.RegisterRequest{
-			Username: username,
-			Password: password,
-			Name:     name,
-			GroupID:  &groupID,
-			Role:     "student",
-		}
-
-		user, err := h.authClient.Register(r.Context(), req)
+		user, err := h.services.Auth.Register(
+			r.Context(),
+			username,
+			password,
+			name,
+			email,
+			"student",
+			groupID,
+		)
 		if err != nil {
-			h.session.FlashError(w, r, "Ошибка при создании пользователя")
+			h.session.FlashError(w, r, fmt.Sprintf("Ошибка при создании пользователя: %s", err.Error()))
 			http.Redirect(w, r, "/register", http.StatusSeeOther)
+		} else {
+			h.session.FlashSuccess(w, r, fmt.Sprintf("Добро пожаловать, %s! Теперь вы можете выполнить вход.", user.Name))
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		h.session.FlashSuccess(w, r, fmt.Sprintf("Добро пожаловать, %s!\nТеперь вы можете выполнить вход.", user.Name))
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
 	}
 
 	groups, err := h.services.Data.GetGroups(r.Context())

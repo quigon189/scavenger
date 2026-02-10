@@ -26,7 +26,9 @@ func Base(w http.ResponseWriter, r *http.Request, title string, component templ.
 
 	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 		components.Alerts(flashes...).Render(r.Context(), w)
+		io.WriteString(w, "<div class=\"container mt-4\"")
 		component.Render(r.Context(), w)
+		io.WriteString(w, "</div>")
 		return nil
 	})
 
@@ -51,7 +53,9 @@ func BaseWithNavbar(w http.ResponseWriter, r *http.Request, title string, compon
 	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 		components.Navbar(userSession.User).Render(r.Context(), w)
 		components.Alerts(flashes...).Render(r.Context(), w)
+		io.WriteString(w, "<div class=\"container mt-4\"")
 		component.Render(r.Context(), w)
+		io.WriteString(w, "</div>")
 		return nil
 	})
 

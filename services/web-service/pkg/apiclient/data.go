@@ -61,6 +61,10 @@ type Group struct {
 	Disciplines []Discipline `json:"disciplines"`
 }
 
+type CreateGroupRequest struct {
+	Name string `json:"name"`
+}
+
 func (d *DataClient) GetGroups(ctx context.Context) ([]Group, error) {
 	var r struct {
 		Data    []Group `json:"data"`
@@ -78,6 +82,46 @@ func (d *DataClient) GetGroups(ctx context.Context) ([]Group, error) {
 	}
 
 	return r.Data, nil
+}
+
+func (d *DataClient) CreateGroup(ctx context.Context, sessionID string, req CreateGroupRequest) (*Group, error) {
+	var res struct {
+		Data    Group  `json:"data"`
+		Success bool   `json:"success"`
+		Error   string `json:"error"`
+	}
+
+	headers := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	err = d.client.doRequest(ctx, http.MethodPost, "/api/groups", headers, bytes.NewReader(body), &res)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create group: %w", err)
+	}
+	if !res.Success {
+		return nil, fmt.Errorf("failed to create group: %s", res.Error)
+	}
+
+	return &res.Data, nil
+}
+
+func (d *DataClient) DeleteGroup(ctx context.Context, sessionID string, id int) error {
+	header := map[string]string{
+		"X-Session-ID": sessionID,
+	}
+
+	err := d.client.doRequest(ctx, http.MethodDelete, fmt.Sprintf("/api/groups/%d", id), header, nil, nil)
+	if err != nil {
+		return fmt.Errorf("failed to delete group: %w", err)
+	}
+
+	return nil
 }
 
 func (d *DataClient) GetDisciplines(ctx context.Context, sessionID string) ([]Discipline, error) {

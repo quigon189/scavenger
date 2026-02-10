@@ -3,14 +3,14 @@ package handlers
 import (
 	"net/http"
 	"web-service/internal/middlewares"
+	"web-service/internal/services"
 	"web-service/internal/session"
 	"web-service/pkg/apiclient"
 )
 
 type Router struct {
 	session    *session.SessionService
-	authClient *apiclient.AuthClient
-	dataClient *apiclient.DataClient
+	services   *services.Services
 	middleware *middlewares.Middleware
 	handler    http.Handler
 	mux        *http.ServeMux
@@ -20,8 +20,7 @@ func NewRouter(session *session.SessionService, authClient *apiclient.AuthClient
 	router := &Router{
 		mux:        http.NewServeMux(),
 		session:    session,
-		authClient: authClient,
-		dataClient: dataClient,
+		services:   services.NewServices(dataClient, authClient),
 		middleware: middlewares.NewMiddleware(session),
 	}
 
@@ -33,13 +32,19 @@ func NewRouter(session *session.SessionService, authClient *apiclient.AuthClient
 }
 
 func (r *Router) registerRoutes() {
-	authHandler := NewAuthHandler(r.session, r.authClient, r.dataClient)
+	authHandler := NewAuthHandler(r.session, r.services)
+	AdminHandler := NewAdminHandler(r.session, r.services)
 
 	r.mux.HandleFunc("/", r.middleware.ActiveRequire(Home))
 	r.mux.HandleFunc("/pending", r.middleware.SessionRequire(PendingPage))
 	r.mux.HandleFunc("/login", authHandler.Login)
 	r.mux.HandleFunc("POST /logout", r.middleware.SessionRequire(authHandler.Logout))
 	r.mux.HandleFunc("/register", authHandler.Register)
+
+	r.mux.HandleFunc("/admin/dashboard", r.middleware.AdminRequire(AdminHandler.Dashboard))
+	r.mux.HandleFunc("GET /admin/groups", r.middleware.AdminRequire(AdminHandler.Groups))
+	r.mux.HandleFunc("POST /admin/groups/{id}/delete", r.middleware.AdminRequire(AdminHandler.DeleteGroup))
+	r.mux.HandleFunc("POST /admin/groups/create", r.middleware.AdminRequire(AdminHandler.CreateGroup))
 }
 
 func (r *Router) Handler() http.Handler {

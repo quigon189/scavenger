@@ -35,7 +35,7 @@ func StudentRegistrationPage(groups []models.Group) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mt-4 vh-100 d-flex justify-content-center\"><div class=\"card shadow-sm\"><div class=\"card-header bg-primary text-white text-center\"><h4 class=\"card-title mb-0\"><i class=\"fas fa-user-graduate me-2\"></i> Регистрация</h4></div><div class=\"card-body p-4\"><div class=\"alert alert-info mb-4\"><h6 class=\"alert-heading\"><i class=\"fas fa-info-circle me-2\"></i> Информация о регистрации</h6><p class=\"mb-0\">Заполните форму ниже для создания учетной записи студента. После регистрации вы сможете загружать лабораторные работы.</p></div><form method=\"POST\" action=\"/register\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Логин *</label> <input type=\"text\" class=\"form-control\" name=\"username\" required placeholder=\"Придумайте логин\"><div class=\"form-text\">Логин должен быть уникальным</div></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Пароль *</label> <input type=\"password\" class=\"form-control\" name=\"password\" required placeholder=\"Придумайте пароль\"><div class=\"form-text\">Минимум 6 символов</div></div></div></div><div class=\"mb-3\"><label class=\"form-label\">ФИО *</label> <input type=\"text\" class=\"form-control\" name=\"name\" required placeholder=\"Фамилия Имя Отчество\"></div><div class=\"mb-4\"><label class=\"form-label\">Группа *</label> <select class=\"form-select\" name=\"group_id\" required><option value=\"\">Выберите группу</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mt-4 vh-100 d-flex justify-content-center\"><div class=\"card shadow-sm\"><div class=\"card-header bg-primary text-white text-center\"><h4 class=\"card-title mb-0\"><i class=\"fas fa-user-graduate me-2\"></i> Регистрация</h4></div><div class=\"card-body p-4\"><div class=\"alert alert-info mb-4\"><h6 class=\"alert-heading\"><i class=\"fas fa-info-circle me-2\"></i> Информация о регистрации</h6><p class=\"mb-0\">Заполните форму ниже для создания учетной записи студента. После регистрации вы сможете загружать лабораторные работы.</p></div><form method=\"POST\" action=\"/register\"><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Логин *</label> <input type=\"text\" class=\"form-control\" name=\"username\" required placeholder=\"Придумайте логин\"><div class=\"form-text\">Логин должен быть уникальным</div></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Пароль *</label> <input type=\"password\" class=\"form-control\" name=\"password\" required placeholder=\"Придумайте пароль\"><div class=\"form-text\">Минимум 8 символов, должен содержать малую букву, большую букву и спецсимвол</div></div></div></div><div class=\"row\"><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">ФИО *</label> <input type=\"text\" class=\"form-control\" name=\"name\" required placeholder=\"Фамилия Имя Отчество\"><div class=\"form-text\">Фамилия и имя обязательны</div></div></div><div class=\"col-md-6\"><div class=\"mb-3\"><label class=\"form-label\">Электронная почта *</label> <input type=\"text\" class=\"form-control\" name=\"email\" required placeholder=\"user@loacal.com\"><div class=\"form-text\">Электронная почта должны быть уникальная</div></div></div></div><div class=\"mb-4\"><label class=\"form-label\">Группа *</label> <select class=\"form-select\" name=\"group_id\" required><option value=\"\">Выберите группу</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -47,7 +47,7 @@ func StudentRegistrationPage(groups []models.Group) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(group.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/register.templ`, Line: 64, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/register.templ`, Line: 83, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -60,7 +60,7 @@ func StudentRegistrationPage(groups []models.Group) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/register.templ`, Line: 65, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/register.templ`, Line: 84, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {

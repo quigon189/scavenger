@@ -20,16 +20,15 @@ func NewMiddleware(session *session.SessionService) *Middleware {
 
 func (m *Middleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, sessionID, err := m.session.GetSession(r)
+		session, err := m.session.GetSession(r)
 		if err != nil {
 			m.session.DeleteSession(w, r)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			log.Printf("WARN Failed to get session %s: %v", sessionID, err)
+			log.Printf("WARN Failed to get session: %v", err)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "session_id", sessionID)
-		ctx = context.WithValue(ctx, "session", session)
+		ctx := context.WithValue(r.Context(), "session", session)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
@@ -37,16 +36,15 @@ func (m *Middleware) SessionRequire(next http.HandlerFunc) http.HandlerFunc {
 
 func (m *Middleware) ActiveRequire(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, sessionID, err := m.session.GetSession(r)
+		session, err := m.session.GetSession(r)
 		if err != nil {
 			m.session.DeleteSession(w, r)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			log.Printf("WARN Failed to get session %s: %v", sessionID, err)
+			log.Printf("WARN Failed to get session: %v", err)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "session_id", sessionID)
-		ctx = context.WithValue(ctx, "session", session)
+		ctx := context.WithValue(r.Context(), "session", session)
 
 		if session.User.Status == "pending" {
 			http.Redirect(w, r, "/pending", http.StatusSeeOther)

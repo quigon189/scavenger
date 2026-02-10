@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type User struct {
 	Username string
 	Name     string
@@ -11,6 +13,7 @@ type User struct {
 }
 
 type Group struct {
-	ID   int
-	Name string
+	ID        int
+	Name      string
+	CreatedAt time.Time
 }

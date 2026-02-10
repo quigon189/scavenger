@@ -45,15 +45,34 @@ templ StudentRegistrationPage(groups []models.Group) {
 							<input type="password" class="form-control" name="password" required
 								placeholder="Придумайте пароль">
 							<div class="form-text">
-								Минимум 6 символов
+								Минимум 8 символов
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div class="mb-3">
-					<label class="form-label">ФИО *</label>
-					<input type="text" class="form-control" name="name" required placeholder="Фамилия Имя Отчество">
+				<div class="row">
+					<div class="col-md-6">
+						<div class="mb-3">
+							<label class="form-label">ФИО *</label>
+							<input type="text" class="form-control" name="name" required
+								placeholder="Фамилия Имя Отчество">
+							<div class="form-text">
+								Фамилия и имя обязательны
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="mb-3">
+							<label class="form-label">Электронная почта *</label>
+							<input type="text" class="form-control" name="email" required
+								placeholder="user@loacal.com">
+							<div class="form-text">
+								Электронная почта должны быть уникальная
+							</div>
+
+						</div>
+					</div>
 				</div>
 
 				<div class="mb-4">
