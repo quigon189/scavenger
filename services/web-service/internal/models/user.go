@@ -3,13 +3,15 @@ package models
 import "time"
 
 type User struct {
-	Username string
-	Name     string
-	Role     string
-	Email    string
-	Group    string
-	Status   string
-	GroupID  *int
+	ID        int
+	Username  string
+	Name      string
+	Role      string
+	Email     string
+	Group     string
+	Status    string
+	GroupID   *int
+	CreatedAt time.Time
 }
 
 type Group struct {

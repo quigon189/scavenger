@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"web-service/internal/models"
 	"web-service/internal/services"
 	"web-service/internal/session"
 	"web-service/internal/views/pages/admin"
@@ -23,7 +24,7 @@ func NewAdminHandler(session *session.SessionService, services *services.Service
 }
 
 func (h *AdminHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
-	session := r.Context().Value("session").(*session.UserSession)
+	session := getSession(r)
 
 	stats, err := h.services.Data.GetAdminDashboard(r.Context(), session.ID)
 	if err != nil {
@@ -34,7 +35,7 @@ func (h *AdminHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) Groups(w http.ResponseWriter, r *http.Request) {
-	session, _ := r.Context().Value("session").(*session.UserSession)
+	session := getSession(r)
 
 	groups, err := h.services.Data.GetGroups(r.Context())
 	if err != nil {
@@ -48,7 +49,7 @@ func (h *AdminHandler) Groups(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
-	session := r.Context().Value("session_id").(*session.UserSession)
+	session := getSession(r)
 	name := r.FormValue("name")
 
 	err := h.services.Data.CreateGroup(r.Context(), session.ID, name)
@@ -63,7 +64,7 @@ func (h *AdminHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
-	session := r.Context().Value("session_id").(*session.UserSession)
+	session := getSession(r)
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -81,4 +82,20 @@ func (h *AdminHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 
 	h.session.FlashSuccess(w, r, "Группа удалена")
 	http.Redirect(w, r, "/admin/groups", http.StatusSeeOther)
+}
+
+func (h *AdminHandler) Teachers(w http.ResponseWriter, r *http.Request) {
+	//_ = getSession(r)
+
+	teachers := []models.User{
+		models.User{
+			ID: 123,
+			Username: "test",
+			Name: "Test Test",
+			Email: "test@test",
+			Status: "active",
+		},
+	}
+
+	BaseWithNavbar(w,r,"Управление преподавателями", admin.TeachersPage(teachers))
 }
