@@ -5,14 +5,14 @@ import (
 	"log"
 	"net/http"
 
-	"web-service/internal/session"
+	"scavenger/internal/services/sessionservice"
 )
 
 type Middleware struct {
-	session *session.SessionService
+	session *sessionservice.SessionService
 }
 
-func NewMiddleware(session *session.SessionService) *Middleware {
+func NewMiddleware(session *sessionservice.SessionService) *Middleware {
 	return &Middleware{
 		session: session,
 	}

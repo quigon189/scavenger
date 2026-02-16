@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	"web-service/internal/models"
+	"scavenger/internal/models"
 )
 
 func GroupsPage(user models.User, groups []models.Group) templ.Component {

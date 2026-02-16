@@ -96,7 +96,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	groups, err := h.services.Data.GetGroups(r.Context())
+	groups, err := h.services.Data.GetAllGroups(r.Context())
 	if err != nil {
 		h.services.Session.FlashError(w, r, "Ошибка при загрузке групп")
 		log.Printf("ERR Failed to get groups: %v", err)

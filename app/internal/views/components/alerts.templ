@@ -1,8 +1,8 @@
 package components
 
-import "web-service/internal/session"
+import "scavneger/internal/sessionservice"
 
-templ Alerts(flashes ...session.Flash) {
+templ Alerts(flashes ...sessionservice.Flash) {
 if len(flashes) > 0 {
 <div aria-live="polite" aria-atomic="true" class="position-relative">
 	<div class="toast-container position-absolute top-0 start-50 translate-middle-x p-3">

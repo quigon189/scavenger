@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"scavenger/internal/middlewares"
+	"scavenger/internal/models"
 	"scavenger/internal/services"
 )
 
@@ -13,12 +14,11 @@ type Router struct {
 	mux        *http.ServeMux
 }
 
-func NewRouter() *Router {
+func NewRouter(services *services.Services) *Router {
 	router := &Router{
 		mux:        http.NewServeMux(),
-		session:    session,
-		services:   services.NewServices(dataClient, authClient),
-		middleware: middlewares.NewMiddleware(session),
+		services:   services,
+		middleware: middlewares.NewMiddleware(services.Session),
 	}
 
 	router.registerRoutes()
@@ -28,13 +28,13 @@ func NewRouter() *Router {
 	return router
 }
 
-func getSession(r *http.Request) *session.UserSession {
-	 return r.Context().Value("session_id").(*session.UserSession)
+func getSession(r *http.Request) *models.UserSession {
+	 return r.Context().Value("session_id").(*models.UserSession)
 }
 
 func (r *Router) registerRoutes() {
-	authHandler := NewAuthHandler(r.session, r.services)
-	AdminHandler := NewAdminHandler(r.session, r.services)
+	authHandler := NewAuthHandler(r.services)
+	AdminHandler := NewAdminHandler(r.services)
 
 	r.mux.HandleFunc("/", r.middleware.ActiveRequire(Home))
 	r.mux.HandleFunc("/pending", r.middleware.SessionRequire(PendingPage))

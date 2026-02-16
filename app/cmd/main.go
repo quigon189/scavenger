@@ -4,8 +4,10 @@ import (
 	"log"
 	"scavenger/internal/config"
 	"scavenger/internal/repositories/authrepo"
+	"scavenger/internal/repositories/datarepo"
 	"scavenger/internal/repositories/sessionrepo"
 	"scavenger/internal/services/authservice"
+	"scavenger/internal/services/dataservice"
 	"scavenger/pkg/postgres"
 	"scavenger/pkg/redis"
 )
@@ -23,11 +25,10 @@ func main() {
 		log.Fatalf("Failed to get postgres client: %v", err)
 	}
 
-	authService := authservice.NewAuthService(
-		authrepo.NewPgUserRepository(pgClient),
-		sessionrepo.NewSessionRepository(redisClient, cfg.SessionTTL),
-		cfg.SessionTTL,
-	)
+	authRepo := authrepo.NewPgUserRepository(pgClient)
+	dataRepo := datarepo.NewDataRepository(pgClient)
+	sessionRepo := sessionrepo.NewSessionRepository(redisClient, cfg.SessionTTL)
 
-
+	authService := authservice.NewAuthService(authRepo, sessionRepo, cfg.SessionTTL)
+	dataService := dataservice.NewDataService(*dataRepo)
 }

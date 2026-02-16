@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	"web-service/internal/models"
+	"scavenger/internal/models"
 )
 
 func Dashboard(user models.User, stats models.AdminDashboardStats) templ.Component {

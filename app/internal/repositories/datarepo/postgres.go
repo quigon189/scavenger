@@ -17,5 +17,6 @@ func NewDataRepository(db *pgxpool.Pool) *repositories.DataRepository {
 		Files:       postgres.NewFileRepository(db),
 		Groups:      postgres.NewGroupRepository(db),
 		Periods:     postgres.NewPeriodRepository(db),
+		Admin:       postgres.NewAdminRepo(db),
 	}
 }

@@ -23,6 +23,10 @@ type SessionRepo interface {
 	GetUserSessions(ctx context.Context, userID int) ([]string, error)
 }
 
+type AdminRepo interface {
+	GetAdminDashboard(ctx context.Context) (*models.AdminDashboard, error)
+}
+
 type StudentRepo interface {
 	Create(ctx context.Context, student *models.Student) error
 	GetByID(ctx context.Context, id int) (*models.Student, error)
@@ -110,4 +114,5 @@ type DataRepository struct {
 	Files       FileRepo
 	Groups      GroupRepo
 	Periods     PeriodRepo
+	Admin       AdminRepo
 }

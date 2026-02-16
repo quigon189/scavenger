@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"strconv"
 
-	"web-service/internal/models"
+	"scavenger/internal/models"
 )
 
 func StudentRegistrationPage(groups []models.Group) templ.Component {

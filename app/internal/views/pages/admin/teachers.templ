@@ -3,10 +3,10 @@ package admin
 import (
 "fmt"
 
-"web-service/internal/models"
+"scavenger/internal/models"
 )
 
-templ TeachersPage(teachers []models.User) {
+templ TeachersPage(teachers []models.Teacher) {
 <div class="container-fluid mt-4">
 	<div class="row mb-4">
 		<div class="col">
@@ -50,9 +50,9 @@ templ TeachersPage(teachers []models.User) {
 						<tr>
 							<td>{ fmt.Sprintf("%d", teacher.ID) }</td>
 							<td>
-								<strong>{ teacher.Name }</strong>
+								<strong>{ teacher.User.Name }</strong>
 							</td>
-							<td>{ teacher.Email }</td>
+							<td>{ teacher.User.Email }</td>
 							<td>
 								<small class="text-muted">{ teacher.CreatedAt.Format("02.01.2006 15:04") }</small>
 							</td>
