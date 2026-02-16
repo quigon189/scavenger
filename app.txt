@@ -1,0 +1,66 @@
+Текущий каталог: /home/quigon/scavenger/app
+├── cmd
+|   └── main.go
+├── go.mod
+├── internal
+|   ├── config
+|   |   └── config.go
+|   ├── models
+|   |   └── models.go
+|   └── services
+|       ├── auth
+|       |   └── postgres.go
+|       ├── data
+|       |   └── postgres.go
+|       ├── interfaces.go
+|       ├── session
+|       |   └── redis.go
+|       └── storage
+|           └── minio.go
+├── migrations
+└── pkg
+    ├── minio
+    |   └── client.go
+    ├── postgres
+    |   └── client.go
+    └── redis
+        └── client.go
+--------------------------
+Файл: /home/quigon/scavenger/app/cmd/main.go
+
+--------------------------
+Файл: /home/quigon/scavenger/app/go.mod
+module scavenger
+
+go 1.25.6
+
+--------------------------
+Файл: /home/quigon/scavenger/app/internal/config/config.go
+
+--------------------------
+Файл: /home/quigon/scavenger/app/internal/models/models.go
+
+--------------------------
+Файл: /home/quigon/scavenger/app/internal/services/auth/postgres.go
+
+--------------------------
+Файл: /home/quigon/scavenger/app/internal/services/data/postgres.go
+
+--------------------------
+Файл: /home/quigon/scavenger/app/internal/services/interfaces.go
+
+--------------------------
+Файл: /home/quigon/scavenger/app/internal/services/session/redis.go
+
+--------------------------
+Файл: /home/quigon/scavenger/app/internal/services/storage/minio.go
+
+--------------------------
+Файл: /home/quigon/scavenger/app/pkg/minio/client.go
+
+--------------------------
+Файл: /home/quigon/scavenger/app/pkg/postgres/client.go
+
+--------------------------
+Файл: /home/quigon/scavenger/app/pkg/redis/client.go
+
