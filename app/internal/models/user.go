@@ -16,6 +16,7 @@ type User struct {
 }
 
 type UserSession struct {
+	ID        string    `json:"-"`
 	User      User      `json:"user"`
 	CreatedAt time.Time `json:"created_at"`
 	ExpiresAt time.Time `json:"expires_at"`
@@ -32,6 +33,7 @@ type RegisterRequest struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
 	Role     string `json:"role"`
+	GroupID  *int   `json:"group_id"`
 }
 
 type AuthResponse struct {
