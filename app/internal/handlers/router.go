@@ -51,6 +51,8 @@ func (r *Router) registerRoutes() {
 	r.mux.HandleFunc("GET /admin/teachers", r.middleware.AdminRequire(AdminHandler.Teachers))
 	r.mux.HandleFunc("POST /admin/teachers/{id}/delete", r.middleware.AdminRequire(AdminHandler.DeleteTeacher))
 	r.mux.HandleFunc("POST /admin/teachers/create", r.middleware.AdminRequire(AdminHandler.CreateTeacher))
+
+	r.mux.HandleFunc("GET /admin/students", r.middleware.AdminRequire(AdminHandler.Students))
 }
 
 func (r *Router) Handler() http.Handler {

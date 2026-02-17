@@ -31,6 +31,7 @@ type StudentRepo interface {
 	Create(ctx context.Context, student *models.Student) error
 	GetByID(ctx context.Context, id int) (*models.Student, error)
 	GetByGroupID(ctx context.Context, groupID int) ([]models.Student, error)
+	GetByStatus(ctx context.Context, status string) ([]models.Student, error)
 	Update(ctx context.Context, student *models.Student) error
 	Delete(ctx context.Context, id int) error
 	GetAll(ctx context.Context) ([]models.Student, error)

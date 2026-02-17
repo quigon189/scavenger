@@ -74,3 +74,12 @@ func (s *DataService) GetAllStudents(ctx context.Context) ([]models.Student, err
 
 	return s.dataRepo.Students.GetAll(ctx)
 }
+
+func (s *DataService) GetStudentsByStatus(ctx context.Context, status string) ([]models.Student, error) {
+	_, err := s.RequireRole(ctx, "admin")
+	if err != nil {
+		return nil, err
+	}
+
+	return s.dataRepo.Students.GetByStatus(ctx, status)
+}

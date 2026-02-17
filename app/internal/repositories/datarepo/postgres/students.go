@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"context"
-	"scavenger/internal/models"
 	"fmt"
+	"scavenger/internal/models"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -89,6 +89,60 @@ WHERE s.id = $1
 	student.Group.ID = student.GroupID
 
 	return student, nil
+}
+
+func (r *StudentRepository) GetByStatus(ctx context.Context, status string) ([]models.Student, error) {
+	var query string
+	var rows pgx.Rows
+	var err error
+	if status != "" {
+		query = `
+SELECT u.id, u.name, u.username, u.email, u.created_at, u.group_id, u.status
+FROM auth.users u
+WHERE u.status = $1 AND u.role = 'student'
+	`
+	rows, err = r.db.Query(ctx, query, status)
+	} else {
+		query = `
+SELECT u.id, u.name, u.username, u.email, u.created_at, u.group_id, u.status
+FROM auth.users u
+WHERE u.role = 'student'
+	`
+	rows, err = r.db.Query(ctx, query)
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var students []models.Student
+
+	for rows.Next() {
+		var student models.Student
+
+		err := rows.Scan(
+			&student.User.ID,
+			&student.User.Name,
+			&student.User.Username,
+			&student.User.Email,
+			&student.User.CreatedAt,
+			&student.User.GroupID,
+			&student.User.Status,
+		)
+		if err != nil {
+			if err == pgx.ErrNoRows {
+				return nil, nil
+			}
+			return nil, fmt.Errorf("failed to scan student: %v", err)
+		}
+
+		student.User.ID = student.ID
+
+		students = append(students, student)
+
+	}
+
+	return students, nil
 }
 
 func (r *StudentRepository) GetByGroupID(ctx context.Context, groupID int) ([]models.Student, error) {

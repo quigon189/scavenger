@@ -21,7 +21,6 @@ type Teacher struct {
 	Disciplines []Discipline `json:"disciplines"`
 }
 
-
 type Student struct {
 	ID        int       `json:"id"`
 	GroupID   int       `json:"group_id"`
@@ -52,7 +51,7 @@ type Discipline struct {
 type Lab struct {
 	ID           int       `json:"id"`
 	DisciplineID int       `json:"discipline_id"`
-	MDFileID     int       `json:"md_file_id"`
+	MDContent    string    `json:"md_content"`
 	Name         string    `json:"name"`
 	Description  string    `json:"description"`
 	Deadline     time.Time `json:"deadline"`

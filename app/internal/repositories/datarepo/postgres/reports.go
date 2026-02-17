@@ -39,7 +39,7 @@ func (r *ReportRepository) GetByID(ctx context.Context, id int) (*models.LabRepo
 	query := `
 SELECT lr.id, lr.lab_id, lr.student_id, lr.status, lr.grade, 
        lr.comment, lr.teacher_note, lr.graded_at, lr.created_at, lr.updated_at,
-       l.id, l.discipline_id, l.md_file_id, l.name, l.description, l.deadline,
+       l.id, l.discipline_id, l.md_content, l.name, l.description, l.deadline,
        l.created_at, l.updated_at,
        s.id, s.group_id, s.created_at, s.updated_at,
        u.username, u.name, u.role
@@ -65,7 +65,7 @@ WHERE lr.id = $1
 		&report.UpdatedAt,
 		&report.Lab.ID,
 		&report.Lab.DisciplineID,
-		&report.Lab.MDFileID,
+		&report.Lab.MDContent,
 		&report.Lab.Name,
 		&report.Lab.Description,
 		&report.Lab.Deadline,
@@ -153,7 +153,7 @@ func (r *ReportRepository) GetByStudentID(ctx context.Context, studentID int) ([
 SELECT lr.id, lr.lab_id, lr.student_id, lr.status, lr.grade, 
        lr.comment, lr.teacher_note, lr.graded_at,
 	   lr.created_at, lr.updated_at,
-       l.id, l.discipline_id, l.md_file_id, l.name, l.description, l.deadline,
+       l.id, l.discipline_id, l.md_content, l.name, l.description, l.deadline,
        l.created_at, l.updated_at,
        d.name as discipline_name
 FROM data.lab_reports lr
@@ -187,7 +187,7 @@ ORDER BY lr.created_at DESC
 			&report.UpdatedAt,
 			&report.Lab.ID,
 			&report.Lab.DisciplineID,
-			&report.Lab.MDFileID,
+			&report.Lab.MDContent,
 			&report.Lab.Name,
 			&report.Lab.Description,
 			&report.Lab.Deadline,

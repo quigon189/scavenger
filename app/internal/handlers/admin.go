@@ -86,16 +86,16 @@ func (h *AdminHandler) Teachers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	BaseWithNavbar(w,r,"Управление преподавателями", admin.TeachersPage(teachers))
+	BaseWithNavbar(w, r, "Управление преподавателями", admin.TeachersPage(teachers))
 }
 
 func (h *AdminHandler) CreateTeacher(w http.ResponseWriter, r *http.Request) {
 
 	req := models.RegisterRequest{
-		Name: r.FormValue("name"),
+		Name:     r.FormValue("name"),
 		Username: r.FormValue("username"),
-		Email: r.FormValue("email"),	
-		Role: "teacher",	
+		Email:    r.FormValue("email"),
+		Role:     "teacher",
 		Password: r.FormValue("password"),
 	}
 
@@ -135,4 +135,15 @@ func (h *AdminHandler) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	h.services.Session.FlashSuccess(w, r, "Группа удалена")
 	http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
 
+}
+
+func (h *AdminHandler) Students(w http.ResponseWriter, r *http.Request) {
+	status := r.URL.Query().Get("status")
+	students, err := h.services.Data.GetStudentsByStatus(r.Context(), status)
+	if err != nil {
+		log.Printf("WARN Failed to get students: %v", err)
+		students = []models.Student{}
+	}
+
+	BaseWithNavbar(w, r, "Управление студентами", admin.StudentsPage(students, status))
 }

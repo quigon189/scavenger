@@ -20,14 +20,14 @@ func NewLabRepository(db *pgxpool.Pool) *LabRepository {
 
 func (r *LabRepository) Create(ctx context.Context, lab *models.Lab) error {
 	query := `
-INSERT INTO data.labs (discipline_id, md_file_id, name, description, deadline)
+INSERT INTO data.labs (discipline_id, md_content, name, description, deadline)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING id, created_at, updated_at
 	`
 
 	return r.db.QueryRow(ctx, query,
 		lab.DisciplineID,
-		lab.MDFileID,
+		lab.MDContent,
 		lab.Name,
 		lab.Description,
 		lab.Deadline,
@@ -40,7 +40,7 @@ RETURNING id, created_at, updated_at
 
 func (r *LabRepository) GetByID(ctx context.Context, id int) (*models.Lab, error) {
 	query := `
-SELECT l.id, l.discipline_id, l.md_file_id, l.name, l.description, l.deadline,
+SELECT l.id, l.discipline_id, l.md_content, l.name, l.description, l.deadline,
        l.created_at, l.updated_at,
        d.id, d.name, d.teacher_id, d.group_id, d.period_id, d.description,
        d.created_at, d.updated_at,
@@ -56,7 +56,7 @@ WHERE l.id = $1
 	err := r.db.QueryRow(ctx, query, id).Scan(
 		&lab.ID,
 		&lab.DisciplineID,
-		&lab.MDFileID,
+		&lab.MDContent,
 		&lab.Name,
 		&lab.Description,
 		&lab.Deadline,
@@ -92,7 +92,7 @@ WHERE l.id = $1
 
 func (r *LabRepository) GetByDisciplineID(ctx context.Context, disciplineID int) ([]models.Lab, error) {
 	query := `
-SELECT l.id, l.discipline_id, l.md_file_id, l.name, l.description, l.deadline,
+SELECT l.id, l.discipline_id, l.md_content, l.name, l.description, l.deadline,
        l.created_at, l.updated_at,
        f.id, f.uuid, f.filename, f.size, f.content_type, f.bucket, f.path, f.created_at
 FROM data.labs l
@@ -115,7 +115,7 @@ ORDER BY l.deadline
 		err := rows.Scan(
 			&lab.ID,
 			&lab.DisciplineID,
-			&lab.MDFileID,
+			&lab.MDContent,
 			&lab.Name,
 			&lab.Description,
 			&lab.Deadline,
@@ -143,7 +143,7 @@ ORDER BY l.deadline
 func (r *LabRepository) Update(ctx context.Context, lab *models.Lab) error {
 	query := `
 UPDATE data.labs
-SET discipline_id = $1, md_file_id = $2, name = $3, 
+SET discipline_id = $1, md_content = $2, name = $3, 
     description = $4, deadline = $5, updated_at = CURRENT_TIMESTAMP
 WHERE id = $6
 RETURNING updated_at
@@ -151,7 +151,7 @@ RETURNING updated_at
 
 	return r.db.QueryRow(ctx, query,
 		lab.DisciplineID,
-		lab.MDFileID,
+		lab.MDContent,
 		lab.Name,
 		lab.Description,
 		lab.Deadline,
