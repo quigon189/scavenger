@@ -36,8 +36,7 @@ func (h *AdminHandler) Groups(w http.ResponseWriter, r *http.Request) {
 
 	groups, err := h.services.Data.GetAllGroups(r.Context())
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при получении групп")
-		log.Printf("ERR Failed to get groups: %v", err)
+		h.services.Session.FlashError(w, r, "Ошибка при получении групп", err)
 		http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
 		return
 	}
@@ -50,7 +49,7 @@ func (h *AdminHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 
 	err := h.services.Data.CreateGroup(r.Context(), &models.Group{Name: name})
 	if err != nil {
-		h.services.Session.FlashError(w, r, err.Error())
+		h.services.Session.FlashError(w, r, "Ошибка при создании группы", err)
 		http.Redirect(w, r, "/admin/groups", http.StatusSeeOther)
 		return
 	}
@@ -63,14 +62,14 @@ func (h *AdminHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID группы")
+		h.services.Session.FlashError(w, r, "Неверный ID группы", err)
 		http.Redirect(w, r, "/admin/gruops", http.StatusSeeOther)
 		return
 	}
 
 	err = h.services.Data.DeleteGroup(r.Context(), id)
 	if err != nil {
-		h.services.Session.FlashError(w, r, err.Error())
+		h.services.Session.FlashError(w, r, "Ошибка удаления группы", err)
 		http.Redirect(w, r, "/admin/groups", http.StatusSeeOther)
 		return
 	}
@@ -80,13 +79,60 @@ func (h *AdminHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) Teachers(w http.ResponseWriter, r *http.Request) {
-
 	teachers, err := h.services.Data.GetAllTeachers(r.Context())
 	if err != nil {
-		h.services.Session.FlashError(w, r, err.Error())
+		h.services.Session.FlashError(w, r, "Ошибка при получении пользователей", err)
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
 		return
 	}
 
 	BaseWithNavbar(w,r,"Управление преподавателями", admin.TeachersPage(teachers))
+}
+
+func (h *AdminHandler) CreateTeacher(w http.ResponseWriter, r *http.Request) {
+
+	req := models.RegisterRequest{
+		Name: r.FormValue("name"),
+		Username: r.FormValue("username"),
+		Email: r.FormValue("email"),	
+		Role: "teacher",	
+		Password: r.FormValue("password"),
+	}
+
+	user, err := h.services.Auth.Register(r.Context(), &req)
+	if err != nil {
+		h.services.Session.FlashError(w, r, "Ошибка регистрации пользователя", err)
+		http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
+		return
+	}
+	err = h.services.Data.CreateTeacher(r.Context(), &models.Teacher{ID: user.ID})
+	if err != nil {
+		h.services.Session.FlashError(w, r, "Ошибка создания преподавателя", err)
+		http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
+		return
+	}
+
+	h.services.Session.FlashSuccess(w, r, "Учетная запись преподавателя создана")
+	http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
+}
+
+func (h *AdminHandler) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		h.services.Session.FlashError(w, r, "Неверный ID преподавателя", err)
+		http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
+		return
+	}
+
+	err = h.services.Data.DeleteTeacher(r.Context(), id)
+	if err != nil {
+		h.services.Session.FlashError(w, r, "Ошибка удаления преподавателя", err)
+		http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
+		return
+	}
+
+	h.services.Session.FlashSuccess(w, r, "Группа удалена")
+	http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
+
 }

@@ -29,7 +29,7 @@ func NewRouter(services *services.Services) *Router {
 }
 
 func getSession(r *http.Request) *models.UserSession {
-	 return r.Context().Value("session_id").(*models.UserSession)
+	 return r.Context().Value("session").(*models.UserSession)
 }
 
 func (r *Router) registerRoutes() {
@@ -43,10 +43,14 @@ func (r *Router) registerRoutes() {
 	r.mux.HandleFunc("/register", authHandler.Register)
 
 	r.mux.HandleFunc("/admin/dashboard", r.middleware.AdminRequire(AdminHandler.Dashboard))
+
 	r.mux.HandleFunc("GET /admin/groups", r.middleware.AdminRequire(AdminHandler.Groups))
-	r.mux.HandleFunc("GET /admin/teachers", r.middleware.AdminRequire(AdminHandler.Teachers))
 	r.mux.HandleFunc("POST /admin/groups/{id}/delete", r.middleware.AdminRequire(AdminHandler.DeleteGroup))
 	r.mux.HandleFunc("POST /admin/groups/create", r.middleware.AdminRequire(AdminHandler.CreateGroup))
+
+	r.mux.HandleFunc("GET /admin/teachers", r.middleware.AdminRequire(AdminHandler.Teachers))
+	r.mux.HandleFunc("POST /admin/teachers/{id}/delete", r.middleware.AdminRequire(AdminHandler.DeleteTeacher))
+	r.mux.HandleFunc("POST /admin/teachers/create", r.middleware.AdminRequire(AdminHandler.CreateTeacher))
 }
 
 func (r *Router) Handler() http.Handler {

@@ -7,8 +7,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewDataRepository(db *pgxpool.Pool) *repositories.DataRepository {
-	return &repositories.DataRepository{
+func NewDataRepository(db *pgxpool.Pool) repositories.DataRepository {
+	return repositories.DataRepository{
 		Students:    postgres.NewStudentRepository(db),
 		Teachers:    postgres.NewTeacherRepository(db),
 		Disciplines: postgres.NewDisciplineRepository(db),

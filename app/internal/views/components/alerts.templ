@@ -1,6 +1,6 @@
 package components
 
-import "scavneger/internal/sessionservice"
+import "scavenger/internal/services/sessionservice"
 
 templ Alerts(flashes ...sessionservice.Flash) {
 if len(flashes) > 0 {
@@ -12,13 +12,13 @@ if len(flashes) > 0 {
 			data-bs-autohide="true" data-bs-delay="10000" autoshow>
 			<div class={"toast-header text-white bg-"+string(flash.Type)}>
 				switch flash.Type {
-				case session.SuccessFlash:
+				case sessionservice.SuccessFlash:
 				<strong class="me-auto">Успех</strong>
-				case session.ErrorFlash:
+				case sessionservice.ErrorFlash:
 				<strong class="me-auto">Ошибка</strong>
-				case session.WarningFlash:
+				case sessionservice.WarningFlash:
 				<strong class="me-auto">Предупреждение</strong>
-				case session.InfoFlash:
+				case sessionservice.InfoFlash:
 				<strong class="me-auto">Уведомление</strong>
 				default:
 				<strong class="me-auto">Уведомление</strong>

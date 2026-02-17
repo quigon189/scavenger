@@ -19,8 +19,8 @@ templ Navbar(user models.User) {
 						<div class="dropdown-header text-muted small">
 							<div>Логин: { user.Username }</div>
 							<div>Роль: { user.Role }</div>
-							if user.Group != "" {
-							<div>Группа: { user.Group }</div>
+							if user.Group.Name != "" {
+							<div>Группа: { user.Group.Name }</div>
 							}
 						</div>
 					</li>

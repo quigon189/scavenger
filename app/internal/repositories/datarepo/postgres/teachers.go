@@ -19,16 +19,39 @@ func NewTeacherRepository(db *pgxpool.Pool) *TeacherRepository {
 }
 
 func (r *TeacherRepository) Create(ctx context.Context, teacher *models.Teacher) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
 	query := `
 INSERT INTO data.teachers (id)
 VALUES ($1)
 RETURNING created_at, updated_at
 	`
 
-	return r.db.QueryRow(ctx, query, teacher.ID).Scan(
+	err = tx.QueryRow(ctx, query, teacher.ID).Scan(
 		&teacher.CreatedAt,
 		&teacher.UpdatedAt,
 	)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	query = `
+UPDATE auth.users
+SET status = 'active'
+WHERE id = $1
+	`
+	
+	_, err = tx.Exec(ctx, query, teacher.ID)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	tx.Commit(ctx)
+	return nil
 }
 
 func (r *TeacherRepository) GetByID(ctx context.Context, id int) (*models.Teacher, error) {
@@ -65,7 +88,7 @@ WHERE t.id = $1
 func (r *TeacherRepository) GetAll(ctx context.Context) ([]models.Teacher, error) {
 	query := `
 SELECT t.id, t.created_at, t.updated_at,
-       u.username, u.name, u.role
+       u.username, u.name, u.email, u.role
 FROM data.teachers t
 JOIN auth.users u ON u.id = t.id
 ORDER BY u.name
@@ -88,6 +111,7 @@ ORDER BY u.name
 			&teacher.UpdatedAt,
 			&teacher.User.Username,
 			&teacher.User.Name,
+			&teacher.User.Email,
 			&teacher.User.Role,
 		)
 		if err != nil {
@@ -122,8 +146,22 @@ func (r *TeacherRepository) GetWithDisciplines(ctx context.Context, id int) (*mo
 }
 
 func (r *TeacherRepository) Delete(ctx context.Context, id int) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
 	query := `DELETE FROM data.teachers WHERE id = $1`
+	_, err = tx.Exec(ctx, query, id)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+	query = `DELETE FROM auth.users WHERE id = $1`
+	_, err = tx.Exec(ctx, query, id)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
 
-	_, err := r.db.Exec(ctx, query, id)
-	return err
+	return tx.Commit(ctx)
 }

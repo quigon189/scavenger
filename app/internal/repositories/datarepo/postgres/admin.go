@@ -23,8 +23,8 @@ SELECT
     (SELECT COUNT(*) FROM data.groups),
     (SELECT COUNT(*) FROM data.disciplines),
 	(SELECT COUNT(*) FROM data.labs),
-	(SELECT COUNT(*) FROM auth.users u WHERE u.status == 'pending' AND u.role == 'student'),
-	(SELECT COUNT(*) FROM data.lab_report r WHERE r.status == 'submitted');
+	(SELECT COUNT(*) FROM auth.users u WHERE u.status = 'pending' AND u.role = 'student'),
+	(SELECT COUNT(*) FROM data.lab_reports r WHERE r.status = 'submitted');
 	`
 
 	adminDashboard := &models.AdminDashboard{}

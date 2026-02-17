@@ -8,7 +8,7 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "scavneger/internal/sessionservice"
+import "scavenger/internal/services/sessionservice"
 
 func Alerts(flashes ...sessionservice.Flash) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -64,22 +64,22 @@ func Alerts(flashes ...sessionservice.Flash) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				switch flash.Type {
-				case session.SuccessFlash:
+				case sessionservice.SuccessFlash:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<strong class=\"me-auto\">Успех</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case session.ErrorFlash:
+				case sessionservice.ErrorFlash:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<strong class=\"me-auto\">Ошибка</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case session.WarningFlash:
+				case sessionservice.WarningFlash:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<strong class=\"me-auto\">Предупреждение</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case session.InfoFlash:
+				case sessionservice.InfoFlash:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<strong class=\"me-auto\">Уведомление</strong> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err

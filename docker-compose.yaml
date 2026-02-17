@@ -41,8 +41,8 @@ services:
       timeout: 5s
       retries: 5
 
-  auth-service:
-    build: ./services/auth-service
+  scavenger:
+    build: ./app
     ports:
       - "8081:8081"
     environment:
@@ -54,58 +54,24 @@ services:
       - REDIS_URL=redis:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_DB=0
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=scavenger
+      - MINIO_SECRET_KEY=${MINIO_PASSWORD}
+      - MINIO_BUCKET=scavenger-files
+      - MINIO_USE_SSL=false
+      - MINIO_SIGNED_URL_TTL=300
       - SESSION_TTL=86400
+      - COOKIE_SECRET=${COOKIE_SECRET}
+      - TIMEOUT=30
       - PORT:8081
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    restart: always
-
-  data-service:
-    build: ./services/data-service
-    ports:
-      - "8082:8082"
-    environment:
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=scavenger
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=scavenger
-      - MINIO_ENDPOINT=minio:9000
-      - MINIO_ACCESS_KEY=scavenger
-      - MINIO_SECRET_KEY=${MINIO_PASSWORD}
-      - MINIO_BUCKET=scavenger-files
-      - MINIO_USE_SSL=false
-      - REDIS_URL=redis:6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - REDIS_DB=0
-      - AUTH_SERVICE_URL=http://auth-service:8081
-      - PORT=8082
-    depends_on:
-      postgres:
-        condition: service_healthy
       minio:
         condition: service_started
-      auth-service:
-        condition: service_started
-
-  web-service:
-    build: ./services/web-service
-    ports:
-      - "8088:8080"
-    environment:
-      - REDIS_URL=redis:6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - REDIS_DB=0
-      - AUTH_URL=auth-service:8081
-      - DATA_URL=data-service:8082
-      - TIMEOUT=30
-      - PORT=8080
-    depends_on:
-      auth-service:
-        condition: service_started
+    restart: always
 
 volumes:
   postgres_data:

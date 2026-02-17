@@ -18,19 +18,41 @@ func NewStudentRepository(db *pgxpool.Pool) *StudentRepository {
 }
 
 func (r *StudentRepository) Create(ctx context.Context, student *models.Student) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
 	query := `
 INSERT INTO data.students (id, group_id)
 VALUES ($1, $2)
 RETURNING created_at, updated_at
 	`
 
-	return r.db.QueryRow(ctx, query,
+	err = tx.QueryRow(ctx, query,
 		student.ID,
 		student.GroupID,
 	).Scan(
 		&student.CreatedAt,
 		&student.UpdatedAt,
 	)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	query = `
+UPDATE auth.users
+SET status = 'active'
+WHERE id = $1
+	`
+	_, err = tx.Exec(ctx, query, student.ID)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	return tx.Commit(ctx)
 }
 
 func (r *StudentRepository) GetByID(ctx context.Context, id int) (*models.Student, error) {

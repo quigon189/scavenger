@@ -42,7 +42,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			prevLogin = username
-			h.services.Session.FlashError(w, r, "Не верный логин или пароль")
+			h.services.Session.FlashError(w, r, "Не верный логин или пароль", err)
 			log.Printf("WARN Failed to login user %s: %v", username, err)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
@@ -86,7 +86,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 			},
 		)
 		if err != nil {
-			h.services.Session.FlashError(w, r, fmt.Sprintf("Ошибка при создании пользователя: %s", err.Error()))
+			h.services.Session.FlashError(w, r, fmt.Sprintf("Ошибка при создании пользователя: %s", err.Error()), err)
 			http.Redirect(w, r, "/register", http.StatusSeeOther)
 		} else {
 			h.services.Session.FlashSuccess(w, r, fmt.Sprintf("Добро пожаловать, %s! Теперь вы можете выполнить вход.", user.Name))
@@ -98,7 +98,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	groups, err := h.services.Data.GetAllGroups(r.Context())
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при загрузке групп")
+		h.services.Session.FlashError(w, r, "Ошибка при загрузке групп", err)
 		log.Printf("ERR Failed to get groups: %v", err)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}

@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -19,7 +20,7 @@ func (m *Middleware) AdminRequire(next http.HandlerFunc) http.HandlerFunc {
 		ctx := context.WithValue(r.Context(), "session", session)
 
 		if session.User.Role != "admin" {
-			m.session.FlashError(w, r, "Доступ запрещен. Требуются права администратора")
+			m.session.FlashError(w, r, "Доступ запрещен. Требуются права администратора", fmt.Errorf("Access denied"))
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}

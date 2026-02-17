@@ -49,3 +49,12 @@ func (s *DataService) GetAllTeachers(ctx context.Context) ([]models.Teacher, err
 
 	return s.dataRepo.Teachers.GetAll(ctx)
 }
+
+func (s *DataService) DeleteTeacher(ctx context.Context, id int) error {
+	_, err := s.RequireRole(ctx, "admin")
+	if err != nil {
+		return err
+	}
+
+	return s.dataRepo.Teachers.Delete(ctx, id)
+}

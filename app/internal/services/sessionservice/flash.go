@@ -47,7 +47,8 @@ func (s *SessionService) FlashSuccess(w http.ResponseWriter, r *http.Request, me
 	}
 }
 
-func (s *SessionService) FlashError(w http.ResponseWriter, r *http.Request, message string) {
+func (s *SessionService) FlashError(w http.ResponseWriter, r *http.Request, message string, e error) {
+	log.Printf("ERR %s: %v",message, e)
 	err := s.AddFlash(w, r, Flash{
 		Type:    ErrorFlash,
 		Message: message,

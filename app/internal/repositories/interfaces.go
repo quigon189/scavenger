@@ -40,6 +40,7 @@ type TeacherRepo interface {
 	Create(ctx context.Context, teacher *models.Teacher) error
 	GetByID(ctx context.Context, id int) (*models.Teacher, error)
 	GetAll(ctx context.Context) ([]models.Teacher, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type DisciplineRepo interface {

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -31,6 +32,8 @@ type MinioConfig struct {
 	SecretKey string
 	Bucket    string
 	UseSSL    bool
+
+	SignedURLTTL int
 }
 
 type Config struct {
@@ -38,8 +41,9 @@ type Config struct {
 	Redis    RedisConfig
 	Minio    MinioConfig
 
-	SessionTTL time.Duration
-	Port       string
+	CookieSecret string
+	SessionTTL   time.Duration
+	Port         string
 }
 
 func Load() *Config {
@@ -68,6 +72,15 @@ func Load() *Config {
 			Password: getEnv("REDIS_PASSWORD", "password"),
 			DB:       redisDB,
 		},
+		Minio: MinioConfig{
+			Endpoint:  getEnv("MINIO_ENDPOINT", "minio:9000"),
+			AccessKey: getEnv("MINIO_ACCESS_KEY", "minio"),
+			SecretKey: getEnv("MINIO_SECRET_KEY", ""),
+			Bucket:    getEnv("MINIO_BUCKET", "files"),
+			UseSSL:    getBoolValue("MINIO_USE_SSL", false),
+			SignedURLTTL: getIntEnv("MINIO_SIGNED_URL_TTL", 300),
+		},
+		CookieSecret:  getEnv("COOKIE_SECRET", "secret-key"),
 		SessionTTL: time.Duration(sessionTTL) * time.Second,
 		Port:       getEnv("PORT", "8081"),
 	}
@@ -83,6 +96,37 @@ func (c *PosetgresConfig) GetDatabaseURL() string {
 		c.DB,
 	)
 }
+
+func getIntEnv(key string, defaultValue int) int {
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		return defaultValue
+	}
+
+	intValue, err := strconv.Atoi(value)
+	if err != nil {
+		log.Printf("WARN Failed to parse int env %s: %v", key, err)
+		return defaultValue
+	}
+
+	return intValue
+}
+
+func getBoolValue(key string, defaultValue bool) bool {
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		return defaultValue
+	}
+
+	boolValue, err := strconv.ParseBool(value)
+	if err != nil {
+		log.Printf("WARN Failed to parse bool env %s: %v", key, err)
+		return defaultValue
+	}
+
+	return boolValue
+}
+
 
 func getEnv(key, defaultValue string) string {
 	value, exists := os.LookupEnv(key)
