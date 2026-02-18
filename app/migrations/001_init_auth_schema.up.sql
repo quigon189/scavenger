@@ -15,15 +15,20 @@ CREATE TABLE auth.users (
 	CHECK (status IN ('pending', 'active', 'blocked'))
 );
 
--- admin admin123
--- stud stud123
--- teach teach123
-INSERT INTO auth.users (username, password_hash, name, email, role, status, group_id) VALUES
-    ('admin', '$2a$10$UeSM2lg6ALPQnjc/d2R3/Ou4xSZanVeBsIaxjkgYwMwDOvoGqD1bq', 'Admin', 'admin@localhost', 'admin', 'active', NULL),
-    ('stud', '$2a$10$VZC0.fidHnzEqCqZeTDzSeYUfy4Rll9gZE/saEB9Mazkysfk/OTKe', 'Student', 'stud@localhost', 'student', 'active', 1),
-    ('teach', '$2a$10$9lo5QPzCXB/sIej/VLclHumVos6pifEkUmvKN13pyXtOAGogv3FT.', 'Teacher', 'teach@localhost', 'teacher', 'active', NULL);
+CREATE TABLE auth.registration_codes (
+	code VARCHAR(8) PRIMARY KEY,
+	name VARCHAR(100) NOT NULL,
+	email VARCHAR(100) NOT NULL,
+	role VARCHAR(20) NOT NULL CHECK (role IN ('student', 'teacher', 'admin')),
+	group_id INT,
+	expires_at TIMESTAMP NOT NULL
+);
 
+-- admin admin123
+INSERT INTO auth.users (username, password_hash, name, email, role, status, group_id) VALUES
+    ('admin', '$2a$10$UeSM2lg6ALPQnjc/d2R3/Ou4xSZanVeBsIaxjkgYwMwDOvoGqD1bq', 'Admin', 'admin@localhost', 'admin', 'active', NULL);
 
 CREATE INDEX idx_users_username ON auth.users(username);
 CREATE INDEX idx_users_email ON auth.users(email);
 CREATE INDEX idx_users_role ON auth.users(role);
+CREATE INDEX idx_code ON auth.registration_codes(code);

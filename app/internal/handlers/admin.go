@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"scavenger/internal/models"
 	"scavenger/internal/services"
@@ -138,12 +140,83 @@ func (h *AdminHandler) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) Students(w http.ResponseWriter, r *http.Request) {
-	status := r.URL.Query().Get("status")
-	students, err := h.services.Data.GetStudentsByStatus(r.Context(), status)
+	students, err := h.services.Data.GetAllStudents(r.Context())
 	if err != nil {
 		log.Printf("WARN Failed to get students: %v", err)
 		students = []models.Student{}
 	}
 
-	BaseWithNavbar(w, r, "Управление студентами", admin.StudentsPage(students, status))
+	BaseWithNavbar(w, r, "Управление студентами", admin.StudentsPage(students))
+}
+
+func (h *AdminHandler) RegistrationCodes(w http.ResponseWriter, r *http.Request) {
+	codes, err := h.services.Auth.GetAllCodes(r.Context())
+	if err != nil {
+		log.Printf("WARN Failed to get registration codes: %v", err)
+		codes = []models.RegistrationCode{}
+	}
+
+	groups, _ := h.services.Data.GetAllGroups(r.Context())
+
+	BaseWithNavbar(w, r, "Коды регистрации", admin.RegistrationCodesPage(codes, groups))
+}
+
+func (h *AdminHandler) CreateCode(w http.ResponseWriter, r *http.Request) {
+	name := r.FormValue("name")
+	email := r.FormValue("email")
+	role := r.FormValue("role")
+	groupIDStr := r.FormValue("group_id")
+
+	var groupID *int
+	if role == "student" {
+		if groupIDStr != "" {
+			id, err := strconv.Atoi(groupIDStr)
+			if err == nil {
+				groupID = &id
+			}
+		} else {
+			h.services.Session.FlashError(w, r, "не выбрана группа", fmt.Errorf("group not set"))
+			http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)
+			return
+		}
+	}
+
+	code := &models.RegistrationCode{
+		Name:      name,
+		Email:     email,
+		Role:      role,
+		GroupID:   groupID,
+		ExpiresAt: time.Now().Add(24 * 7 * time.Hour),
+	}
+
+	err := h.services.Auth.GenerateCode(r.Context(), code)
+	if err != nil {
+		log.Printf("ERROR Failed to generate code: %v", err)
+		h.services.Session.FlashError(w, r, "Ошибка при генерации кода: ", err)
+	} else {
+		// Сохраняем сгенерированный код в сессии, чтобы показать в модалке
+		h.services.Session.FlashSuccess(w, r, "Код успешно сгенерирован")
+	}
+
+	http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)
+}
+
+func (h *AdminHandler) RevokeCode(w http.ResponseWriter, r *http.Request) {
+
+    code := r.PathValue("code")
+    if code == "" {
+        h.services.Session.FlashError(w, r, "Код не указан", fmt.Errorf("bad code"))
+        http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)
+        return
+    }
+
+	err := h.services.Auth.RevokeCode(r.Context(), code)
+    if err != nil {
+        log.Printf("ERROR Failed to revoke code %s: %v", code, err)
+        h.services.Session.FlashError(w, r, "Ошибка при отзыве кода: "+err.Error(), err)
+    } else {
+        h.services.Session.FlashSuccess(w, r, "Код успешно отозван")
+    }
+
+    http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)
 }

@@ -83,7 +83,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(len(reports))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 49, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 49, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -96,7 +96,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(countReportsByStatus(reports, "submitted"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 55, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 55, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(countReportsByStatus(reports, "graded"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 61, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 61, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -128,7 +128,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(disc.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 94, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 94, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -141,7 +141,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(disc.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 94, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 94, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -159,7 +159,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(disc.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 96, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 96, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -172,7 +172,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(disc.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 96, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 96, Col: 48}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -197,7 +197,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(lab.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 107, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 107, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -210,7 +210,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 107, Col: 55}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 107, Col: 55}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -228,7 +228,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(lab.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 109, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 109, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -241,7 +241,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 109, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 109, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -382,7 +382,7 @@ func reportsPage(disciplines []models.Discipline, reports []models.LabReport, fi
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(filterParams.StudentSearch)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 189, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 189, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -469,7 +469,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(len(reports))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 269, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 269, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -487,7 +487,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(buildSortURL(filterParams, "student"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 280, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 280, Col: 85}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -517,7 +517,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(buildSortURL(filterParams, "discipline"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 295, Col: 88}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 295, Col: 88}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -547,7 +547,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(buildSortURL(filterParams, "uploaded_at"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 310, Col: 89}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 310, Col: 89}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -577,7 +577,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(buildSortURL(filterParams, "grade"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 325, Col: 83}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 325, Col: 83}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -612,7 +612,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(report.Student.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 344, Col: 69}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 344, Col: 69}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -625,7 +625,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(report.Student.GroupName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 347, Col: 99}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 347, Col: 99}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -638,7 +638,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var23 string
 				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(report.Discipline.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 349, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 349, Col: 64}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 				if templ_7745c5c3_Err != nil {
@@ -651,7 +651,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(report.Lab.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 351, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 351, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -664,7 +664,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var25 string
 				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(report.Lab.FormatDeadline())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 354, Col: 83}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 354, Col: 83}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
@@ -677,7 +677,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(report.UploadedAt.Format("02.01.2006 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 358, Col: 86}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 358, Col: 86}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -690,7 +690,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(formatTimeAgo(report.UploadedAt))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 360, Col: 100}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 360, Col: 100}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -712,7 +712,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var29 string
 				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var28).String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 1, Col: 0}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 1, Col: 0}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 				if templ_7745c5c3_Err != nil {
@@ -725,7 +725,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(report.GetStatusText())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 364, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 364, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 				if templ_7745c5c3_Err != nil {
@@ -743,7 +743,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 					var templ_7745c5c3_Var31 string
 					templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(report.Grade)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 369, Col: 89}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 369, Col: 89}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 					if templ_7745c5c3_Err != nil {
@@ -766,7 +766,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 				var templ_7745c5c3_Var32 templ.SafeURL
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/reports/" + strconv.Itoa(report.ID) + "/review")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 376, Col: 109}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 376, Col: 109}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
@@ -794,7 +794,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 					var templ_7745c5c3_Var33 string
 					templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(buildPageURL(filterParams, filterParams.Page-1))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 396, Col: 97}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 396, Col: 97}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 					if templ_7745c5c3_Err != nil {
@@ -814,7 +814,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 						var templ_7745c5c3_Var34 string
 						templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(buildPageURL(filterParams, i))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 407, Col: 77}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 407, Col: 77}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 						if templ_7745c5c3_Err != nil {
@@ -827,7 +827,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 						var templ_7745c5c3_Var35 string
 						templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(i)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 409, Col: 43}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 409, Col: 43}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 						if templ_7745c5c3_Err != nil {
@@ -845,7 +845,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 						var templ_7745c5c3_Var36 string
 						templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(buildPageURL(filterParams, i))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 415, Col: 77}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 415, Col: 77}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 						if templ_7745c5c3_Err != nil {
@@ -858,7 +858,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 						var templ_7745c5c3_Var37 string
 						templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(i)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 417, Col: 43}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 417, Col: 43}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 						if templ_7745c5c3_Err != nil {
@@ -878,7 +878,7 @@ func ReportsTable(reports []models.LabReport, filterParams models.ReportFilterPa
 					var templ_7745c5c3_Var38 string
 					templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(buildPageURL(filterParams, filterParams.Page+1))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/app/views/admin_reports.templ`, Line: 427, Col: 97}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `old/views/admin_reports.templ`, Line: 427, Col: 97}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 					if templ_7745c5c3_Err != nil {

@@ -36,11 +36,14 @@ func (r *Router) registerRoutes() {
 	authHandler := NewAuthHandler(r.services)
 	AdminHandler := NewAdminHandler(r.services)
 
-	r.mux.HandleFunc("/", r.middleware.ActiveRequire(Home))
-	r.mux.HandleFunc("/pending", r.middleware.SessionRequire(PendingPage))
+	r.mux.HandleFunc("/", r.middleware.SessionRequire(Home))
 	r.mux.HandleFunc("/login", authHandler.Login)
 	r.mux.HandleFunc("POST /logout", r.middleware.SessionRequire(authHandler.Logout))
-	r.mux.HandleFunc("/register", authHandler.Register)
+
+	r.mux.HandleFunc("GET /register", authHandler.EnterCode)
+	r.mux.HandleFunc("POST /register", authHandler.VerifyCode)
+	r.mux.HandleFunc("GET /register/complete", authHandler.RegisterComplete)
+	r.mux.HandleFunc("POST /register/complete", authHandler.RegisterCompletePost)
 
 	r.mux.HandleFunc("/admin/dashboard", r.middleware.AdminRequire(AdminHandler.Dashboard))
 
@@ -53,6 +56,10 @@ func (r *Router) registerRoutes() {
 	r.mux.HandleFunc("POST /admin/teachers/create", r.middleware.AdminRequire(AdminHandler.CreateTeacher))
 
 	r.mux.HandleFunc("GET /admin/students", r.middleware.AdminRequire(AdminHandler.Students))
+
+	r.mux.HandleFunc("GET /admin/codes", r.middleware.AdminRequire(AdminHandler.RegistrationCodes))
+	r.mux.HandleFunc("POST /admin/codes/generate", r.middleware.AdminRequire(AdminHandler.CreateCode))
+	r.mux.HandleFunc("POST /admin/codes/{code}/revoke", r.middleware.AdminRequire(AdminHandler.RevokeCode))
 }
 
 func (r *Router) Handler() http.Handler {

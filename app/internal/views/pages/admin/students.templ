@@ -6,7 +6,7 @@ import (
 "scavenger/internal/models"
 )
 
-templ StudentsPage(students []models.Student, currentStatus string) {
+templ StudentsPage(students []models.Student) {
 <div class="container-fluid mt-4">
 	<div class="row mb-4">
 		<div class="col">
@@ -14,30 +14,6 @@ templ StudentsPage(students []models.Student, currentStatus string) {
 				<i class="fas fa-users me-2"></i>Управление студентами
 			</h1>
 			<p class="text-muted">Подтверждение регистрации и управление студентами</p>
-		</div>
-		<div class="col-auto">
-			<div class="btn-group" role="group">
-				if currentStatus=="" {
-				<a href="/admin/students" class="btn btn-primary">Все</a>
-				} else {
-				<a href="/admin/students" class="btn btn-outline-primary">Все</a>
-				}
-				if currentStatus=="pending" {
-				<a href="/admin/students?status=pending" class="btn btn-warning">Ожидают</a>
-				} else {
-				<a href="/admin/students?status=pending" class="btn btn-outline-warning">Ожидают</a>
-				}
-				if currentStatus=="active" {
-				<a href="/admin/students?status=active" class="btn btn-success">Активные</a>
-				} else {
-				<a href="/admin/students?status=active" class="btn btn-outline-success">Активные</a>
-				}
-				if currentStatus=="blocked" {
-				<a href="/admin/students?status=blocked" class="btn btn-danger">Заблокированные</a>
-				} else {
-				<a href="/admin/students?status=blocked" class="btn btn-outline-danger">Заблокированные</a>
-				}
-			</div>
 		</div>
 	</div>
 
@@ -48,15 +24,7 @@ templ StudentsPage(students []models.Student, currentStatus string) {
 				<i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
 				<h4>Студенты не найдены</h4>
 				<p class="text-muted">
-					if currentStatus == "pending" {
-					"Нет студентов, ожидающих подтверждения"
-					} else if currentStatus == "active" {
-					"Нет активных студентов"
-					} else if currentStatus == "blocked" {
-					"Нет заблокированных студентов"
-					} else {
 					"В системе пока нет студентов"
-					}
 				</p>
 			</div>
 			} else {
@@ -69,7 +37,6 @@ templ StudentsPage(students []models.Student, currentStatus string) {
 							<th>Логин</th>
 							<th>Email</th>
 							<th>Группа</th>
-							<th>Статус</th>
 							<th>Дата регистрации</th>
 							<th>Действия</th>
 						</tr>
@@ -87,51 +54,10 @@ templ StudentsPage(students []models.Student, currentStatus string) {
 								<span class="badge bg-secondary">{ fmt.Sprintf("Группа %d", student.Group.Name) }</span>
 							</td>
 							<td>
-								if student.User.Status == "pending" {
-								<span class="badge bg-warning">Ожидает подтверждения</span>
-								} else if student.User.Status == "active" {
-								<span class="badge bg-success">Активен</span>
-								} else {
-								<span class="badge bg-danger">Заблокирован</span>
-								}
-							</td>
-							<td>
 								<small class="text-muted">{ student.CreatedAt.Format("02.01.2006 15:04") }</small>
 							</td>
 							<td>
 								<div class="btn-group btn-group-sm" role="group">
-									if student.User.Status == "pending" {
-									<form method="POST" action={ fmt.Sprintf("/admin/students/%d/status", student.ID) }
-										class="d-inline">
-										<input type="hidden" name="status" value="active">
-										<button type="submit" class="btn btn-success btn-sm">
-											<i class="fas fa-check me-1"></i>Подтвердить
-										</button>
-									</form>
-									<form method="POST" action={ fmt.Sprintf("/admin/students/%d/status", student.ID) }
-										class="d-inline">
-										<input type="hidden" name="status" value="blocked">
-										<button type="submit" class="btn btn-danger btn-sm">
-											<i class="fas fa-ban me-1"></i>Отклонить
-										</button>
-									</form>
-									} else if student.User.Status == "active" {
-									<form method="POST" action={ fmt.Sprintf("/admin/students/%d/status", student.ID) }
-										class="d-inline">
-										<input type="hidden" name="status" value="blocked">
-										<button type="submit" class="btn btn-danger btn-sm">
-											<i class="fas fa-ban me-1"></i>Заблокировать
-										</button>
-									</form>
-									} else {
-									<form method="POST" action={ fmt.Sprintf("/admin/students/%d/status", student.ID) }
-										class="d-inline">
-										<input type="hidden" name="status" value="active">
-										<button type="submit" class="btn btn-success btn-sm">
-											<i class="fas fa-check me-1"></i>Активировать
-										</button>
-									</form>
-									}
 								</div>
 							</td>
 						</tr>

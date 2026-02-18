@@ -31,6 +31,48 @@ func NewSessionService(sessionRepo *sessionrepo.SessionRepository, cookieStore *
 	}
 }
 
+func (s *SessionService) SetCodeCookie(w http.ResponseWriter,r *http.Request, code *models.RegistrationCode) {
+	session, _ := s.cookieStore.Get(r, sessionKey)
+	session.Values["reg_code"] = code.Code
+	session.Values["reg_name"] = code.Name
+	session.Values["reg_email"] = code.Email
+	session.Values["reg_role"] = code.Role
+	if code.GroupID != nil {
+		session.Values["reg_group_id"] = *code.GroupID
+	}
+
+	session.Save(r, w)
+}
+
+func (s *SessionService) GetCodeCookie(w http.ResponseWriter, r *http.Request) (*models.RegistrationCode, error) {
+	session, _ := s.cookieStore.Get(r, sessionKey)
+	code := &models.RegistrationCode{}
+	var ok bool
+	code.Code, ok = session.Values["reg_code"].(string)
+	if !ok {
+		return nil, fmt.Errorf("failed get reg_code from cookie")
+	}
+	code.Name = session.Values["reg_name"].(string)
+	code.Email = session.Values["reg_email"].(string)
+	code.Role = session.Values["reg_role"].(string)
+	regGroupID, hasGroup := session.Values["reg_group_id"].(int)
+	if hasGroup {
+		code.GroupID = &regGroupID
+	}
+
+	return code, nil
+}
+
+func (s *SessionService) DeleteCodeCookie(w http.ResponseWriter, r *http.Request) {
+	session, _ := s.cookieStore.Get(r ,sessionKey)
+	delete(session.Values, "reg_code")
+	delete(session.Values, "reg_name")
+	delete(session.Values, "reg_email")
+	delete(session.Values, "reg_role")
+	delete(session.Values, "reg_group_id")
+	session.Save(r, w)
+}
+
 func (s *SessionService) SetSessionCockie(w http.ResponseWriter, r *http.Request, sessionID string, expires_at time.Time) {
 	session, err := s.cookieStore.Get(r, sessionKey)
 	if err != nil {

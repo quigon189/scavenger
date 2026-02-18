@@ -8,12 +8,6 @@ import (
 )
 
 func (s *DataService) CreateTeacher(ctx context.Context, teacher *models.Teacher) error {
-	// Только админ может создавать преподавателей
-	_, err := s.RequireRole(ctx, "admin")
-	if err != nil {
-		return err
-	}
-
 	return s.dataRepo.Teachers.Create(ctx, teacher)
 }
 

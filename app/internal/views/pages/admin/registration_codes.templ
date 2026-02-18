@@ -1,0 +1,184 @@
+package admin
+
+import (
+"time"
+"scavenger/internal/models"
+"strconv"
+)
+
+templ RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Group) {
+<div class="container-fluid mt-4">
+	<div class="row mb-4">
+		<div class="col">
+			<h1 class="h2">
+				<i class="fas fa-qrcode me-2"></i>Коды регистрации
+			</h1>
+			<p class="text-muted">Управление пригласительными кодами для регистрации пользователей</p>
+		</div>
+		<div class="col-auto">
+			<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateCodeModal">
+				<i class="fas fa-plus-circle me-2"></i>Сгенерировать код
+			</button>
+		</div>
+	</div>
+
+	<!-- Таблица с кодами -->
+	<div class="card">
+		<div class="card-body">
+			if len(codes) == 0 {
+			<div class="text-center py-5">
+				<i class="fas fa-qrcode fa-3x text-muted mb-3"></i>
+				<h4>Коды не найдены</h4>
+				<p class="text-muted">Сгенерируйте первый пригласительный код</p>
+				<button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#generateCodeModal">
+					<i class="fas fa-plus-circle me-2"></i>Сгенерировать код
+				</button>
+			</div>
+			} else {
+			<div class="table-responsive">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th>Код</th>
+							<th>Имя</th>
+							<th>Email</th>
+							<th>Роль</th>
+							<th>Группа</th>
+							<th>Срок действия</th>
+							<th>Статус</th>
+							<th>Действия</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, code := range codes {
+						<tr>
+							<td><code>{ code.Code }</code></td>
+							<td>{ code.Name }</td>
+							<td>{ code.Email }</td>
+							<td>
+								if code.Role == "student" {
+								<span class="badge bg-info">Студент</span>
+								} else if code.Role == "teacher" {
+								<span class="badge bg-success">Преподаватель</span>
+								} else {
+								<span class="badge bg-secondary">{ code.Role }</span>
+								}
+							</td>
+							<td>
+								if code.GroupID != nil {
+								<span class="badge bg-warning">Группа { strconv.Itoa(*code.GroupID) }</span>
+								} else {
+								<span class="text-muted">—</span>
+								}
+							</td>
+							<td>
+								<small class="text-muted">{ code.ExpiresAt.Format("02.01.2006 15:04") }</small>
+							</td>
+							<td>
+								<span class="badge bg-secondary">{ code.ExpiresAt.Format("02.01.2006") }</span>
+							</td>
+							<td>
+								<form method="POST" action={ "/admin/codes/" + code.Code + "/revoke" } class="d-inline"
+									onsubmit="return confirm('Отозвать этот код?')">
+									<button type="submit" class="btn btn-sm btn-outline-danger">
+										<i class="fas fa-ban me-1"></i>Отозвать
+									</button>
+								</form>
+							</td>
+						</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			}
+		</div>
+	</div>
+</div>
+
+<!-- Модальное окно генерации кода -->
+<div class="modal fade" id="generateCodeModal" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Генерация пригласительного кода</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<form method="POST" action="/admin/codes/generate">
+				<div class="modal-body">
+					<div class="mb-3">
+						<label class="form-label">Имя *</label>
+						<input type="text" class="form-control" name="name" required placeholder="Иванов Иван Иванович">
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Email *</label>
+						<input type="email" class="form-control" name="email" required placeholder="user@example.com">
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Роль *</label>
+						<select class="form-select" name="role" required id="roleSelect" onchange="toggleGroupField()">
+							<option value="">Выберите роль</option>
+							<option value="student">Студент</option>
+							<option value="teacher">Преподаватель</option>
+						</select>
+					</div>
+					<div class="mb-3" id="groupField" style="display: none;">
+						<label class="form-label">Группа</label>
+						<select class="form-select" name="group_id">
+							<option value="">Не выбрана</option>
+							for _, group := range groups {
+							<option value={ strconv.Itoa(group.ID) }>{ group.Name }</option>
+							}
+						</select>
+						<div class="form-text">Выберите группу для студента</div>
+					</div>
+					<script>
+						function toggleGroupField() {
+							var role = document.getElementById('roleSelect').value;
+							var groupField = document.getElementById('groupField');
+							if (role === 'student') {
+								groupField.style.display = 'block';
+							} else {
+								groupField.style.display = 'none';
+							}
+						}
+					</script>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+					<button type="submit" class="btn btn-primary">Сгенерировать</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Модальное окно для показа сгенерированного кода (если есть в сессии) -->
+if flashCode, ok := ctx.Value("last_generated_code").(string); ok {
+<div class="modal fade" id="codeGeneratedModal" tabindex="-1" data-bs-backdrop="static">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header bg-success text-white">
+				<h5 class="modal-title">Код успешно создан</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body text-center">
+				<p>Сохраните этот код, он будет показан только один раз:</p>
+				<div class="display-4 fw-bold p-3 bg-light border rounded">
+					<code>{ flashCode }</code>
+				</div>
+				<p class="text-muted mt-3">
+					Срок действия: { ctx.Value("last_code_expires").(time.Time).Format("02.01.2006 15:04") }
+				</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	var myModal = new bootstrap.Modal(document.getElementById('codeGeneratedModal'));
+	myModal.show();
+</script>
+}
+}

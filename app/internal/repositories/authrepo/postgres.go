@@ -18,11 +18,93 @@ func NewPgUserRepository(db *pgxpool.Pool) *PgUserRepo {
 	return &PgUserRepo{db: db}
 }
 
+func (r *PgUserRepo) CreateCode(ctx context.Context, code *models.RegistrationCode) error {
+	query := `
+	INSERT INTO auth.registration_codes (code, name, email, role, group_id, expires_at)
+	VALUES ($1, $2, $3, $4, $5, $6)
+	`
+
+	_, err := r.db.Exec(ctx, query,
+		code.Code,
+		code.Name,
+		code.Email,
+		code.Role,
+		code.GroupID,
+		code.ExpiresAt,
+	)
+	return err
+}
+
+func (r *PgUserRepo) GetCode(ctx context.Context, codeStr string) (*models.RegistrationCode, error) {
+	query := `
+	SELECT code, name, email, role, group_id, expires_at
+	FROM auth.registration_codes
+	WHERE code = $1
+	`
+
+	code := models.RegistrationCode{}
+	err := r.db.QueryRow(ctx, query, codeStr).Scan(
+		&code.Code,
+		&code.Name,
+		&code.Email,
+		&code.Role,
+		&code.GroupID,
+		&code.ExpiresAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &code, nil
+}
+
+func (r *PgUserRepo) GetAllCodes(ctx context.Context) ([]models.RegistrationCode, error) {
+	query := `
+	SELECT code, name, email, role, group_id, expires_at
+	FROM auth.registration_codes
+	`
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		if errors.Is(pgx.ErrNoRows, err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	codes := []models.RegistrationCode{}
+	for rows.Next() {
+		code := models.RegistrationCode{}
+		err := rows.Scan(
+			&code.Code,
+			&code.Name,
+			&code.Email,
+			&code.Role,
+			&code.GroupID,
+			&code.ExpiresAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		codes = append(codes, code)
+	}
+	return codes, nil
+}
+
+func (r *PgUserRepo) DeleteCode(ctx context.Context, code string) error {
+	query := `
+	DELETE FROM auth.registration_codes
+	WHERE code = $1
+	`
+
+	_, err := r.db.Exec(ctx, query, code)
+	return err
+}
+
 func (r *PgUserRepo) CreateUser(ctx context.Context, user *models.User) error {
 	query := `
 		INSERT INTO auth.users (username, email, name, password_hash, role, group_id)
 		VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING id, status, created_at, updated_at
+		RETURNING id, created_at, updated_at
 	`
 
 	return r.db.QueryRow(ctx, query,
@@ -32,12 +114,12 @@ func (r *PgUserRepo) CreateUser(ctx context.Context, user *models.User) error {
 		user.PasswordHash,
 		user.Role,
 		user.GroupID,
-	).Scan(&user.ID, &user.Status, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
 }
 
 func (r *PgUserRepo) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
 	query := `
-		SELECT id, username, email, name, password_hash, role, status, group_id, created_at, updated_at
+		SELECT id, username, email, name, password_hash, role, group_id, created_at, updated_at
 		FROM auth.users
 		WHERE username = $1
 	`
@@ -50,7 +132,6 @@ func (r *PgUserRepo) GetUserByUsername(ctx context.Context, username string) (*m
 		&user.Name,
 		&user.PasswordHash,
 		&user.Role,
-		&user.Status,
 		&user.GroupID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
@@ -69,7 +150,7 @@ func (r *PgUserRepo) GetUserByUsername(ctx context.Context, username string) (*m
 
 func (r *PgUserRepo) GetUserByID(ctx context.Context, userID int) (*models.User, error) {
 	query := `
-		SELECT id, username, email, name, password_hash, role, status, group_id, created_at, updated_at
+		SELECT id, username, email, name, password_hash, role, group_id, created_at, updated_at
 		FROM auth.users
 		WHERE id = $1
 	`
@@ -82,7 +163,6 @@ func (r *PgUserRepo) GetUserByID(ctx context.Context, userID int) (*models.User,
 		&user.Name,
 		&user.PasswordHash,
 		&user.Role,
-		&user.Status,
 		&user.GroupID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
@@ -102,7 +182,7 @@ func (r *PgUserRepo) GetUserByID(ctx context.Context, userID int) (*models.User,
 func (r *PgUserRepo) UpdateUser(ctx context.Context, user *models.User) error {
 	query := `
 		UPDATE auth.users
-		SET username = $1, email = $2, name = $3, password_hash = $4, status = $5, group_id = $6, updated_at = CURRENT_TIMESTAMP
+		SET username = $1, email = $2, name = $3, password_hash = $4, group_id = $5, updated_at = CURRENT_TIMESTAMP
 		WHERE id = $7
 		RETURNING updated_at
 	`
@@ -112,7 +192,6 @@ func (r *PgUserRepo) UpdateUser(ctx context.Context, user *models.User) error {
 		user.Email,
 		user.Name,
 		user.PasswordHash,
-		user.Status,
 		user.GroupID,
 		user.ID,
 	).Scan(&user.UpdatedAt)

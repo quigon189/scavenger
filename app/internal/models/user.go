@@ -9,12 +9,25 @@ type User struct {
 	Name         string `json:"name"`
 	PasswordHash string `json:"-"`
 	Role         string `json:"role"`
-	Status       string `json:"status"`
 	GroupID      *int   `json:"group_id"`
 
 	Group     Group     `json:"group"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type RegistrationCode struct {
+	Code      string    `json:"code"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Role      string    `json:"role"`
+	GroupID   *int      `json:"group_id"`
+	ExpiresAt time.Time `json:"expires_at"`
+}
+
+type RegCodeRequest struct {
+	Code  string `json:"code"`
+	Email string `json:"email"`
 }
 
 type UserSession struct {

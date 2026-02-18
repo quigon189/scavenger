@@ -13,6 +13,11 @@ type UserRepo interface {
 	UpdateUser(ctx context.Context, user *models.User) error
 	UpdatePassword(ctx context.Context, userID int, passwordHash string) error
 	DeleteUser(ctx context.Context, userID int) error
+
+	CreateCode(ctx context.Context, code *models.RegistrationCode) error
+	GetCode(ctx context.Context, codeStr string) (*models.RegistrationCode, error)
+	GetAllCodes(ctx context.Context) ([]models.RegistrationCode, error)
+	DeleteCode(ctx context.Context, code string) error
 }
 
 type SessionRepo interface {
@@ -31,7 +36,6 @@ type StudentRepo interface {
 	Create(ctx context.Context, student *models.Student) error
 	GetByID(ctx context.Context, id int) (*models.Student, error)
 	GetByGroupID(ctx context.Context, groupID int) ([]models.Student, error)
-	GetByStatus(ctx context.Context, status string) ([]models.Student, error)
 	Update(ctx context.Context, student *models.Student) error
 	Delete(ctx context.Context, id int) error
 	GetAll(ctx context.Context) ([]models.Student, error)
