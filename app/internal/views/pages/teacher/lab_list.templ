@@ -1,0 +1,85 @@
+package teacher
+
+import (
+"scavenger/internal/models"
+"strconv"
+)
+
+templ LabsList(user models.User, discipline *models.Discipline, labs []models.Lab) {
+<div class="container-fluid mt-4">
+	<div class="row mb-4">
+		<div class="col">
+			<h1 class="h2">
+				<i class="fas fa-flask me-2"></i>
+				Лабораторные работы: { discipline.Name }
+			</h1>
+			<p class="text-muted">
+				Группа: { discipline.Group.Name } | Период: { discipline.Period.Name }
+			</p>
+		</div>
+		<div class="col-auto">
+			<a href={"/teacher/disciplines/" + strconv.Itoa(discipline.ID) + "/labs/new"} class="btn btn-primary">
+				<i class="fas fa-plus-circle me-2"></i>Создать работу
+			</a>
+			<a href="/teacher/dashboard" class="btn btn-outline-secondary ms-2">
+				<i class="fas fa-arrow-left me-2"></i>К дисциплинам
+			</a>
+		</div>
+	</div>
+
+	if len(labs) == 0 {
+	<div class="card">
+		<div class="card-body text-center py-5">
+			<i class="fas fa-flask fa-3x text-muted mb-3"></i>
+			<h4>Лабораторные работы отсутствуют</h4>
+			<p class="text-muted">Создайте первую лабораторную работу для этой дисциплины</p>
+			<a href={"/teacher/disciplines/" + strconv.Itoa(discipline.ID) + "/labs/new"} class="btn btn-primary mt-2">
+				<i class="fas fa-plus-circle me-2"></i>Создать работу
+			</a>
+		</div>
+	</div>
+	} else {
+	<div class="row row-cols-1 g-4">
+		for _, lab := range labs {
+		<div class="col">
+			<div class="card shadow-sm">
+				<div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+					<h5 class="mb-0">{ lab.Name }</h5>
+					<div class="btn-group btn-group-sm">
+						<a href={"/teacher/labs/" + strconv.Itoa(lab.ID) + "/edit"} class="btn btn-light">
+							<i class="fas fa-edit"></i>
+						</a>
+						<form method="POST" action={"/teacher/labs/" + strconv.Itoa(lab.ID) + "/delete"} class="d-inline"
+							onsubmit="return confirm('Удалить лабораторную работу?')">
+							<button type="submit" class="btn btn-light">
+								<i class="fas fa-trash"></i>
+							</button>
+						</form>
+					</div>
+				</div>
+				<div class="card-body">
+					if !lab.Deadline.IsZero() {
+					<p class="small text-muted">
+						<i class="far fa-calendar-alt me-1"></i>
+						Дедлайн: { lab.Deadline.Format("02.01.2006 15:04") }
+					</p>
+					}
+					if lab.Description != "" {
+					<p class="card-text">{ lab.Description }</p>
+					}
+					if lab.MDContent != "" {
+					<div class="mt-2 p-2 bg-light rounded">
+						<pre class="mb-0 small">{ lab.MDContent }</pre>
+					</div>
+					}
+				</div>
+				<div class="card-footer bg-transparent">
+					<small class="text-muted">Создано: { lab.CreatedAt.Format("02.01.2006") }</small>
+				</div>
+			</div>
+		</div>
+		}
+	</div>
+	}
+</div>
+}

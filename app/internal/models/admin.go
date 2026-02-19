@@ -6,6 +6,5 @@ type AdminDashboard struct {
 	TotalGroups      int `json:"total_groups"`
 	TotalDisciplines int `json:"total_disciplines"`
 	TotalLabs        int `json:"total_labs"`
-	PendingStudents  int `json:"pending_students"`
-	RecentReports    int `json:"recent_reports"`
+	TotalCodes       int `json:"total_reg_codes"`
 }

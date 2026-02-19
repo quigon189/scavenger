@@ -43,11 +43,9 @@ func (r *LabRepository) GetByID(ctx context.Context, id int) (*models.Lab, error
 SELECT l.id, l.discipline_id, l.md_content, l.name, l.description, l.deadline,
        l.created_at, l.updated_at,
        d.id, d.name, d.teacher_id, d.group_id, d.period_id, d.description,
-       d.created_at, d.updated_at,
-       f.id, f.uuid, f.filename, f.size, f.content_type, f.bucket, f.path, f.created_at
+       d.created_at, d.updated_at 
 FROM data.labs l
 JOIN data.disciplines d ON d.id = l.discipline_id
-LEFT JOIN data.files f ON f.id = l.md_file_id
 WHERE l.id = $1
 	`
 
@@ -70,14 +68,6 @@ WHERE l.id = $1
 		&lab.Discipline.Description,
 		&lab.Discipline.CreatedAt,
 		&lab.Discipline.UpdatedAt,
-		&lab.MDFile.ID,
-		&lab.MDFile.UUID,
-		&lab.MDFile.Filename,
-		&lab.MDFile.Size,
-		&lab.MDFile.ContentType,
-		&lab.MDFile.Bucket,
-		&lab.MDFile.Path,
-		&lab.MDFile.CreatedAt,
 	)
 
 	if err != nil {
@@ -93,10 +83,8 @@ WHERE l.id = $1
 func (r *LabRepository) GetByDisciplineID(ctx context.Context, disciplineID int) ([]models.Lab, error) {
 	query := `
 SELECT l.id, l.discipline_id, l.md_content, l.name, l.description, l.deadline,
-       l.created_at, l.updated_at,
-       f.id, f.uuid, f.filename, f.size, f.content_type, f.bucket, f.path, f.created_at
+       l.created_at, l.updated_at
 FROM data.labs l
-LEFT JOIN data.files f ON f.id = l.md_file_id
 WHERE l.discipline_id = $1
 ORDER BY l.deadline
 	`
@@ -121,14 +109,6 @@ ORDER BY l.deadline
 			&lab.Deadline,
 			&lab.CreatedAt,
 			&lab.UpdatedAt,
-			&lab.MDFile.ID,
-			&lab.MDFile.UUID,
-			&lab.MDFile.Filename,
-			&lab.MDFile.Size,
-			&lab.MDFile.ContentType,
-			&lab.MDFile.Bucket,
-			&lab.MDFile.Path,
-			&lab.MDFile.CreatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan lab: %v", err)

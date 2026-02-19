@@ -23,8 +23,7 @@ SELECT
     (SELECT COUNT(*) FROM data.groups),
     (SELECT COUNT(*) FROM data.disciplines),
 	(SELECT COUNT(*) FROM data.labs),
-	(SELECT COUNT(*) FROM auth.users u WHERE u.status = 'pending' AND u.role = 'student'),
-	(SELECT COUNT(*) FROM data.lab_reports r WHERE r.status = 'submitted');
+	(SELECT COUNT(*) FROM auth.registration_codes)
 	`
 
 	adminDashboard := &models.AdminDashboard{}
@@ -34,8 +33,7 @@ SELECT
 		&adminDashboard.TotalGroups,
 		&adminDashboard.TotalDisciplines,
 		&adminDashboard.TotalLabs,
-		&adminDashboard.PendingStudents,
-		&adminDashboard.RecentReports,
+		&adminDashboard.TotalCodes,
 	)
 	if err != nil {
 		return nil, err

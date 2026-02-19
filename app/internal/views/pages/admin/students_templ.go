@@ -107,9 +107,9 @@ func StudentsPage(students []models.Student) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Группа %d", student.Group.Name))
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(student.Group.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/students.templ`, Line: 54, Col: 93}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/students.templ`, Line: 54, Col: 61}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {

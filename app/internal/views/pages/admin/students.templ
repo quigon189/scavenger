@@ -51,7 +51,7 @@ templ StudentsPage(students []models.Student) {
 							<td>{ student.User.Username }</td>
 							<td>{ student.User.Email }</td>
 							<td>
-								<span class="badge bg-secondary">{ fmt.Sprintf("Группа %d", student.Group.Name) }</span>
+								<span class="badge bg-secondary">{ student.Group.Name }</span>
 							</td>
 							<td>
 								<small class="text-muted">{ student.CreatedAt.Format("02.01.2006 15:04") }</small>

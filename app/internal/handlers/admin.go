@@ -30,7 +30,12 @@ func (h *AdminHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 		log.Printf("WARN Failed to get admin Dashboard stats: %v", err)
 	}
 
-	BaseWithNavbar(w, r, "Админ-панель", admin.Dashboard(session.User, stats))
+	codes, _ := h.services.Auth.GetAllCodes(r.Context())
+	if len(codes) > 5 {
+		codes = codes[:5]
+	}
+
+	BaseWithNavbar(w, r, "Админ-панель", admin.Dashboard(session.User, stats, codes))
 }
 
 func (h *AdminHandler) Groups(w http.ResponseWriter, r *http.Request) {
@@ -41,6 +46,11 @@ func (h *AdminHandler) Groups(w http.ResponseWriter, r *http.Request) {
 		h.services.Session.FlashError(w, r, "Ошибка при получении групп", err)
 		http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
 		return
+	}
+
+	for i := range groups {
+		students, _ := h.services.Data.GetStudentsByGroup(r.Context(), groups[i].ID)
+		groups[i].Students = append(groups[i].Students, students...)
 	}
 
 	BaseWithNavbar(w, r, "Управление группами", admin.GroupsPage(session.User, groups))
@@ -195,7 +205,7 @@ func (h *AdminHandler) CreateCode(w http.ResponseWriter, r *http.Request) {
 		h.services.Session.FlashError(w, r, "Ошибка при генерации кода: ", err)
 	} else {
 		// Сохраняем сгенерированный код в сессии, чтобы показать в модалке
-		h.services.Session.FlashSuccess(w, r, "Код успешно сгенерирован")
+		h.services.Session.FlashSuccess(w, r, "Код успешно сгенерирован: " + code.Code)
 	}
 
 	http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)

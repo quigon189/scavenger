@@ -38,18 +38,6 @@ RETURNING created_at, updated_at
 		return err
 	}
 
-	query = `
-UPDATE auth.users
-SET status = 'active'
-WHERE id = $1
-	`
-	
-	_, err = tx.Exec(ctx, query, teacher.ID)
-	if err != nil {
-		tx.Rollback(ctx)
-		return err
-	}
-
 	tx.Commit(ctx)
 	return nil
 }

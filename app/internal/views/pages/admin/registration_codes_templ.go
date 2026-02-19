@@ -163,113 +163,83 @@ func RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Grou
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</small></td><td><span class=\"badge bg-secondary\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</small></td><td>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(code.ExpiresAt.Format("02.01.2006"))
+				if time.Now().Before(code.ExpiresAt) {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<span class=\"badge bg-success\">Активен</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<span class=\"badge bg-secondary\">Истек</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</td><td><form method=\"POST\" action=\"")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 78, Col: 78}
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var8 templ.SafeURL
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/codes/" + code.Code + "/revoke")
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 85, Col: 76}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span></td><td><form method=\"POST\" action=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var9 templ.SafeURL
-				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/codes/" + code.Code + "/revoke")
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 81, Col: 76}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" class=\"d-inline\" onsubmit=\"return confirm('Отозвать этот код?')\"><button type=\"submit\" class=\"btn btn-sm btn-outline-danger\"><i class=\"fas fa-ban me-1\"></i>Отозвать</button></form></td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" class=\"d-inline\" onsubmit=\"return confirm('Отозвать этот код?')\"><button type=\"submit\" class=\"btn btn-sm btn-outline-danger\"><i class=\"fas fa-ban me-1\"></i>Отозвать</button></form></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</tbody></table></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</tbody></table></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></div></div><!-- Модальное окно генерации кода --><div class=\"modal fade\" id=\"generateCodeModal\" tabindex=\"-1\"><div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\">Генерация пригласительного кода</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button></div><form method=\"POST\" action=\"/admin/codes/generate\"><div class=\"modal-body\"><div class=\"mb-3\"><label class=\"form-label\">Имя *</label> <input type=\"text\" class=\"form-control\" name=\"name\" required placeholder=\"Иванов Иван Иванович\"></div><div class=\"mb-3\"><label class=\"form-label\">Email *</label> <input type=\"email\" class=\"form-control\" name=\"email\" required placeholder=\"user@example.com\"></div><div class=\"mb-3\"><label class=\"form-label\">Роль *</label> <select class=\"form-select\" name=\"role\" required id=\"roleSelect\" onchange=\"toggleGroupField()\"><option value=\"\">Выберите роль</option> <option value=\"student\">Студент</option> <option value=\"teacher\">Преподаватель</option></select></div><div class=\"mb-3\" id=\"groupField\" style=\"display: none;\"><label class=\"form-label\">Группа</label> <select class=\"form-select\" name=\"group_id\"><option value=\"\">Не выбрана</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div></div></div><!-- Модальное окно генерации кода --><div class=\"modal fade\" id=\"generateCodeModal\" tabindex=\"-1\"><div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\">Генерация пригласительного кода</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button></div><form method=\"POST\" action=\"/admin/codes/generate\"><div class=\"modal-body\"><div class=\"mb-3\"><label class=\"form-label\">Имя *</label> <input type=\"text\" class=\"form-control\" name=\"name\" required placeholder=\"Иванов Иван Иванович\"></div><div class=\"mb-3\"><label class=\"form-label\">Email *</label> <input type=\"email\" class=\"form-control\" name=\"email\" required placeholder=\"user@example.com\"></div><div class=\"mb-3\"><label class=\"form-label\">Роль *</label> <select class=\"form-select\" name=\"role\" required id=\"roleSelect\" onchange=\"toggleGroupField()\"><option value=\"\">Выберите роль</option> <option value=\"student\">Студент</option> <option value=\"teacher\">Преподаватель</option></select></div><div class=\"mb-3\" id=\"groupField\" style=\"display: none;\"><label class=\"form-label\">Группа</label> <select class=\"form-select\" name=\"group_id\"><option value=\"\">Не выбрана</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, group := range groups {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<option value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<option value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(group.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 133, Col: 45}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(group.ID))
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 129, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 133, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 129, Col: 60}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</option>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</option>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</select><div class=\"form-text\">Выберите группу для студента</div></div><script>\n\t\t\t\t\t\tfunction toggleGroupField() {\n\t\t\t\t\t\t\tvar role = document.getElementById('roleSelect').value;\n\t\t\t\t\t\t\tvar groupField = document.getElementById('groupField');\n\t\t\t\t\t\t\tif (role === 'student') {\n\t\t\t\t\t\t\t\tgroupField.style.display = 'block';\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tgroupField.style.display = 'none';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t</script></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button> <button type=\"submit\" class=\"btn btn-primary\">Сгенерировать</button></div></form></div></div></div><!-- Модальное окно для показа сгенерированного кода (если есть в сессии) -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</select><div class=\"form-text\">Выберите группу для студента</div></div><script>\n\t\t\t\t\t\tfunction toggleGroupField() {\n\t\t\t\t\t\t\tvar role = document.getElementById('roleSelect').value;\n\t\t\t\t\t\t\tvar groupField = document.getElementById('groupField');\n\t\t\t\t\t\t\tif (role === 'student') {\n\t\t\t\t\t\t\t\tgroupField.style.display = 'block';\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tgroupField.style.display = 'none';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t</script></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Отмена</button> <button type=\"submit\" class=\"btn btn-primary\">Сгенерировать</button></div></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
-		}
-		if flashCode, ok := ctx.Value("last_generated_code").(string); ok {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"modal fade\" id=\"codeGeneratedModal\" tabindex=\"-1\" data-bs-backdrop=\"static\"><div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-header bg-success text-white\"><h5 class=\"modal-title\">Код успешно создан</h5><button type=\"button\" class=\"btn-close btn-close-white\" data-bs-dismiss=\"modal\"></button></div><div class=\"modal-body text-center\"><p>Сохраните этот код, он будет показан только один раз:</p><div class=\"display-4 fw-bold p-3 bg-light border rounded\"><code>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(flashCode)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 167, Col: 22}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</code></div><p class=\"text-muted mt-3\">Срок действия: ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(ctx.Value("last_code_expires").(time.Time).Format("02.01.2006 15:04"))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 170, Col: 103}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</p></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-primary\" data-bs-dismiss=\"modal\">Закрыть</button></div></div></div></div><script>\n\tvar myModal = new bootstrap.Modal(document.getElementById('codeGeneratedModal'));\n\tmyModal.show();\n</script>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 		}
 		return nil
 	})

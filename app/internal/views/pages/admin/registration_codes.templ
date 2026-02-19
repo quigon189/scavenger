@@ -75,7 +75,11 @@ templ RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Gro
 								<small class="text-muted">{ code.ExpiresAt.Format("02.01.2006 15:04") }</small>
 							</td>
 							<td>
-								<span class="badge bg-secondary">{ code.ExpiresAt.Format("02.01.2006") }</span>
+								if time.Now().Before(code.ExpiresAt) {
+								<span class="badge bg-success">Активен</span>
+								} else {
+								<span class="badge bg-secondary">Истек</span>
+								}
 							</td>
 							<td>
 								<form method="POST" action={ "/admin/codes/" + code.Code + "/revoke" } class="d-inline"
@@ -152,33 +156,4 @@ templ RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Gro
 	</div>
 </div>
 
-<!-- Модальное окно для показа сгенерированного кода (если есть в сессии) -->
-if flashCode, ok := ctx.Value("last_generated_code").(string); ok {
-<div class="modal fade" id="codeGeneratedModal" tabindex="-1" data-bs-backdrop="static">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header bg-success text-white">
-				<h5 class="modal-title">Код успешно создан</h5>
-				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-			</div>
-			<div class="modal-body text-center">
-				<p>Сохраните этот код, он будет показан только один раз:</p>
-				<div class="display-4 fw-bold p-3 bg-light border rounded">
-					<code>{ flashCode }</code>
-				</div>
-				<p class="text-muted mt-3">
-					Срок действия: { ctx.Value("last_code_expires").(time.Time).Format("02.01.2006 15:04") }
-				</p>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
-			</div>
-		</div>
-	</div>
-</div>
-<script>
-	var myModal = new bootstrap.Modal(document.getElementById('codeGeneratedModal'));
-	myModal.show();
-</script>
-}
 }

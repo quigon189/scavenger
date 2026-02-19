@@ -56,7 +56,11 @@ templ GroupsPage(user models.User, groups []models.Group) {
 								<small class="text-muted">{ group.CreatedAt.Format("02.01.2006") }</small>
 							</td>
 							<td>
-								<span class="badge bg-info">0 студентов</span>
+								if len(group.Students) == 0 {
+									<span class="badge bg-info">-</span>
+								} else {
+									<span class="badge bg-info">{ fmt.Sprintf("%d", len(group.Students)) }</span>
+								}
 							</td>
 							<td>
 								<div class="btn-group btn-group-sm" role="group">

@@ -83,7 +83,7 @@ WHERE s.id = $1
 func (r *StudentRepository) GetByGroupID(ctx context.Context, groupID int) ([]models.Student, error) {
 	query := `
 SELECT s.id, s.group_id, s.created_at, s.updated_at,
-       u.username, u.name, u.role,
+       u.username, u.name, u.role
 FROM data.students s
 JOIN auth.users u ON u.id = s.id
 JOIN data.groups g ON g.id = s.group_id

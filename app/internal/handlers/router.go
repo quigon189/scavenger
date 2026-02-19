@@ -29,12 +29,13 @@ func NewRouter(services *services.Services) *Router {
 }
 
 func getSession(r *http.Request) *models.UserSession {
-	 return r.Context().Value("session").(*models.UserSession)
+	return r.Context().Value("session").(*models.UserSession)
 }
 
 func (r *Router) registerRoutes() {
 	authHandler := NewAuthHandler(r.services)
-	AdminHandler := NewAdminHandler(r.services)
+	adminHandler := NewAdminHandler(r.services)
+	teacherHandler := NewTeacherHandler(r.services)
 
 	r.mux.HandleFunc("/", r.middleware.SessionRequire(Home))
 	r.mux.HandleFunc("/login", authHandler.Login)
@@ -45,21 +46,36 @@ func (r *Router) registerRoutes() {
 	r.mux.HandleFunc("GET /register/complete", authHandler.RegisterComplete)
 	r.mux.HandleFunc("POST /register/complete", authHandler.RegisterCompletePost)
 
-	r.mux.HandleFunc("/admin/dashboard", r.middleware.AdminRequire(AdminHandler.Dashboard))
+	r.mux.HandleFunc("/admin/dashboard", r.middleware.AdminRequire(adminHandler.Dashboard))
 
-	r.mux.HandleFunc("GET /admin/groups", r.middleware.AdminRequire(AdminHandler.Groups))
-	r.mux.HandleFunc("POST /admin/groups/{id}/delete", r.middleware.AdminRequire(AdminHandler.DeleteGroup))
-	r.mux.HandleFunc("POST /admin/groups/create", r.middleware.AdminRequire(AdminHandler.CreateGroup))
+	r.mux.HandleFunc("GET /admin/groups", r.middleware.AdminRequire(adminHandler.Groups))
+	r.mux.HandleFunc("POST /admin/groups/{id}/delete", r.middleware.AdminRequire(adminHandler.DeleteGroup))
+	r.mux.HandleFunc("POST /admin/groups/create", r.middleware.AdminRequire(adminHandler.CreateGroup))
 
-	r.mux.HandleFunc("GET /admin/teachers", r.middleware.AdminRequire(AdminHandler.Teachers))
-	r.mux.HandleFunc("POST /admin/teachers/{id}/delete", r.middleware.AdminRequire(AdminHandler.DeleteTeacher))
-	r.mux.HandleFunc("POST /admin/teachers/create", r.middleware.AdminRequire(AdminHandler.CreateTeacher))
+	r.mux.HandleFunc("GET /admin/teachers", r.middleware.AdminRequire(adminHandler.Teachers))
+	r.mux.HandleFunc("POST /admin/teachers/{id}/delete", r.middleware.AdminRequire(adminHandler.DeleteTeacher))
+	r.mux.HandleFunc("POST /admin/teachers/create", r.middleware.AdminRequire(adminHandler.CreateTeacher))
 
-	r.mux.HandleFunc("GET /admin/students", r.middleware.AdminRequire(AdminHandler.Students))
+	r.mux.HandleFunc("GET /admin/students", r.middleware.AdminRequire(adminHandler.Students))
 
-	r.mux.HandleFunc("GET /admin/codes", r.middleware.AdminRequire(AdminHandler.RegistrationCodes))
-	r.mux.HandleFunc("POST /admin/codes/generate", r.middleware.AdminRequire(AdminHandler.CreateCode))
-	r.mux.HandleFunc("POST /admin/codes/{code}/revoke", r.middleware.AdminRequire(AdminHandler.RevokeCode))
+	r.mux.HandleFunc("GET /admin/codes", r.middleware.AdminRequire(adminHandler.RegistrationCodes))
+	r.mux.HandleFunc("POST /admin/codes/generate", r.middleware.AdminRequire(adminHandler.CreateCode))
+	r.mux.HandleFunc("POST /admin/codes/{code}/revoke", r.middleware.AdminRequire(adminHandler.RevokeCode))
+
+	// Маршруты для преподавателя
+	r.mux.HandleFunc("GET /teacher/dashboard", r.middleware.TeacherRequire(teacherHandler.Dashboard))
+	r.mux.HandleFunc("GET /teacher/disciplines/new", r.middleware.TeacherRequire(teacherHandler.CreateDisciplineForm))
+	r.mux.HandleFunc("POST /teacher/disciplines/create", r.middleware.TeacherRequire(teacherHandler.CreateDiscipline))
+	r.mux.HandleFunc("GET /teacher/disciplines/{id}/edit", r.middleware.TeacherRequire(teacherHandler.EditDisciplineForm))
+	r.mux.HandleFunc("POST /teacher/disciplines/{id}/edit", r.middleware.TeacherRequire(teacherHandler.EditDiscipline))
+	r.mux.HandleFunc("POST /teacher/disciplines/{id}/delete", r.middleware.TeacherRequire(teacherHandler.DeleteDiscipline))
+
+	r.mux.HandleFunc("GET /teacher/disciplines/{disciplineId}/labs", r.middleware.TeacherRequire(teacherHandler.LabsList))
+	r.mux.HandleFunc("GET /teacher/disciplines/{disciplineId}/labs/new", r.middleware.TeacherRequire(teacherHandler.CreateLabForm))
+	r.mux.HandleFunc("POST /teacher/disciplines/{disciplineId}/labs/create", r.middleware.TeacherRequire(teacherHandler.CreateLab))
+	r.mux.HandleFunc("GET /teacher/labs/{labId}/edit", r.middleware.TeacherRequire(teacherHandler.EditLabForm))
+	r.mux.HandleFunc("POST /teacher/labs/{labId}/edit", r.middleware.TeacherRequire(teacherHandler.EditLab))
+	r.mux.HandleFunc("POST /teacher/labs/{labId}/delete", r.middleware.TeacherRequire(teacherHandler.DeleteLab))
 }
 
 func (r *Router) Handler() http.Handler {
