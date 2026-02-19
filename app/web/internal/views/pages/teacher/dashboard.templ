@@ -1,0 +1,79 @@
+package teacher
+
+import (
+"strconv"
+"scavenger/core/models"
+)
+
+templ Dashboard(user models.User, disciplines []models.Discipline) {
+<div class="container-fluid mt-4">
+	<div class="row mb-4">
+		<div class="col">
+			<h1 class="h2">
+				<i class="fas fa-chalkboard-teacher me-2"></i>
+				Мои дисциплины
+			</h1>
+			<p class="text-muted">Управление учебными дисциплинами и лабораторными работами</p>
+		</div>
+		<div class="col-auto">
+			<a href="/teacher/disciplines/new" class="btn btn-primary">
+				<i class="fas fa-plus-circle me-2"></i>Создать дисциплину
+			</a>
+		</div>
+	</div>
+
+	if len(disciplines) == 0 {
+	<div class="card">
+		<div class="card-body text-center py-5">
+			<i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+			<h4>У вас пока нет дисциплин</h4>
+			<p class="text-muted">Создайте первую дисциплину, чтобы начать работу</p>
+			<a href="/teacher/disciplines/new" class="btn btn-primary mt-2">
+				<i class="fas fa-plus-circle me-2"></i>Создать дисциплину
+			</a>
+		</div>
+	</div>
+	} else {
+	<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+		for _, d := range disciplines {
+		<div class="col">
+			<div class="card h-100 shadow-sm">
+				<div class="card-header bg-primary text-white">
+					<h5 class="card-title mb-0">{ d.Name }</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text small text-muted mb-2">
+						<i class="fas fa-users me-1"></i> Группа: { d.Group.Name }<br>
+						<i class="fas fa-calendar-alt me-1"></i> Период: { d.Period.Name }
+					</p>
+					if d.Description != "" {
+					<p class="card-text">{ d.Description }</p>
+					}
+					<hr>
+					<div class="d-flex justify-content-between align-items-center">
+						<span class="badge bg-info">{ len(d.Labs) } работ</span>
+						<div class="btn-group btn-group-sm">
+							<a href={"/teacher/disciplines/" + strconv.Itoa(d.ID) + "/labs"} class="btn btn-outline-primary">
+								<i class="fas fa-flask me-1"></i>Работы
+							</a>
+							<a href={"/teacher/disciplines/" + strconv.Itoa(d.ID) + "/edit"}
+								class="btn btn-outline-secondary">
+								<i class="fas fa-edit"></i>
+							</a>
+							<form method="POST" action={"/teacher/disciplines/" + strconv.Itoa(d.ID) + "/delete"}
+								class="d-inline"
+								onsubmit="return confirm('Удалить дисциплину? Это также удалит все связанные лабораторные работы.')">
+								<button type="submit" class="btn btn-outline-danger">
+									<i class="fas fa-trash"></i>
+								</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		}
+	</div>
+	}
+</div>
+}

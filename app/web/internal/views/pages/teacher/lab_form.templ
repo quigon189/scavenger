@@ -1,0 +1,90 @@
+package teacher
+
+import (
+"scavenger/core/models"
+"strconv"
+)
+
+templ LabForm(user models.User, discipline *models.Discipline, lab *models.Lab) {
+<div class="container-fluid mt-4">
+	<div class="row mb-4">
+		<div class="col">
+			<h1 class="h2">
+				<i class="fas fa-flask me-2"></i>
+				if lab == nil {
+				Создание лабораторной работы
+				} else {
+				Редактирование лабораторной работы
+				}
+			</h1>
+			<p class="text-muted">Дисциплина: { discipline.Name }</p>
+		</div>
+	</div>
+
+	<div class="card">
+		<div class="card-body">
+			{{
+			url := "/teacher/disciplines/" + strconv.Itoa(discipline.ID) + "/labs/create"
+			if lab!= nil {
+			url = "/teacher/labs/" + strconv.Itoa(lab.ID) + "/edit"
+			}
+			}}
+			<form method="POST" action={ templ.URL(url) }>
+				<div class="mb-3">
+					<label class="form-label">Название работы *</label>
+					<input type="text" class="form-control" name="name" required
+					if lab !=nil { 
+						value={lab.Name} 
+					} else { 
+						value=""
+					} placeholder="Например: Работа с массивами">
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">Описание</label>
+					<textarea class="form-control" name="description" rows="3" placeholder="Краткое описание задания">
+						if lab != nil { 
+							{lab.Description}
+						}
+					</textarea>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">Дедлайн</label>
+					if lab != nil && !lab.Deadline.IsZero() {
+					<input type="datetime-local" class="form-control" name="deadline" value={
+						lab.Deadline.Format("2006-01-02T15:04") }>
+					} else {
+					<input type="datetime-local" class="form-control" name="deadline" value={ "" }>
+					}
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">Содержание (Markdown)</label>
+					<textarea class="form-control" name="md_content" rows="10"
+						placeholder="Текст задания в формате Markdown">
+						if lab != nil { 
+							{lab.MDContent}
+							}
+					</textarea>
+					<div class="form-text">Поддерживается разметка Markdown</div>
+				</div>
+
+				<div class="d-flex gap-2">
+					<button type="submit" class="btn btn-primary">
+						<i class="fas fa-save me-2"></i>
+						if lab == nil {
+						Создать
+						} else {
+						Сохранить
+						}
+					</button>
+					<a href="/teacher/disciplines/{ strconv.Itoa(discipline.ID) }/labs" class="btn btn-secondary">
+						<i class="fas fa-times me-2"></i>Отмена
+					</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+}

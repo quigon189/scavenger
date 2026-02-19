@@ -1,0 +1,39 @@
+package components
+
+import "scavenger/core/services/sessionservice"
+
+templ Alerts(flashes ...sessionservice.Flash) {
+if len(flashes) > 0 {
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+	<div class="toast-container position-absolute top-0 start-50 translate-middle-x p-3">
+
+		for _, flash := range flashes {
+		<div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true"
+			data-bs-autohide="true" data-bs-delay="10000" autoshow>
+			<div class={"toast-header text-white bg-"+string(flash.Type)}>
+				switch flash.Type {
+				case sessionservice.SuccessFlash:
+				<strong class="me-auto">Успех</strong>
+				case sessionservice.ErrorFlash:
+				<strong class="me-auto">Ошибка</strong>
+				case sessionservice.WarningFlash:
+				<strong class="me-auto">Предупреждение</strong>
+				case sessionservice.InfoFlash:
+				<strong class="me-auto">Уведомление</strong>
+				default:
+				<strong class="me-auto">Уведомление</strong>
+				}
+				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+			</div>
+			<div class="toast-body">
+				{ flash.Message }
+			</div>
+		</div>
+
+		}
+
+	</div>
+</div>
+}
+
+}

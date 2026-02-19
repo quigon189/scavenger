@@ -1,0 +1,15 @@
+package pages
+
+import "scavenger/core/models"
+
+templ Home(user models.User) {
+<div class="container mt-4">
+	<h1>Welcome, { user.Name }!</h1>
+</div>
+}
+
+templ PendingPage(user models.User) {
+<div class="container mt-4">
+	<h1>Ваша учетная запись пока не активна! Дождитесь пока администратор её активирует.</h1>
+</div>
+}
