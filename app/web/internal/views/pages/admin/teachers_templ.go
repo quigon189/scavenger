@@ -57,7 +57,7 @@ func TeachersPage(teachers []models.Teacher) templ.Component {
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", teacher.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/teachers.templ`, Line: 51, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/teachers.templ`, Line: 51, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -70,7 +70,7 @@ func TeachersPage(teachers []models.Teacher) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(teacher.User.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/teachers.templ`, Line: 53, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/teachers.templ`, Line: 53, Col: 35}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -83,7 +83,7 @@ func TeachersPage(teachers []models.Teacher) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(teacher.User.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/teachers.templ`, Line: 55, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/teachers.templ`, Line: 55, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -96,7 +96,7 @@ func TeachersPage(teachers []models.Teacher) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(teacher.CreatedAt.Format("02.01.2006 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/teachers.templ`, Line: 57, Col: 80}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/teachers.templ`, Line: 57, Col: 80}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func TeachersPage(teachers []models.Teacher) templ.Component {
 				var templ_7745c5c3_Var6 templ.SafeURL
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/admin/teachers/%d/delete", teacher.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/teachers.templ`, Line: 60, Col: 89}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/teachers.templ`, Line: 60, Col: 89}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {

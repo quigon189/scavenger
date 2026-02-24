@@ -9,16 +9,19 @@ import (
 
 	"scavenger/core/models"
 	"scavenger/core/services"
+	"scavenger/web/internal/services/session"
 	"scavenger/web/internal/views/pages/admin"
 )
 
 type AdminHandler struct {
 	services *services.Services
+	session  *session.SessionService
 }
 
-func NewAdminHandler(services *services.Services) *AdminHandler {
+func NewAdminHandler(services *services.Services, session *session.SessionService) *AdminHandler {
 	return &AdminHandler{
 		services: services,
+		session: session,
 	}
 }
 
@@ -43,7 +46,7 @@ func (h *AdminHandler) Groups(w http.ResponseWriter, r *http.Request) {
 
 	groups, err := h.services.Data.GetAllGroups(r.Context())
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при получении групп", err)
+		h.session.FlashError(w, r, "Ошибка при получении групп", err)
 		http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
 		return
 	}
@@ -61,12 +64,12 @@ func (h *AdminHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 
 	err := h.services.Data.CreateGroup(r.Context(), &models.Group{Name: name})
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при создании группы", err)
+		h.session.FlashError(w, r, "Ошибка при создании группы", err)
 		http.Redirect(w, r, "/admin/groups", http.StatusSeeOther)
 		return
 	}
 
-	h.services.Session.FlashSuccess(w, r, "Группа создана")
+	h.session.FlashSuccess(w, r, "Группа создана")
 	http.Redirect(w, r, "/admin/groups", http.StatusSeeOther)
 }
 
@@ -74,26 +77,26 @@ func (h *AdminHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID группы", err)
+		h.session.FlashError(w, r, "Неверный ID группы", err)
 		http.Redirect(w, r, "/admin/gruops", http.StatusSeeOther)
 		return
 	}
 
 	err = h.services.Data.DeleteGroup(r.Context(), id)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка удаления группы", err)
+		h.session.FlashError(w, r, "Ошибка удаления группы", err)
 		http.Redirect(w, r, "/admin/groups", http.StatusSeeOther)
 		return
 	}
 
-	h.services.Session.FlashSuccess(w, r, "Группа удалена")
+	h.session.FlashSuccess(w, r, "Группа удалена")
 	http.Redirect(w, r, "/admin/groups", http.StatusSeeOther)
 }
 
 func (h *AdminHandler) Teachers(w http.ResponseWriter, r *http.Request) {
 	teachers, err := h.services.Data.GetAllTeachers(r.Context())
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при получении пользователей", err)
+		h.session.FlashError(w, r, "Ошибка при получении пользователей", err)
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
 		return
 	}
@@ -113,18 +116,18 @@ func (h *AdminHandler) CreateTeacher(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.services.Auth.Register(r.Context(), &req)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка регистрации пользователя", err)
+		h.session.FlashError(w, r, "Ошибка регистрации пользователя", err)
 		http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
 		return
 	}
 	err = h.services.Data.CreateTeacher(r.Context(), &models.Teacher{ID: user.ID})
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка создания преподавателя", err)
+		h.session.FlashError(w, r, "Ошибка создания преподавателя", err)
 		http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
 		return
 	}
 
-	h.services.Session.FlashSuccess(w, r, "Учетная запись преподавателя создана")
+	h.session.FlashSuccess(w, r, "Учетная запись преподавателя создана")
 	http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
 }
 
@@ -132,19 +135,19 @@ func (h *AdminHandler) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID преподавателя", err)
+		h.session.FlashError(w, r, "Неверный ID преподавателя", err)
 		http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
 		return
 	}
 
 	err = h.services.Data.DeleteTeacher(r.Context(), id)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка удаления преподавателя", err)
+		h.session.FlashError(w, r, "Ошибка удаления преподавателя", err)
 		http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
 		return
 	}
 
-	h.services.Session.FlashSuccess(w, r, "Группа удалена")
+	h.session.FlashSuccess(w, r, "Группа удалена")
 	http.Redirect(w, r, "/admin/teachers", http.StatusSeeOther)
 
 }
@@ -185,7 +188,7 @@ func (h *AdminHandler) CreateCode(w http.ResponseWriter, r *http.Request) {
 				groupID = &id
 			}
 		} else {
-			h.services.Session.FlashError(w, r, "не выбрана группа", fmt.Errorf("group not set"))
+			h.session.FlashError(w, r, "не выбрана группа", fmt.Errorf("group not set"))
 			http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)
 			return
 		}
@@ -202,10 +205,10 @@ func (h *AdminHandler) CreateCode(w http.ResponseWriter, r *http.Request) {
 	err := h.services.Auth.GenerateCode(r.Context(), code)
 	if err != nil {
 		log.Printf("ERROR Failed to generate code: %v", err)
-		h.services.Session.FlashError(w, r, "Ошибка при генерации кода: ", err)
+		h.session.FlashError(w, r, "Ошибка при генерации кода: ", err)
 	} else {
 		// Сохраняем сгенерированный код в сессии, чтобы показать в модалке
-		h.services.Session.FlashSuccess(w, r, "Код успешно сгенерирован: " + code.Code)
+		h.session.FlashSuccess(w, r, "Код успешно сгенерирован: "+code.Code)
 	}
 
 	http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)
@@ -213,20 +216,20 @@ func (h *AdminHandler) CreateCode(w http.ResponseWriter, r *http.Request) {
 
 func (h *AdminHandler) RevokeCode(w http.ResponseWriter, r *http.Request) {
 
-    code := r.PathValue("code")
-    if code == "" {
-        h.services.Session.FlashError(w, r, "Код не указан", fmt.Errorf("bad code"))
-        http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)
-        return
-    }
+	code := r.PathValue("code")
+	if code == "" {
+		h.session.FlashError(w, r, "Код не указан", fmt.Errorf("bad code"))
+		http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)
+		return
+	}
 
 	err := h.services.Auth.RevokeCode(r.Context(), code)
-    if err != nil {
-        log.Printf("ERROR Failed to revoke code %s: %v", code, err)
-        h.services.Session.FlashError(w, r, "Ошибка при отзыве кода: "+err.Error(), err)
-    } else {
-        h.services.Session.FlashSuccess(w, r, "Код успешно отозван")
-    }
+	if err != nil {
+		log.Printf("ERROR Failed to revoke code %s: %v", code, err)
+		h.session.FlashError(w, r, "Ошибка при отзыве кода: "+err.Error(), err)
+	} else {
+		h.session.FlashSuccess(w, r, "Код успешно отозван")
+	}
 
-    http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)
+	http.Redirect(w, r, "/admin/codes", http.StatusSeeOther)
 }

@@ -2,23 +2,26 @@ package handlers
 
 import (
 	"net/http"
-	"scavenger/web/internal/middlewares"
 	"scavenger/core/models"
 	"scavenger/core/services"
+	"scavenger/web/internal/middlewares"
+	"scavenger/web/internal/services/session"
 )
 
 type Router struct {
 	services   *services.Services
+	session    *session.SessionService
 	middleware *middlewares.Middleware
 	handler    http.Handler
 	mux        *http.ServeMux
 }
 
-func NewRouter(services *services.Services) *Router {
+func NewRouter(services *services.Services, session *session.SessionService) *Router {
 	router := &Router{
 		mux:        http.NewServeMux(),
 		services:   services,
-		middleware: middlewares.NewMiddleware(services.Session),
+		session: session,
+		middleware: middlewares.NewMiddleware(session),
 	}
 
 	router.registerRoutes()
@@ -33,9 +36,9 @@ func getSession(r *http.Request) *models.UserSession {
 }
 
 func (r *Router) registerRoutes() {
-	authHandler := NewAuthHandler(r.services)
-	adminHandler := NewAdminHandler(r.services)
-	teacherHandler := NewTeacherHandler(r.services)
+	authHandler := NewAuthHandler(r.services, r.session)
+	adminHandler := NewAdminHandler(r.services, r.session)
+	teacherHandler := NewTeacherHandler(r.services, r.session)
 
 	r.mux.HandleFunc("/", r.middleware.SessionRequire(Home))
 	r.mux.HandleFunc("/login", authHandler.Login)

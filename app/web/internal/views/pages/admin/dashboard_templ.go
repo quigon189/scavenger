@@ -42,7 +42,7 @@ func Dashboard(user models.User, stats *models.AdminDashboard, recentCodes []mod
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", stats.TotalStudents))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/dashboard.templ`, Line: 26, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/dashboard.templ`, Line: 26, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -55,7 +55,7 @@ func Dashboard(user models.User, stats *models.AdminDashboard, recentCodes []mod
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", stats.TotalTeachers))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/dashboard.templ`, Line: 44, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/dashboard.templ`, Line: 44, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -68,7 +68,7 @@ func Dashboard(user models.User, stats *models.AdminDashboard, recentCodes []mod
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", stats.TotalGroups))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/dashboard.templ`, Line: 62, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/dashboard.templ`, Line: 62, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -81,7 +81,7 @@ func Dashboard(user models.User, stats *models.AdminDashboard, recentCodes []mod
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", stats.TotalCodes))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/dashboard.templ`, Line: 80, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/dashboard.templ`, Line: 80, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func Dashboard(user models.User, stats *models.AdminDashboard, recentCodes []mod
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(code.Code)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/dashboard.templ`, Line: 140, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/dashboard.templ`, Line: 140, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -122,7 +122,7 @@ func Dashboard(user models.User, stats *models.AdminDashboard, recentCodes []mod
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(code.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/dashboard.templ`, Line: 140, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/dashboard.templ`, Line: 140, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -135,7 +135,7 @@ func Dashboard(user models.User, stats *models.AdminDashboard, recentCodes []mod
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(code.ExpiresAt.Format("02.01.2006"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/dashboard.templ`, Line: 141, Col: 71}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/dashboard.templ`, Line: 141, Col: 71}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -148,7 +148,7 @@ func Dashboard(user models.User, stats *models.AdminDashboard, recentCodes []mod
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(code.Role)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/dashboard.templ`, Line: 144, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/dashboard.templ`, Line: 144, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {

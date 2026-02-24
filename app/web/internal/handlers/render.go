@@ -8,22 +8,22 @@ import (
 	"net/http"
 
 	"scavenger/core/models"
-	"scavenger/core/services/sessionservice"
 	"scavenger/web/internal/views/components"
 	"scavenger/web/internal/views/layouts"
+	"scavenger/web/internal/services/session"
 
 	"github.com/a-h/templ"
 )
 
 func Base(w http.ResponseWriter, r *http.Request, title string, component templ.Component) error {
-	fls, ok := r.Context().Value("flashes").([]sessionservice.Flash)
+	fls, ok := r.Context().Value("flashes").([]session.Flash)
 	if !ok {
 		log.Printf("WARN Failed to get flashes from context")
 	}
 
-	var flashes []sessionservice.Flash
+	var flashes []session.Flash
 	flashes = append(flashes, fls...)
-	fls = []sessionservice.Flash{}
+	fls = []session.Flash{}
 
 	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 		components.Alerts(flashes...).Render(r.Context(), w)
@@ -42,14 +42,14 @@ func BaseWithNavbar(w http.ResponseWriter, r *http.Request, title string, compon
 		return fmt.Errorf("failed to get session")
 	}
 
-	fls, ok := r.Context().Value("flashes").([]sessionservice.Flash)
+	fls, ok := r.Context().Value("flashes").([]session.Flash)
 	if !ok {
 		log.Printf("WARN Failed to get flashes from context")
 	}
 
-	var flashes []sessionservice.Flash
+	var flashes []session.Flash
 	flashes = append(flashes, fls...)
-	fls = []sessionservice.Flash{}
+	fls = []session.Flash{}
 
 	base := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 		components.Navbar(userSession.User).Render(r.Context(), w)

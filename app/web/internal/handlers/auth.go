@@ -8,21 +8,24 @@ import (
 
 	"scavenger/core/models"
 	"scavenger/core/services"
+	"scavenger/web/internal/services/session"
 	"scavenger/web/internal/views/pages"
 )
 
 type AuthHandler struct {
 	services *services.Services
+	session  *session.SessionService
 }
 
-func NewAuthHandler(services *services.Services) *AuthHandler {
+func NewAuthHandler(services *services.Services, session *session.SessionService) *AuthHandler {
 	return &AuthHandler{
 		services: services,
+		session: session,
 	}
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	session, _ := h.services.Session.GetSession(r)
+	session, _ := h.session.GetSession(r)
 	if session != nil && session.ID != "" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -37,12 +40,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			Password: password,
 		})
 		if err == nil {
-			h.services.Session.SetSessionCockie(w, r, userSession.ID, userSession.ExpiresAt)
+			h.session.SetSessionCockie(w, r, userSession.ID, userSession.ExpiresAt)
 			http.Redirect(w, r, "/home", http.StatusSeeOther)
 			return
 		} else {
 			prevLogin = username
-			h.services.Session.FlashError(w, r, "Не верный логин или пароль", err)
+			h.session.FlashError(w, r, "Не верный логин или пароль", err)
 			log.Printf("WARN Failed to login user %s: %v", username, err)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
@@ -53,16 +56,16 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	session, err := h.services.Session.GetSession(r)
+	session, err := h.session.GetSession(r)
 	if err == nil {
-		h.services.Session.DeleteSession(w, r)
+		h.session.DeleteSession(w, r)
 		h.services.Auth.Logout(r.Context(), session.ID)
 	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (h *AuthHandler) EnterCode(w http.ResponseWriter, r *http.Request) {
-	session, _ := h.services.Session.GetSession(r)
+	session, _ := h.session.GetSession(r)
 	if session != nil && session.ID != "" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -72,7 +75,7 @@ func (h *AuthHandler) EnterCode(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	session, _ := h.services.Session.GetSession(r)
+	session, _ := h.session.GetSession(r)
 	if session != nil && session.ID != "" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -96,10 +99,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 			},
 		)
 		if err != nil {
-			h.services.Session.FlashError(w, r, fmt.Sprintf("Ошибка при создании пользователя: %s", err.Error()), err)
+			h.session.FlashError(w, r, fmt.Sprintf("Ошибка при создании пользователя: %s", err.Error()), err)
 			http.Redirect(w, r, "/register", http.StatusSeeOther)
 		} else {
-			h.services.Session.FlashSuccess(w, r, fmt.Sprintf("Добро пожаловать, %s! Теперь вы можете выполнить вход.", user.Name))
+			h.session.FlashSuccess(w, r, fmt.Sprintf("Добро пожаловать, %s! Теперь вы можете выполнить вход.", user.Name))
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
@@ -108,7 +111,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	groups, err := h.services.Data.GetAllGroups(r.Context())
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при загрузке групп", err)
+		h.session.FlashError(w, r, "Ошибка при загрузке групп", err)
 		log.Printf("ERR Failed to get groups: %v", err)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
@@ -117,7 +120,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
-	sess, _ := h.services.Session.GetSession(r)
+	sess, _ := h.session.GetSession(r)
 	if sess != nil && sess.ID != "" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -130,26 +133,26 @@ func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 
 	regCode, err := h.services.Auth.GetCodeInfo(r.Context(), &code)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный код или email", err)
+		h.session.FlashError(w, r, "Неверный код или email", err)
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}
 
-	h.services.Session.SetCodeCookie(w, r, regCode)
+	h.session.SetCodeCookie(w, r, regCode)
 
 	http.Redirect(w, r, "/register/complete", http.StatusSeeOther)
 }
 
 func (h *AuthHandler) RegisterComplete(w http.ResponseWriter, r *http.Request) {
-	sess, _ := h.services.Session.GetSession(r)
+	sess, _ := h.session.GetSession(r)
 	if sess != nil && sess.ID != "" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
-	code, err := h.services.Session.GetCodeCookie(w, r)
+	code, err := h.session.GetCodeCookie(w, r)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Сначала надо указать код и email", fmt.Errorf("failed to get code cookie"))
+		h.session.FlashError(w, r, "Сначала надо указать код и email", fmt.Errorf("failed to get code cookie"))
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}
@@ -169,15 +172,15 @@ func (h *AuthHandler) RegisterComplete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) RegisterCompletePost(w http.ResponseWriter, r *http.Request) {
-	sess, _ := h.services.Session.GetSession(r)
+	sess, _ := h.session.GetSession(r)
 	if sess != nil && sess.ID != "" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
-	code, err := h.services.Session.GetCodeCookie(w, r)
+	code, err := h.session.GetCodeCookie(w, r)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Сначала надо указать код и email", fmt.Errorf("failed to get code cookie"))
+		h.session.FlashError(w, r, "Сначала надо указать код и email", fmt.Errorf("failed to get code cookie"))
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}
@@ -196,7 +199,7 @@ func (h *AuthHandler) RegisterCompletePost(w http.ResponseWriter, r *http.Reques
 
 	user, err := h.services.Auth.Register(r.Context(), req)
 	if err != nil {
-		h.services.Session.FlashError(w, r, fmt.Sprintf("Ошибка регистрации: %s", err.Error()), err)
+		h.session.FlashError(w, r, fmt.Sprintf("Ошибка регистрации: %s", err.Error()), err)
 		http.Redirect(w, r, "/register/complete", http.StatusSeeOther)
 		return
 	}
@@ -210,9 +213,9 @@ func (h *AuthHandler) RegisterCompletePost(w http.ResponseWriter, r *http.Reques
 		h.services.Data.CreateTeacher(r.Context(), &models.Teacher{ID: user.ID})
 	}
 
-	h.services.Session.DeleteCodeCookie(w, r)
+	h.session.DeleteCodeCookie(w, r)
 	h.services.Auth.RevokeCode(r.Context(), code.Code)
 
-	h.services.Session.FlashSuccess(w, r, fmt.Sprintf("Добро пожаловать, %s! Теперь вы можете войти.", user.Name))
+	h.session.FlashSuccess(w, r, fmt.Sprintf("Добро пожаловать, %s! Теперь вы можете войти.", user.Name))
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

@@ -7,15 +7,15 @@ import (
 	"os"
 	"os/signal"
 	"scavenger/core/config"
-	"scavenger/web/internal/handlers"
 	"scavenger/core/repositories/authrepo"
 	"scavenger/core/repositories/datarepo"
 	"scavenger/core/repositories/sessionrepo"
 	"scavenger/core/services"
 	"scavenger/core/services/authservice"
 	"scavenger/core/services/dataservice"
-	"scavenger/core/services/sessionservice"
 	"scavenger/core/storage"
+	"scavenger/web/internal/handlers"
+	"scavenger/web/internal/services/session"
 	"scavenger/web/pkg/minio"
 	"scavenger/web/pkg/postgres"
 	"scavenger/web/pkg/redis"
@@ -55,12 +55,12 @@ func main() {
 	sessionRepo := sessionrepo.NewSessionRepository(redisClient, cfg.SessionTTL)
 
 	authService := authservice.NewAuthService(authRepo, sessionRepo, cfg.SessionTTL)
-	dataService := dataservice.NewDataService(dataRepo, sessionRepo, storageMinio, cfg.Minio.Bucket, time.Duration(cfg.Minio.SignedURLTTL) * time.Second)
-	sessionService := sessionservice.NewSessionService(sessionRepo, cookieStore)
+	dataService := dataservice.NewDataService(dataRepo, sessionRepo, storageMinio, cfg.Minio.Bucket, time.Duration(cfg.Minio.SignedURLTTL)*time.Second)
+	sessionService := session.NewSessionService(authService, cookieStore)
 
-	svcs := services.NewServices(authService, dataService, sessionService)
+	svcs := services.NewServices(authService, dataService)
 
-	router := handlers.NewRouter(svcs)
+	router := handlers.NewRouter(svcs, sessionService)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,

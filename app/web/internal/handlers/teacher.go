@@ -8,16 +8,19 @@ import (
 
 	"scavenger/core/models"
 	"scavenger/core/services"
+	"scavenger/web/internal/services/session"
 	"scavenger/web/internal/views/pages/teacher"
 )
 
 type TeacherHandler struct {
 	services *services.Services
+	session  *session.SessionService
 }
 
-func NewTeacherHandler(services *services.Services) *TeacherHandler {
+func NewTeacherHandler(services *services.Services, session *session.SessionService) *TeacherHandler {
 	return &TeacherHandler{
 		services: services,
+		session:  session,
 	}
 }
 
@@ -26,7 +29,7 @@ func (h *TeacherHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 
 	disciplines, err := h.services.Data.GetDisciplinesByTeacher(r.Context(), session.User.ID)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при загрузке дисциплин", err)
+		h.session.FlashError(w, r, "Ошибка при загрузке дисциплин", err)
 		disciplines = []models.Discipline{}
 	}
 
@@ -38,13 +41,13 @@ func (h *TeacherHandler) CreateDisciplineForm(w http.ResponseWriter, r *http.Req
 
 	groups, err := h.services.Data.GetAllGroups(r.Context())
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при загрузке групп", err)
+		h.session.FlashError(w, r, "Ошибка при загрузке групп", err)
 		groups = []models.Group{}
 	}
 
 	periods, err := h.services.Data.GetAllPeriods(r.Context())
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при загрузке периодов", err)
+		h.session.FlashError(w, r, "Ошибка при загрузке периодов", err)
 		periods = []models.Period{}
 	}
 
@@ -69,12 +72,12 @@ func (h *TeacherHandler) CreateDiscipline(w http.ResponseWriter, r *http.Request
 
 	err := h.services.Data.CreateDiscipline(r.Context(), discipline)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при создании дисциплины", err)
+		h.session.FlashError(w, r, "Ошибка при создании дисциплины", err)
 		http.Redirect(w, r, "/teacher/disciplines/new", http.StatusSeeOther)
 		return
 	}
 
-	h.services.Session.FlashSuccess(w, r, "Дисциплина успешно создана")
+	h.session.FlashSuccess(w, r, "Дисциплина успешно создана")
 	http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 }
 
@@ -83,33 +86,33 @@ func (h *TeacherHandler) EditDisciplineForm(w http.ResponseWriter, r *http.Reque
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID дисциплины", err)
+		h.session.FlashError(w, r, "Неверный ID дисциплины", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 
 	discipline, err := h.services.Data.GetDiscipline(r.Context(), id)
 	if err != nil || discipline == nil {
-		h.services.Session.FlashError(w, r, "Дисциплина не найдена", err)
+		h.session.FlashError(w, r, "Дисциплина не найдена", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 
 	if discipline.TeacherID != session.User.ID {
-		h.services.Session.FlashError(w, r, "Нет прав на редактирование этой дисциплины", fmt.Errorf("access denied"))
+		h.session.FlashError(w, r, "Нет прав на редактирование этой дисциплины", fmt.Errorf("access denied"))
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 
 	groups, err := h.services.Data.GetAllGroups(r.Context())
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при загрузке групп", err)
+		h.session.FlashError(w, r, "Ошибка при загрузке групп", err)
 		groups = []models.Group{}
 	}
 
 	periods, err := h.services.Data.GetAllPeriods(r.Context())
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при загрузке периодов", err)
+		h.session.FlashError(w, r, "Ошибка при загрузке периодов", err)
 		periods = []models.Period{}
 	}
 
@@ -121,7 +124,7 @@ func (h *TeacherHandler) EditDiscipline(w http.ResponseWriter, r *http.Request) 
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID дисциплины", err)
+		h.session.FlashError(w, r, "Неверный ID дисциплины", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
@@ -142,12 +145,12 @@ func (h *TeacherHandler) EditDiscipline(w http.ResponseWriter, r *http.Request) 
 
 	err = h.services.Data.UpdateDiscipline(r.Context(), discipline)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при обновлении дисциплины", err)
+		h.session.FlashError(w, r, "Ошибка при обновлении дисциплины", err)
 		http.Redirect(w, r, "/teacher/disciplines/"+idStr+"/edit", http.StatusSeeOther)
 		return
 	}
 
-	h.services.Session.FlashSuccess(w, r, "Дисциплина обновлена")
+	h.session.FlashSuccess(w, r, "Дисциплина обновлена")
 	http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 }
 
@@ -155,16 +158,16 @@ func (h *TeacherHandler) DeleteDiscipline(w http.ResponseWriter, r *http.Request
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID дисциплины", err)
+		h.session.FlashError(w, r, "Неверный ID дисциплины", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 
 	err = h.services.Data.DeleteDiscipline(r.Context(), id)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при удалении дисциплины", err)
+		h.session.FlashError(w, r, "Ошибка при удалении дисциплины", err)
 	} else {
-		h.services.Session.FlashSuccess(w, r, "Дисциплина удалена")
+		h.session.FlashSuccess(w, r, "Дисциплина удалена")
 	}
 	http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 }
@@ -174,26 +177,26 @@ func (h *TeacherHandler) LabsList(w http.ResponseWriter, r *http.Request) {
 	disciplineIDStr := r.PathValue("disciplineId")
 	disciplineID, err := strconv.Atoi(disciplineIDStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID дисциплины", err)
+		h.session.FlashError(w, r, "Неверный ID дисциплины", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 
 	discipline, err := h.services.Data.GetDiscipline(r.Context(), disciplineID)
 	if err != nil || discipline == nil {
-		h.services.Session.FlashError(w, r, "Дисциплина не найдена", err)
+		h.session.FlashError(w, r, "Дисциплина не найдена", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 	if discipline.TeacherID != session.User.ID {
-		h.services.Session.FlashError(w, r, "Нет доступа к этой дисциплине", fmt.Errorf("access denied"))
+		h.session.FlashError(w, r, "Нет доступа к этой дисциплине", fmt.Errorf("access denied"))
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 
 	labs, err := h.services.Data.GetLabsByDiscipline(r.Context(), disciplineID)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при загрузке лабораторных работ", err)
+		h.session.FlashError(w, r, "Ошибка при загрузке лабораторных работ", err)
 		labs = []models.Lab{}
 	}
 
@@ -205,19 +208,19 @@ func (h *TeacherHandler) CreateLabForm(w http.ResponseWriter, r *http.Request) {
 	disciplineIDStr := r.PathValue("disciplineId")
 	disciplineID, err := strconv.Atoi(disciplineIDStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID дисциплины", err)
+		h.session.FlashError(w, r, "Неверный ID дисциплины", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 
 	discipline, err := h.services.Data.GetDiscipline(r.Context(), disciplineID)
 	if err != nil || discipline == nil {
-		h.services.Session.FlashError(w, r, "Дисциплина не найдена", err)
+		h.session.FlashError(w, r, "Дисциплина не найдена", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 	if discipline.TeacherID != session.User.ID {
-		h.services.Session.FlashError(w, r, "Нет доступа к этой дисциплине", fmt.Errorf("access denied"))
+		h.session.FlashError(w, r, "Нет доступа к этой дисциплине", fmt.Errorf("access denied"))
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
@@ -230,19 +233,19 @@ func (h *TeacherHandler) CreateLab(w http.ResponseWriter, r *http.Request) {
 	disciplineIDStr := r.PathValue("disciplineId")
 	disciplineID, err := strconv.Atoi(disciplineIDStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID дисциплины", err)
+		h.session.FlashError(w, r, "Неверный ID дисциплины", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 
 	discipline, err := h.services.Data.GetDiscipline(r.Context(), disciplineID)
 	if err != nil || discipline == nil {
-		h.services.Session.FlashError(w, r, "Дисциплина не найдена", err)
+		h.session.FlashError(w, r, "Дисциплина не найдена", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 	if discipline.TeacherID != session.User.ID {
-		h.services.Session.FlashError(w, r, "Нет доступа к этой дисциплине", fmt.Errorf("access denied"))
+		h.session.FlashError(w, r, "Нет доступа к этой дисциплине", fmt.Errorf("access denied"))
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
@@ -256,7 +259,7 @@ func (h *TeacherHandler) CreateLab(w http.ResponseWriter, r *http.Request) {
 	if deadlineStr != "" {
 		deadline, err = time.Parse("2006-01-02T15:04", deadlineStr)
 		if err != nil {
-			h.services.Session.FlashError(w, r, "Неверный формат даты", err)
+			h.session.FlashError(w, r, "Неверный формат даты", err)
 			http.Redirect(w, r, "/teacher/disciplines/"+disciplineIDStr+"/labs/new", http.StatusSeeOther)
 			return
 		}
@@ -272,12 +275,12 @@ func (h *TeacherHandler) CreateLab(w http.ResponseWriter, r *http.Request) {
 
 	err = h.services.Data.CreateLab(r.Context(), lab)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при создании лабораторной работы", err)
+		h.session.FlashError(w, r, "Ошибка при создании лабораторной работы", err)
 		http.Redirect(w, r, "/teacher/disciplines/"+disciplineIDStr+"/labs/new", http.StatusSeeOther)
 		return
 	}
 
-	h.services.Session.FlashSuccess(w, r, "Лабораторная работа создана")
+	h.session.FlashSuccess(w, r, "Лабораторная работа создана")
 	http.Redirect(w, r, "/teacher/disciplines/"+disciplineIDStr+"/labs", http.StatusSeeOther)
 }
 
@@ -286,19 +289,19 @@ func (h *TeacherHandler) EditLabForm(w http.ResponseWriter, r *http.Request) {
 	labIDStr := r.PathValue("labId")
 	labID, err := strconv.Atoi(labIDStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID лабораторной", err)
+		h.session.FlashError(w, r, "Неверный ID лабораторной", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 
 	lab, err := h.services.Data.GetLab(r.Context(), labID)
 	if err != nil || lab == nil {
-		h.services.Session.FlashError(w, r, "Лабораторная работа не найдена", err)
+		h.session.FlashError(w, r, "Лабораторная работа не найдена", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 	if lab.Discipline.TeacherID != session.User.ID {
-		h.services.Session.FlashError(w, r, "Нет доступа к этой лабораторной", fmt.Errorf("access denied"))
+		h.session.FlashError(w, r, "Нет доступа к этой лабораторной", fmt.Errorf("access denied"))
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
@@ -313,19 +316,19 @@ func (h *TeacherHandler) EditLab(w http.ResponseWriter, r *http.Request) {
 	labIDStr := r.PathValue("labId")
 	labID, err := strconv.Atoi(labIDStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID лабораторной", err)
+		h.session.FlashError(w, r, "Неверный ID лабораторной", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 
 	lab, err := h.services.Data.GetLab(r.Context(), labID)
 	if err != nil || lab == nil {
-		h.services.Session.FlashError(w, r, "Лабораторная работа не найдена", err)
+		h.session.FlashError(w, r, "Лабораторная работа не найдена", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
 	if lab.Discipline.TeacherID != session.User.ID {
-		h.services.Session.FlashError(w, r, "Нет доступа к этой лабораторной", fmt.Errorf("access denied"))
+		h.session.FlashError(w, r, "Нет доступа к этой лабораторной", fmt.Errorf("access denied"))
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
@@ -339,7 +342,7 @@ func (h *TeacherHandler) EditLab(w http.ResponseWriter, r *http.Request) {
 	if deadlineStr != "" {
 		deadline, err = time.Parse("2006-01-02T15:04", deadlineStr)
 		if err != nil {
-			h.services.Session.FlashError(w, r, "Неверный формат даты", err)
+			h.session.FlashError(w, r, "Неверный формат даты", err)
 			http.Redirect(w, r, "/teacher/labs/"+labIDStr+"/edit", http.StatusSeeOther)
 			return
 		}
@@ -352,12 +355,12 @@ func (h *TeacherHandler) EditLab(w http.ResponseWriter, r *http.Request) {
 
 	err = h.services.Data.UpdateLab(r.Context(), lab)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при обновлении лабораторной работы", err)
+		h.session.FlashError(w, r, "Ошибка при обновлении лабораторной работы", err)
 		http.Redirect(w, r, "/teacher/labs/"+labIDStr+"/edit", http.StatusSeeOther)
 		return
 	}
 
-	h.services.Session.FlashSuccess(w, r, "Лабораторная работа обновлена")
+	h.session.FlashSuccess(w, r, "Лабораторная работа обновлена")
 	http.Redirect(w, r, "/teacher/disciplines/"+strconv.Itoa(lab.DisciplineID)+"/labs", http.StatusSeeOther)
 }
 
@@ -365,7 +368,7 @@ func (h *TeacherHandler) DeleteLab(w http.ResponseWriter, r *http.Request) {
 	labIDStr := r.PathValue("labId")
 	labID, err := strconv.Atoi(labIDStr)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Неверный ID лабораторной", err)
+		h.session.FlashError(w, r, "Неверный ID лабораторной", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
@@ -373,7 +376,7 @@ func (h *TeacherHandler) DeleteLab(w http.ResponseWriter, r *http.Request) {
 	// Получим дисциплину для редиректа
 	lab, err := h.services.Data.GetLab(r.Context(), labID)
 	if err != nil || lab == nil {
-		h.services.Session.FlashError(w, r, "Лабораторная работа не найдена", err)
+		h.session.FlashError(w, r, "Лабораторная работа не найдена", err)
 		http.Redirect(w, r, "/teacher/dashboard", http.StatusSeeOther)
 		return
 	}
@@ -381,9 +384,9 @@ func (h *TeacherHandler) DeleteLab(w http.ResponseWriter, r *http.Request) {
 
 	err = h.services.Data.DeleteLab(r.Context(), labID)
 	if err != nil {
-		h.services.Session.FlashError(w, r, "Ошибка при удалении лабораторной работы", err)
+		h.session.FlashError(w, r, "Ошибка при удалении лабораторной работы", err)
 	} else {
-		h.services.Session.FlashSuccess(w, r, "Лабораторная работа удалена")
+		h.session.FlashSuccess(w, r, "Лабораторная работа удалена")
 	}
 	http.Redirect(w, r, "/teacher/disciplines/"+strconv.Itoa(disciplineID)+"/labs", http.StatusSeeOther)
 }

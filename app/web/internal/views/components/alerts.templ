@@ -1,8 +1,8 @@
 package components
 
-import "scavenger/core/services/sessionservice"
+import "scavenger/web/internal/services/session"
 
-templ Alerts(flashes ...sessionservice.Flash) {
+templ Alerts(flashes ...session.Flash) {
 if len(flashes) > 0 {
 <div aria-live="polite" aria-atomic="true" class="position-relative">
 	<div class="toast-container position-absolute top-0 start-50 translate-middle-x p-3">
@@ -12,13 +12,13 @@ if len(flashes) > 0 {
 			data-bs-autohide="true" data-bs-delay="10000" autoshow>
 			<div class={"toast-header text-white bg-"+string(flash.Type)}>
 				switch flash.Type {
-				case sessionservice.SuccessFlash:
+				case session.SuccessFlash:
 				<strong class="me-auto">Успех</strong>
-				case sessionservice.ErrorFlash:
+				case session.ErrorFlash:
 				<strong class="me-auto">Ошибка</strong>
-				case sessionservice.WarningFlash:
+				case session.WarningFlash:
 				<strong class="me-auto">Предупреждение</strong>
-				case sessionservice.InfoFlash:
+				case session.InfoFlash:
 				<strong class="me-auto">Уведомление</strong>
 				default:
 				<strong class="me-auto">Уведомление</strong>

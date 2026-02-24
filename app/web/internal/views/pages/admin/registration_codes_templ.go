@@ -57,7 +57,7 @@ func RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Grou
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(code.Code)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 55, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/registration_codes.templ`, Line: 55, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -70,7 +70,7 @@ func RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Grou
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(code.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 56, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/registration_codes.templ`, Line: 56, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -83,7 +83,7 @@ func RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Grou
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(code.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 57, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/registration_codes.templ`, Line: 57, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -111,7 +111,7 @@ func RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Grou
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(code.Role)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 64, Col: 52}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/registration_codes.templ`, Line: 64, Col: 52}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -134,7 +134,7 @@ func RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Grou
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(*code.GroupID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 69, Col: 81}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/registration_codes.templ`, Line: 69, Col: 81}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -157,7 +157,7 @@ func RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Grou
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(code.ExpiresAt.Format("02.01.2006 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 75, Col: 77}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/registration_codes.templ`, Line: 75, Col: 77}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -185,7 +185,7 @@ func RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Grou
 				var templ_7745c5c3_Var8 templ.SafeURL
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs("/admin/codes/" + code.Code + "/revoke")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 85, Col: 76}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/registration_codes.templ`, Line: 85, Col: 76}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -213,7 +213,7 @@ func RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Grou
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(group.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 133, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/registration_codes.templ`, Line: 133, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -226,7 +226,7 @@ func RegistrationCodesPage(codes []models.RegistrationCode, groups []models.Grou
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(group.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/admin/registration_codes.templ`, Line: 133, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/admin/registration_codes.templ`, Line: 133, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {

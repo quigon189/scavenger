@@ -1,4 +1,4 @@
-package sessionservice
+package session
 
 import (
 	"encoding/gob"

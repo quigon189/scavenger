@@ -1,4 +1,4 @@
-package sessionservice
+package session
 
 import (
 	"fmt"
@@ -7,31 +7,30 @@ import (
 	"time"
 
 	"scavenger/core/models"
-	"scavenger/core/repositories/sessionrepo"
+	"scavenger/core/services/authservice"
 
 	"github.com/gorilla/sessions"
 )
 
 type SessionService struct {
+	authService   *authservice.AuthService
 	cookieStore   *sessions.CookieStore
-	sessionRepo   *sessionrepo.SessionRepository
 	sessionPrefix string
 	httpClent     *http.Client
 }
 
 const sessionKey = "session"
 
-func NewSessionService(sessionRepo *sessionrepo.SessionRepository, cookieStore *sessions.CookieStore) *SessionService {
+func NewSessionService(authService *authservice.AuthService, cookieStore *sessions.CookieStore) *SessionService {
 	return &SessionService{
 		cookieStore: cookieStore,
-		sessionRepo: sessionRepo,
 		httpClent: &http.Client{
 			Timeout: 5 * time.Second,
 		},
 	}
 }
 
-func (s *SessionService) SetCodeCookie(w http.ResponseWriter,r *http.Request, code *models.RegistrationCode) {
+func (s *SessionService) SetCodeCookie(w http.ResponseWriter, r *http.Request, code *models.RegistrationCode) {
 	session, _ := s.cookieStore.Get(r, sessionKey)
 	session.Values["reg_code"] = code.Code
 	session.Values["reg_name"] = code.Name
@@ -64,7 +63,7 @@ func (s *SessionService) GetCodeCookie(w http.ResponseWriter, r *http.Request) (
 }
 
 func (s *SessionService) DeleteCodeCookie(w http.ResponseWriter, r *http.Request) {
-	session, _ := s.cookieStore.Get(r ,sessionKey)
+	session, _ := s.cookieStore.Get(r, sessionKey)
 	delete(session.Values, "reg_code")
 	delete(session.Values, "reg_name")
 	delete(session.Values, "reg_email")
@@ -95,9 +94,10 @@ func (s *SessionService) GetSession(r *http.Request) (*models.UserSession, error
 		return nil, fmt.Errorf("Failed to get session_id from cookie session")
 	}
 
-	userSession, err := s.sessionRepo.GetSession(r.Context(), sessionID)
+
+	userSession, err := s.authService.ValidateSession(r.Context(), sessionID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get session from repo: %w", err)
+		return nil, fmt.Errorf("failed to get session authService: %w", err)
 	}
 
 	return userSession, nil

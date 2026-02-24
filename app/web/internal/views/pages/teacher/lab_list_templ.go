@@ -41,7 +41,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 14, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 14, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -54,7 +54,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.Group.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 17, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 17, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -67,7 +67,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(discipline.Period.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 17, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 17, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -80,7 +80,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 		var templ_7745c5c3_Var5 templ.SafeURL
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs("/teacher/disciplines/" + strconv.Itoa(discipline.ID) + "/labs/new")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 21, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 21, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -98,7 +98,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 			var templ_7745c5c3_Var6 templ.SafeURL
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs("/teacher/disciplines/" + strconv.Itoa(discipline.ID) + "/labs/new")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 36, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 36, Col: 79}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -121,7 +121,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 47, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 47, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -134,7 +134,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 				var templ_7745c5c3_Var8 templ.SafeURL
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs("/teacher/labs/" + strconv.Itoa(lab.ID) + "/edit")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 49, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 49, Col: 64}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -147,7 +147,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 				var templ_7745c5c3_Var9 templ.SafeURL
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs("/teacher/labs/" + strconv.Itoa(lab.ID) + "/delete")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 52, Col: 85}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 52, Col: 85}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -165,7 +165,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 					var templ_7745c5c3_Var10 string
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Deadline.Format("02.01.2006 15:04"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 64, Col: 63}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 64, Col: 63}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
@@ -184,7 +184,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(lab.Description)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 68, Col: 43}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 68, Col: 43}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
@@ -203,7 +203,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(lab.MDContent)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 72, Col: 45}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 72, Col: 45}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -221,7 +221,7 @@ func LabsList(user models.User, discipline *models.Discipline, labs []models.Lab
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(lab.CreatedAt.Format("02.01.2006"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/teacher/lab_list.templ`, Line: 77, Col: 83}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/web/internal/views/pages/teacher/lab_list.templ`, Line: 77, Col: 83}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
