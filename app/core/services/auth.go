@@ -1,27 +1,15 @@
-package auth
+package services
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"log"
-	"math/rand/v2"
-	"net/mail"
-	"regexp"
-	"slices"
-	"strings"
 	"time"
+	"log"
 
-	"scavenger/core/internal/repositories"
-	"scavenger/core/internal/repositories/postgres"
-	"scavenger/core/internal/repositories/redisrepo"
 	"scavenger/core/models"
+	"scavenger/core/repositories"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -32,92 +20,12 @@ type AuthService struct {
 	sessionTTL  time.Duration
 }
 
-func NewAuthService(db *pgxpool.Pool, redisClient *redis.Client, ttl time.Duration) *AuthService {
+func NewAuthService(authRepo repositories.AuthRepo, sessionRepo repositories.SessionRepo, sessionTTL time.Duration) *AuthService {
 	return &AuthService{
-		userRepo:    postgres.NewAuthRepository(db),
-		sessionRepo: redisrepo.NewSessionRepository(redisClient, ttl),
-		sessionTTL:  ttl,
+		userRepo:    authRepo,
+		sessionRepo: sessionRepo,
+		sessionTTL: sessionTTL,
 	}
-}
-
-func (s *AuthService) Authenticate(ctx context.Context) (*models.User, error) {
-	session, ok := ctx.Value("session").(*models.UserSession)
-	if !ok {
-		return nil, fmt.Errorf("failed to get session")
-	}
-
-	return &session.User, nil
-}
-
-func (s *AuthService) RequireRole(ctx context.Context, requiredRoles ...string) (*models.User, error) {
-	user, err := s.Authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	access := false
-	for _, requiredRole := range requiredRoles {
-		if user.Role == requiredRole {
-			access = true
-			break
-		}
-	}
-
-	if access {
-		return user, nil
-	}
-	return nil, fmt.Errorf("access denied")
-}
-
-func (s *AuthService) GenerateCode(ctx context.Context, code *models.RegistrationCode) error {
-	_, err := s.RequireRole(ctx, "admin")
-	if err != nil {
-		return fmt.Errorf("доступ запрещен")
-	}
-
-	reName := regexp.MustCompile(`^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+( [А-ЯЁ][а-яё]+)?$`)
-
-	errs := []string{}
-	if !reName.MatchString(code.Name) {
-		errs = append(errs, "неверно указано имя")
-	}
-	if _, err := mail.ParseAddress(code.Email); err != nil {
-		errs = append(errs, "неверно указана электронная почта")
-	}
-	if !slices.Contains([]string{"student", "admin", "teacher"}, code.Role) {
-		errs = append(errs, "неверно указана роль")
-	}
-	if code.ExpiresAt.Before(time.Now()) {
-		errs = append(errs, "неверно указан срок годности")
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf(strings.Join(errs, "; "))
-	}
-
-	var pgErr *pgconn.PgError
-	for range 10 {
-		code.Code = generateCode()
-		err = s.userRepo.CreateCode(ctx, code)
-		if err != nil {
-			if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
-				continue
-			} else {
-				return err
-			}
-		}
-		break
-	}
-	return nil
-}
-
-func (s *AuthService) GetAllCodes(ctx context.Context) ([]models.RegistrationCode, error) {
-	_, err := s.RequireRole(ctx, "admin")
-	if err != nil {
-		return nil, fmt.Errorf("access denied: %w", err)
-	}
-
-	return s.userRepo.GetAllCodes(ctx)
 }
 
 func (s *AuthService) GetCodeInfo(ctx context.Context, req *models.RegCodeRequest) (*models.RegistrationCode, error) {
@@ -252,11 +160,3 @@ func (s *AuthService) ChangePassword(ctx context.Context, userID int, oldPasswor
 	return s.LogoutAll(ctx, user.ID)
 }
 
-func generateCode() string {
-	code := make([]byte, 8)
-	l := len(charset)
-	for i := range code {
-		code[i] = charset[rand.IntN(l)]
-	}
-	return string(code)
-}
