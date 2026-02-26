@@ -1,4 +1,4 @@
-package services
+package admin
 
 import (
 	"context"
@@ -12,13 +12,18 @@ import (
 
 	"scavenger/core/models"
 	"scavenger/core/repositories"
+	"scavenger/core/services/base"
 	"scavenger/core/storage"
 )
 
+const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
 type AdminService struct {
-	BaseService
+	base.BaseService
 	dataRepo     repositories.DataRepo
-	authRepo     repositories.AuthRepo
+	userRepo     repositories.UserRepo
+	codeRepo     repositories.CodeRepo
+	groupRepo    repositories.GroupRepo
 	storage      storage.Storage
 	bucketName   string
 	signedURLTTL time.Duration
@@ -26,11 +31,13 @@ type AdminService struct {
 
 func NewAdminService(
 	dataRepo repositories.DataRepo,
-	authRepo repositories.AuthRepo,
+	userRepo repositories.UserRepo,
+	codeRepo repositories.CodeRepo,
 ) *AdminService {
 	return &AdminService{
 		dataRepo: dataRepo,
-		authRepo: authRepo,
+		userRepo: userRepo,
+		codeRepo: codeRepo,
 	}
 }
 
@@ -73,7 +80,7 @@ func (s *AdminService) GenerateCode(ctx context.Context, code *models.Registrati
 
 	for range 10 {
 		code.Code = generateCode()
-		err := s.authRepo.CreateCode(ctx, code)
+		err := s.codeRepo.CreateCode(ctx, code)
 		if err != nil {
 			continue
 		}
@@ -87,11 +94,29 @@ func (s *AdminService) GetAllCodes(ctx context.Context) ([]models.RegistrationCo
 		return nil, err
 	}
 
-	return s.authRepo.GetAllCodes(ctx)
+	return s.codeRepo.GetAllCodes(ctx)
 }
 
 func (s *AdminService) RevokeCode(ctx context.Context, code string) error {
-	return s.authRepo.DeleteCode(ctx, code)
+	if err := s.adminRequire(ctx); err != nil {
+		return err
+	}
+	return s.codeRepo.DeleteCode(ctx, code)
+}
+
+func (s *AdminService) GetAllGroups(ctx context.Context) ([]models.Group, error) {
+	if err := s.adminRequire(ctx); err != nil {
+		return nil, err
+	}
+
+	return s.groupRepo.GetAll(ctx)
+}
+
+func (s *AdminService) CreateGroup(ctx context.Context, group *models.Group) error {
+	if err := s.adminRequire(ctx); err != nil {
+		return err
+	}
+	return s.groupRepo.Create(ctx, group)
 }
 
 func generateCode() string {

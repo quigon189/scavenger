@@ -10,14 +10,16 @@ type AdminRepo interface {
 	GetAdminDashboard(ctx context.Context) (*models.AdminDashboard, error)
 }
 
-type AuthRepo interface {
+type UserRepo interface {
 	CreateUser(ctx context.Context, user *models.User) error
 	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
 	GetUserByID(ctx context.Context, userID int) (*models.User, error)
 	UpdateUser(ctx context.Context, user *models.User) error
 	UpdatePassword(ctx context.Context, userID int, passwordHash string) error
 	DeleteUser(ctx context.Context, userID int) error
+}
 
+type CodeRepo interface {
 	CreateCode(ctx context.Context, code *models.RegistrationCode) error
 	GetCode(ctx context.Context, codeStr string) (*models.RegistrationCode, error)
 	GetAllCodes(ctx context.Context) ([]models.RegistrationCode, error)

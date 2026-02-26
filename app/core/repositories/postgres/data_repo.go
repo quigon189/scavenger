@@ -1,21 +1,21 @@
 package postgres
 
 import (
-	"scavenger/core/repositories/postgres"
+	"scavenger/core/repositories"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewDataRepo(db *pgxpool.Pool) *DataRepo {
-	return &DataRepo{
-		Admin: postgres.NewAdminRepo(db),
-		Student: postgres.NewStudentRepository(db),
-		Teacher: postgres.NewTeacherRepository(db),
-		Period: postgres.NewPeriodRepository(db),
-		Discipline: postgres.NewDisciplineRepository(db),
-		Lab: postgres.NewLabRepository(db),
-		Report: postgres.NewReportRepository(db),
-		File: postgres.NewFileRepository(db),
-		Group: postgres.NewGroupRepository(db),
+func NewDataRepo(db *pgxpool.Pool) *repositories.DataRepo {
+	return &repositories.DataRepo{
+		Admin:      NewAdminRepo(db),
+		Student:    NewStudentRepository(db),
+		Teacher:    NewTeacherRepository(db),
+		Period:     NewPeriodRepository(db),
+		Discipline: NewDisciplineRepository(db),
+		Lab:        NewLabRepository(db),
+		Report:     NewReportRepository(db),
+		File:       NewFileRepository(db),
+		Group:      NewGroupRepository(db),
 	}
 }

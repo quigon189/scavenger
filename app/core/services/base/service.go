@@ -1,13 +1,13 @@
-package services
+package base
 
 import (
 	"context"
 	"fmt"
 	"scavenger/core/models"
+	"slices"
 )
 
-type BaseService struct {
-}
+type BaseService struct{}
 
 func (s *BaseService) Authenticate(ctx context.Context) (*models.User, error) {
 	session, ok := ctx.Value("session").(*models.UserSession)
@@ -24,16 +24,9 @@ func (s *BaseService) RequireRole(ctx context.Context, requiredRoles ...string) 
 		return err
 	}
 
-	access := false
-	for _, requiredRole := range requiredRoles {
-		if user.Role == requiredRole {
-			access = true
-			break
-		}
+	if !slices.Contains(requiredRoles, user.Role) {
+		return fmt.Errorf("access denied")
 	}
 
-	if access {
-		return nil
-	}
-	return fmt.Errorf("access denied")
+	return nil
 }
