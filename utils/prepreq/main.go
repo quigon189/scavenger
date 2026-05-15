@@ -13,6 +13,7 @@ func isTextByExt(path string) bool {
 		".txt": true, ".md": true, ".go": true, 
 		".js": true, ".html": true, ".css": true, ".json": true,
 		".py": true, ".mod": true, ".yaml": true, ".yml": true,
+		".templ": true,
 	}
 	ext := filepath.Ext(path)
 	return extensions[strings.ToLower(ext)]
