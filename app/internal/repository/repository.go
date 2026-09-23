@@ -18,7 +18,7 @@ type UserRepo interface {
 	Create(ctx context.Context, u *domain.User) error
 	ByID(ctx context.Context, id int64) (*domain.User, error)
 	ByEmail(ctx context.Context, email string) (*domain.User, error)
-	List(ctx context.Context, limit, offset int) ([]domain.User, error)
+	List(ctx context.Context) ([]domain.User, error)
 }
 
 type SessionRepo interface {
