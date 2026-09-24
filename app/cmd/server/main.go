@@ -9,6 +9,8 @@ import (
 	"os/signal"
 	"scavenger/internal/config"
 	"scavenger/internal/handler"
+	"scavenger/internal/repository/sqlite"
+	"scavenger/internal/service"
 	"syscall"
 	"time"
 )
@@ -31,8 +33,19 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	repo, err := sqlite.Open(ctx, cfg.DBDSN)
+	if err != nil {
+		return err
+	}
+
+	services := service.New(service.Deps{
+		Repo: repo,
+		SessionSecret: []byte("123"),
+	})
+
 	h := handler.New(handler.Deps{
 		Config: cfg,
+		Services: services,
 	})
 
 	srv := &http.Server{
