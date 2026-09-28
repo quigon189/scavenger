@@ -3,7 +3,10 @@ package handler
 import (
 	"log/slog"
 	"net/http"
+	"scavenger/internal/auth"
+	"scavenger/internal/domain"
 	"scavenger/internal/reqlog"
+	"slices"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -43,6 +46,53 @@ func RequestLogger(base *slog.Logger) func(http.Handler) http.Handler {
 			}()
 
 			next.ServeHTTP(ww, r)
+		})
+	}
+}
+
+func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log := reqlog.From(r.Context())
+		c, err := r.Cookie(auth.SessionCookie)
+		if err != nil || c.Value == "" {
+			next.ServeHTTP(w,r)
+			return
+		}
+		u, err := h.svc.Auth.UserBySession(r.Context(), c.Value)
+		if err != nil {
+			log.Warn("user session", "err", err)
+			auth.ClearSessionCookie(w)
+			next.ServeHTTP(w, r)
+			return
+		}
+		ctx := auth.WithUser(r.Context(), u)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func RequireAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if auth.UserFromCtx(r.Context()) == nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func RequireRole (roles ...domain.Role) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			u := auth.UserFromCtx(r.Context())
+			if u == nil {
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
+			if !slices.Contains(roles, u.Role) {
+				http.Error(w, "forbidden", http.StatusSeeOther)
+				return
+			}
+			next.ServeHTTP(w, r)
 		})
 	}
 }

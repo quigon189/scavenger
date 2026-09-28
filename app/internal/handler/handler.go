@@ -6,7 +6,6 @@ import (
 
 	"scavenger/internal/config"
 	"scavenger/internal/csrf"
-	"scavenger/internal/reqlog"
 	"scavenger/internal/service"
 
 	"github.com/go-chi/chi/v5"
@@ -42,11 +41,15 @@ func (h *Handler) Router() http.Handler {
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
 	r.Group(func(pub chi.Router) {
-		pub.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			log := reqlog.From(r.Context())
-			log.Info("Hello from slog!")
-			w.Write([]byte("Hello!"))
-		})
+		pub.Get("/login", h.LoginPage)
+		pub.Post("/login", h.LoginSubmit)
+		pub.Post("/logout", h.Logout)
+	})
+
+	r.Group(func(g chi.Router) {
+		g.Use(csrf.Middleware)
+		g.Use(h.AuthMiddleware)
+		g.Get("/", h.Home)
 	})
 
 	return r

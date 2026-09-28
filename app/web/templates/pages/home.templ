@@ -1,0 +1,23 @@
+package pages
+
+import (
+    "scavenger/internal/domain"
+    "scavenger/web/templates"
+)
+
+templ Home(user *domain.User) {
+    @templates.Layout("Главная", user) {
+        <h1>Добро пожаловать</h1>
+        if user != nil {
+            <p>Вы вошли как <b>{ user.FullName }</b>.</p>
+            switch user.Role {
+                case domain.RoleStudent:
+                    <a class="btn btn-primary" href="/s">Мои дисциплины</a>
+                case domain.RoleTeacher:
+                    <a class="btn btn-primary" href="/t">Панель преподавателя</a>
+            }
+        } else {
+            <a class="btn btn-primary" href="/login">Войти</a>
+        }
+    }
+}

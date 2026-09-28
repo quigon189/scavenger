@@ -1,0 +1,27 @@
+package pages
+
+import "scavenger/web/templates"
+
+templ LoginPage(errMsg string) {
+    @templates.Layout("Вход", nil) {
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <h1 class="mb-3">Вход</h1>
+                if errMsg != "" {
+                    <div class="alert alert-danger">{ errMsg }</div>
+                }
+                <form hx-post="/login" hx-target="body" hx-swap="outerHTML" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Пароль</label>
+                        <input type="password" name="password" class="form-control" required/>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Войти</button>
+                </form>
+            </div>
+        </div>
+    }
+}
