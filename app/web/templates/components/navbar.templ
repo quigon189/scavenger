@@ -3,9 +3,9 @@ package components
 import "scavenger/internal/domain"
 
 templ Navbar(user *domain.User) {
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">Edu</a>
+            <a class="navbar-brand" href="/">Scavenger</a>
             if user != nil {
                 <div class="ms-auto d-flex align-items-center gap-3 text-light">
                     <span>{ user.FullName } ({ string(user.Role) })</span>

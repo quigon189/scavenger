@@ -37,14 +37,23 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	slog.Debug("repository opened", "dsn", cfg.DBDSN)
 
 	services := service.New(service.Deps{
-		Repo: repo,
+		Repo:          repo,
 		SessionSecret: []byte("123"),
 	})
 
+	users, err := repo.Users().List(context.Background())
+	if len(users) < 1 {
+		err := addTestUsers(services)
+		if err != nil {
+			return err
+		}
+	}
+
 	h := handler.New(handler.Deps{
-		Config: cfg,
+		Config:   cfg,
 		Services: services,
 	})
 
@@ -68,7 +77,7 @@ func run() error {
 	select {
 	case <-ctx.Done():
 		slog.Info("shutdown signal received")
-	case err := <- errCh:
+	case err := <-errCh:
 		return err
 	}
 
@@ -82,4 +91,31 @@ func setupLogger(level string) {
 	var lvl slog.Level
 	_ = lvl.UnmarshalText([]byte(level))
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: lvl})))
+}
+
+func addTestUsers(svc *service.Services) error {
+	users := []service.UserInput{
+		{
+			Email:    "t@edu",
+			Password: "123456",
+			Role:     "teacher",
+			FullName: "Teacher Teacherov",
+		},
+		{
+			Email:    "s@edu",
+			Password: "123456",
+			Role:     "student",
+			FullName: "Student Studentov",
+		},
+	}
+
+	for _, ui := range users {
+		if u, err := svc.Auth.CreateUser(context.Background(), ui); err != nil {
+			return err
+		} else {
+			slog.Debug("create user", "user", u)
+		}
+	}
+
+	return nil
 }

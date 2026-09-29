@@ -1,6 +1,10 @@
 package config
 
-import "os"
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 type Config struct {
 	Addr     string
@@ -9,6 +13,12 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
+
+	err := godotenv.Load()
+	if err != nil {
+		return nil, err
+	}
+
 	c := &Config{
 		Addr:     getenv("APP_ADDR", ":8080"),
 		LogLevel: getenv("APP_LOG_LEVEL", "info"),

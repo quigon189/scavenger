@@ -36,6 +36,7 @@ func (h *Handler) Router() http.Handler {
 	r.Use(RequestLogger(slog.Default()))
 	r.Use(middleware.Recoverer)
 	r.Use(csrf.Middleware)
+	r.Use(h.AuthMiddleware)
 
 	fs := http.FileServer(http.Dir("web/static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
@@ -47,8 +48,8 @@ func (h *Handler) Router() http.Handler {
 	})
 
 	r.Group(func(g chi.Router) {
-		g.Use(csrf.Middleware)
-		g.Use(h.AuthMiddleware)
+		g.Use(csrf.Verify)
+		g.Use(RequireAuth)
 		g.Get("/", h.Home)
 	})
 

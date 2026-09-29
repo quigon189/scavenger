@@ -1,0 +1,13 @@
+package templates
+
+import (
+	"scavenger/internal/domain"
+)
+
+templ StudentHome(user *domain.User) {
+	@Layout("Панель студента", user, true) {
+		<h1>Панель студента</h1>
+		<hr>
+		<h2>Добро пожаловать, <b>{ user.FullName }</b></h2>
+	}
+}

@@ -25,7 +25,6 @@ func (h *Handler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidCredetials) {
-			w.WriteHeader(http.StatusUnauthorized)
 			pages.LoginPage("Неверный email или пароль").Render(r.Context(), w)
 			return
 		}

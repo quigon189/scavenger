@@ -6,18 +6,16 @@ import (
 )
 
 templ Home(user *domain.User) {
-    @templates.Layout("Главная", user) {
-        <h1>Добро пожаловать</h1>
-        if user != nil {
-            <p>Вы вошли как <b>{ user.FullName }</b>.</p>
-            switch user.Role {
-                case domain.RoleStudent:
-                    <a class="btn btn-primary" href="/s">Мои дисциплины</a>
-                case domain.RoleTeacher:
-                    <a class="btn btn-primary" href="/t">Панель преподавателя</a>
-            }
-        } else {
+	if user != nil {
+		switch user.Role {
+		case domain.RoleStudent:
+			@templates.StudentHome(user)
+		case domain.RoleTeacher:
+			@templates.TeacherHome(user)
+		}
+	} else {
+		@templates.Layout("Главная", user, true) {
             <a class="btn btn-primary" href="/login">Войти</a>
-        }
-    }
+		}
+	}
 }
