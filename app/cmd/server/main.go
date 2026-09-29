@@ -13,6 +13,8 @@ import (
 	"scavenger/internal/service"
 	"syscall"
 	"time"
+
+	"github.com/lmittmann/tint"
 )
 
 func main() {
@@ -90,7 +92,12 @@ func run() error {
 func setupLogger(level string) {
 	var lvl slog.Level
 	_ = lvl.UnmarshalText([]byte(level))
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: lvl})))
+	logger := slog.New(tint.NewTextHandler(os.Stdout, &tint.Options{
+		Level: lvl,
+		TimeFormat: time.Kitchen,
+		NoColor: false,
+	}))
+	slog.SetDefault(logger)
 }
 
 func addTestUsers(svc *service.Services) error {
@@ -110,11 +117,21 @@ func addTestUsers(svc *service.Services) error {
 	}
 
 	for _, ui := range users {
-		if u, err := svc.Auth.CreateUser(context.Background(), ui); err != nil {
+		if u, err := svc.User.Create(context.Background(), ui); err != nil {
 			return err
 		} else {
 			slog.Debug("create user", "user", u)
 		}
+	}
+
+	createdUsers, err := svc.User.List(context.Background())
+	if err != nil {
+		return nil
+	}
+
+	if len(users) > 1 {
+		svc.User.Deactivate(context.Background(), createdUsers[1].ID)
+		slog.Debug("user deactivated", "uid", createdUsers[1].ID)
 	}
 
 	return nil

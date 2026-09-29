@@ -34,7 +34,7 @@ func (h *Handler) Router() http.Handler {
 
 	r.Use(middleware.RequestID)
 	r.Use(RequestLogger(slog.Default()))
-	r.Use(middleware.Recoverer)
+	r.Use(Recoverer)
 	r.Use(csrf.Middleware)
 	r.Use(h.AuthMiddleware)
 

@@ -3,6 +3,7 @@ package handler
 import (
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 	"scavenger/internal/auth"
 	"scavenger/internal/domain"
 	"scavenger/internal/reqlog"
@@ -19,9 +20,9 @@ func RequestLogger(base *slog.Logger) func(http.Handler) http.Handler {
 			start := time.Now()
 
 			log := base.With(
-				slog.String("request_id", middleware.GetReqID(r.Context())),
 				slog.String("method", r.Method),
 				slog.String("path", r.URL.Path),
+				slog.String("request_id", middleware.GetReqID(r.Context())),
 				slog.String("remote_addr", r.RemoteAddr),
 				slog.String("user_agent", r.UserAgent()),
 			)
@@ -48,6 +49,28 @@ func RequestLogger(base *slog.Logger) func(http.Handler) http.Handler {
 			next.ServeHTTP(ww, r)
 		})
 	}
+}
+
+func Recoverer(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if rvr := recover(); rvr != nil && rvr != http.ErrAbortHandler {
+				log := reqlog.From(r.Context())
+
+				log.Error("panic recovered",
+					slog.Any("error", rvr),
+					slog.String("stack", string(debug.Stack())),
+				)
+
+				if w.Header().Get("Content-Type") == "" {
+					w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+				}
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		}()
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {

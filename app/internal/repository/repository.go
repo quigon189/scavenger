@@ -19,6 +19,7 @@ type UserRepo interface {
 	ByID(ctx context.Context, id int64) (*domain.User, error)
 	ByEmail(ctx context.Context, email string) (*domain.User, error)
 	List(ctx context.Context) ([]domain.User, error)
+	Update(ctx context.Context, u *domain.User) error
 }
 
 type SessionRepo interface {

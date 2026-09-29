@@ -28,6 +28,10 @@ func (h *Handler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 			pages.LoginPage("Неверный email или пароль").Render(r.Context(), w)
 			return
 		}
+		if errors.Is(err, service.ErrUnactiveUser) {
+			pages.LoginPage("Пользователь неактивен, обратитесь к администратору"). Render(r.Context(), w)
+			return
+		}
 		log.Error("login", "err", err)
 		http.Error(w, "internal", http.StatusInternalServerError)
 		return
