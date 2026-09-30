@@ -89,6 +89,57 @@ func (s *UserService) Deactivate(ctx context.Context, id int64) error {
 	})
 }
 
+func (s *UserService) Activate(ctx context.Context, id int64) error {
+	return s.repo.WithTx(ctx, func(r repository.Repository) error {
+		user, err := r.Users().ByID(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		user.IsActive = true
+
+		return r.Users().Update(ctx, user)
+	})
+}
+
+func (s *UserService) UpdatePassword(ctx context.Context, id int64, password string) error {
+	return s.repo.WithTx(ctx, func(r repository.Repository) error {
+		user, err := r.Users().ByID(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		if isValidPassword(password) {
+			passwordHash, err := auth.HashPassword(password)
+			if err != nil {
+				return err
+			}
+			user.PasswordHash = passwordHash
+
+			return r.Users().Update(ctx, user)
+		}
+
+		return ErrInvalidPassword
+	})
+}
+
+func (s *UserService) UpdateFullName(ctx context.Context, id int64, fullName string) error {
+	return s.repo.WithTx(ctx, func(r repository.Repository) error {
+		user, err := r.Users().ByID(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		if !isValidFullName(fullName) {
+			return ErrInvalidFullName
+		}
+
+		user.FullName = fullName
+
+		return r.Users().Update(ctx, user)
+	})
+}
+
 func isValidEmail(email string) bool {
 	_, err := mail.ParseAddress(email)
 	return err == nil
