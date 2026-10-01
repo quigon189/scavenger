@@ -8,13 +8,15 @@ type Deps struct {
 }
 
 type Services struct {
-	Auth *AuthService
-	User *UserService
+	Auth  *AuthService
+	User  *UserService
+	Group *GroupService
 }
 
 func New(d Deps) *Services {
 	return &Services{
-		Auth: NewAuth(d.Repo, d.SessionSecret),
-		User: NewUser(d.Repo),
+		Auth:  NewAuth(d.Repo, d.SessionSecret),
+		User:  NewUser(d.Repo),
+		Group: NewGroup(d.Repo),
 	}
 }

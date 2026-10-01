@@ -72,6 +72,14 @@ func (s *UserService) Create(ctx context.Context, in UserInput) (*domain.User, e
 	return &user, nil
 }
 
+func (s *UserService) ByID(ctx context.Context, id int64) (*domain.User, error) {
+	return s.repo.Users().ByID(ctx, id)
+}
+
+func (s *UserService) ByEmail(ctx context.Context, email string) (*domain.User, error) {
+	return s.repo.Users().ByEmail(ctx, email)
+}
+
 func (s *UserService) List(ctx context.Context) ([]domain.User, error) {
 	return s.repo.Users().List(ctx)
 }

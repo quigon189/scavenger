@@ -9,6 +9,8 @@ type Repository interface {
 	Users() UserRepo
 	Sessions() SessionRepo
 
+	Groups() GroupRepo
+
 	WithTx(ctx context.Context, fn func(Repository) error) error
 
 	Close() error
@@ -33,6 +35,9 @@ type GroupRepo interface {
 	Create(ctx context.Context, g *domain.Group) error
 	ByID(ctx context.Context, id int64) (*domain.Group, error)
 	ByStudentID(ctx context.Context, id int64) (*domain.Group, error)
-	Students(ctx context.Context, id int64) ([]domain.User, error)
+	List(ctx context.Context) ([]domain.Group, error)
+	StudentIDs(ctx context.Context, id int64) ([]int64, error)
+	AddStudent(ctx context.Context, gid int64, sid int64) error
+	RemoveStudent(ctx context.Context, sid int64) error
 	Update(ctx context.Context, g *domain.Group) error
 }

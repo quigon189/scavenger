@@ -63,3 +63,4 @@ func (d *DB) WithTx(ctx context.Context, fn func(repository.Repository) error) e
 
 func (d *DB) Users() repository.UserRepo       { return &userRepo{q: d.q} }
 func (d *DB) Sessions() repository.SessionRepo { return &sessionRepo{q: d.q} }
+func (d *DB) Groups() repository.GroupRepo     { return &groupRepo{q: d.q} }

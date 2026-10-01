@@ -124,14 +124,41 @@ func addTestUsers(svc *service.Services) error {
 		}
 	}
 
-	createdUsers, err := svc.User.List(context.Background())
-	if err != nil {
-		return nil
+	groupInput := service.GroupInput{
+		Number: 702,
+		StartYear: 2026,
+		DurationOfStudy: 3,
+		Specialty: "Веб-разработка",
+		ShortSpecialty: "ВР",
 	}
 
-	if len(users) > 1 {
-		svc.User.Deactivate(context.Background(), createdUsers[1].ID)
-		slog.Debug("user deactivated", "uid", createdUsers[1].ID)
+	g, err := svc.Group.Create(context.Background(), groupInput)
+	if err != nil {
+		return err
+	}
+
+	slog.Debug("create group", "group", g)
+
+	stud, err := svc.User.ByEmail(context.Background(), "s@edu")
+	if err != nil {
+		return err
+	}
+
+	if err := svc.Group.AddStudent(context.Background(), g.ID, stud.ID); err != nil {
+		return err
+	}
+
+	groups, err := svc.Group.List(context.Background())
+	if err != nil {
+		return err
+	}
+
+	for _, g := range groups {
+		studs, err := svc.Group.Students(context.Background(), g.ID)
+		if err != nil {
+			return err
+		}
+		slog.Debug("group info", "group_number", g.Number, "students", studs)
 	}
 
 	return nil

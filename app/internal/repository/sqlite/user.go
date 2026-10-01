@@ -12,10 +12,11 @@ import (
 type userRepo struct{ q queryer }
 
 func (r *userRepo) Create(ctx context.Context, u *domain.User) error {
+	u.CreatedAt = time.Now()
 	res, err := r.q.ExecContext(ctx,
 		`INSERT INTO users(email, password_hash, full_name, role, created_at)
 		 VALUES (?, ?, ?, ?, ?)`,
-		u.Email, u.PasswordHash, u.FullName, string(u.Role), time.Now().UTC())
+		u.Email, u.PasswordHash, u.FullName, string(u.Role), u.CreatedAt.UTC())
 	if err != nil {
 		return err
 	}
