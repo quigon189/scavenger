@@ -112,7 +112,7 @@ func RequireRole (roles ...domain.Role) func(http.Handler) http.Handler {
 				return
 			}
 			if !slices.Contains(roles, u.Role) {
-				http.Error(w, "forbidden", http.StatusSeeOther)
+				http.Error(w, "forbidden", http.StatusForbidden)
 				return
 			}
 			next.ServeHTTP(w, r)

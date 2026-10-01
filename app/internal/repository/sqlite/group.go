@@ -102,9 +102,6 @@ func (r *groupRepo) StudentIDs(ctx context.Context, gid int64) ([]int64, error) 
 		WHERE group_id = ?
 		`, gid)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, repository.ErrNotFound
-		}
 		return nil, err
 	}
 	defer rows.Close()
@@ -130,7 +127,7 @@ func (r *groupRepo) AddStudent(ctx context.Context, gid int64, sid int64) error 
 
 func (r *groupRepo) RemoveStudent(ctx context.Context, sid int64) error {
 	_, err := r.q.ExecContext(ctx, `
-		DELETE FROM group_users
+		DELETE FROM group_students
 		WHERE student_id = ?
 		`, sid)
 	return err
@@ -138,7 +135,7 @@ func (r *groupRepo) RemoveStudent(ctx context.Context, sid int64) error {
 
 func (r *groupRepo) Update(ctx context.Context, g *domain.Group) error {
 	_, err := r.q.ExecContext(ctx, `
-		UPDATE group_students
+		UPDATE groups
 		SET number = ?, start_year = ?, end_year = ?, specialty = ?, short_specialty = ?
 		WHERE id = ?
 		`, g.Number, g.StartYear, g.EndYear, g.Specialty, g.ShortSpecialty, g.ID)
