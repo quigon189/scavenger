@@ -7,7 +7,9 @@ CREATE TABLE groups (
 	end_year INTEGER NOT NULL CHECK ( end_year BETWEEN start_year AND 3000 ),
 	specialty TEXT NOT NULL,
 	short_specialty TEXT NOT NULL,
-	created_at DATETIME NOT NULL
+	created_at DATETIME NOT NULL,
+
+	UNIQUE (number, start_year)
 );
 
 CREATE TABLE group_students (

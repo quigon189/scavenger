@@ -26,3 +26,14 @@ func (r Role) Valid() bool {
 	}
 	return false
 }
+
+func (u *User) ViewRole() string {
+	switch u.Role {
+	case RoleStudent:
+		return "Студент"
+	case RoleTeacher:
+		return "Преподаватель"
+	default:
+		return "Без роли"
+	}
+}

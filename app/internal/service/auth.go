@@ -11,7 +11,6 @@ import (
 
 var (
 	ErrInvalidCredetials = errors.New("invalid credentials")
-	ErrUnactiveUser      = errors.New("unactive user")
 	ErrUnauthorized      = errors.New("unauthorized")
 )
 

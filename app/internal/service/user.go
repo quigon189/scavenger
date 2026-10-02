@@ -17,6 +17,7 @@ var (
 	ErrInvalidFullName = errors.New("invalid full name")
 	ErrInvalidPassword = errors.New("invalid password")
 	ErrInvalidRole = errors.New("invalid role")
+	ErrUnactiveUser = errors.New("unactive user")
 )
 
 type UserService struct {

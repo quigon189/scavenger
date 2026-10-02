@@ -5,11 +5,11 @@ import (
     "scavenger/web/templates"
 )
 
-templ Home(user *domain.User) {
+templ Home(user *domain.User, group *domain.Group) {
 	if user != nil {
 		switch user.Role {
 		case domain.RoleStudent:
-			@templates.StudentHome(user)
+			@templates.StudentHome(user, group)
 		case domain.RoleTeacher:
 			@templates.TeacherHome(user)
 		}

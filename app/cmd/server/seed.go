@@ -58,7 +58,8 @@ func Seed(ctx context.Context, svc *service.Services) error {
 		return err
 	}
 
-	groups, err := svc.Group.List(ctx)
+	isActive := true
+	groups, err := svc.Group.List(ctx, &service.GroupFilter{IsActive: &isActive})
 	if err != nil {
 		return err
 	}

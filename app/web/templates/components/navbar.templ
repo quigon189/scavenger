@@ -8,7 +8,7 @@ templ Navbar(user *domain.User) {
             <a class="navbar-brand" href="/">Scavenger</a>
             if user != nil {
                 <div class="ms-auto d-flex align-items-center gap-3 text-light">
-                    <span>{ user.FullName } ({ string(user.Role) })</span>
+                    <span>{ user.FullName } ({ user.ViewRole() })</span>
                     <form method="post" action="/logout">
                         <button class="btn btn-outline-light btn-sm">Выйти</button>
                     </form>
