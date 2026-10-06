@@ -98,7 +98,7 @@ func Seed(ctx context.Context, svc *service.Services) error {
 		return err
 	}
 
-	slog.Info("disciplines", "discs", discs)
+	slog.Debug("list disciplines", "discs", discs)
 	
 	return nil
 }

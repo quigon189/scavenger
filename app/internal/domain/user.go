@@ -17,6 +17,7 @@ type User struct {
 	Role         Role
 	IsActive     bool
 	CreatedAt    time.Time
+	UpdatedAt    *time.Time
 }
 
 func (r Role) Valid() bool {

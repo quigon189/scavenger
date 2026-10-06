@@ -13,6 +13,7 @@ type Group struct {
 	Specialty      string
 	ShortSpecialty string
 	CreatedAt      time.Time
+	UpdatedAt      *time.Time
 }
 
 func (g *Group) IsActive() bool {

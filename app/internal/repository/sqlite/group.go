@@ -11,33 +11,51 @@ import (
 
 type groupRepo struct{ q queryer }
 
-func (r *groupRepo) Create(ctx context.Context, g *domain.Group) error {
-	g.CreatedAt = time.Now()
-	res, err := r.q.ExecContext(ctx, `
-		INSERT INTO groups(number, start_year, end_year, specialty, short_specialty, created_at)
-		VALUES (?, ?, ?, ?, ?, ?)
-		`, g.Number, g.StartYear, g.EndYear, g.Specialty, g.ShortSpecialty, g.CreatedAt.UTC())
+func (r *groupRepo) Save(ctx context.Context, g *domain.Group) error {
+	if g.ID == 0 {
+		createdAt := time.Now()
+		res, err := r.q.ExecContext(ctx,
+			`INSERT INTO groups(number, start_year, end_year, specialty, short_specialty, created_at)
+			VALUES (?, ?, ?, ?, ?, ?)`,
+			g.Number, g.StartYear, g.EndYear, g.Specialty, g.ShortSpecialty, createdAt.UTC())
+		if err != nil {
+			return err
+		}
+		g.ID, err = res.LastInsertId()
+		if err != nil {
+			return err
+		}
+		g.CreatedAt = createdAt
+		return nil
+	}
+
+	updatedAt := time.Now()
+	_, err := r.q.ExecContext(ctx,
+		`UPDATE groups SET
+			number          = ?,
+			start_year      = ?,
+			end_year        = ?,
+			specialty       = ?,
+			short_specialty = ?,
+			updated_at      = ?
+		WHERE id = ?`,
+		g.Number, g.StartYear, g.EndYear, g.Specialty, g.ShortSpecialty, updatedAt.UTC(), g.ID)
 	if err != nil {
 		return err
 	}
-
-	g.ID, err = res.LastInsertId()
-	if err != nil {
-		return err
-	}
-
+	g.UpdatedAt = &updatedAt
 	return nil
 }
 
 func (r *groupRepo) ByID(ctx context.Context, gid int64) (*domain.Group, error) {
 	var g domain.Group
 	row := r.q.QueryRowContext(ctx, `
-		SELECT id, number, start_year, end_year, specialty, short_specialty, created_at
+		SELECT id, number, start_year, end_year, specialty, short_specialty, created_at, updated_at
 		FROM groups
 		WHERE id = ?
 		`, gid)
 	err := row.Scan(&g.ID, &g.Number, &g.StartYear, &g.EndYear,
-		&g.Specialty, &g.ShortSpecialty, &g.CreatedAt)
+		&g.Specialty, &g.ShortSpecialty, &g.CreatedAt, &g.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.ErrNotFound
@@ -67,7 +85,7 @@ func (r *groupRepo) ByStudentID(ctx context.Context, sid int64) (*domain.Group, 
 
 func (r *groupRepo) List(ctx context.Context) ([]domain.Group, error) {
 	rows, err := r.q.QueryContext(ctx, `
-	SELECT id, number, start_year, end_year, specialty, short_specialty, created_at
+	SELECT id, number, start_year, end_year, specialty, short_specialty, created_at, updated_at
 	FROM groups
 	`)
 	if err != nil {
@@ -86,6 +104,7 @@ func (r *groupRepo) List(ctx context.Context) ([]domain.Group, error) {
 			&group.Specialty,
 			&group.ShortSpecialty,
 			&group.CreatedAt,
+			&group.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -130,14 +149,5 @@ func (r *groupRepo) RemoveStudent(ctx context.Context, sid int64) error {
 		DELETE FROM group_students
 		WHERE student_id = ?
 		`, sid)
-	return err
-}
-
-func (r *groupRepo) Update(ctx context.Context, g *domain.Group) error {
-	_, err := r.q.ExecContext(ctx, `
-		UPDATE groups
-		SET number = ?, start_year = ?, end_year = ?, specialty = ?, short_specialty = ?
-		WHERE id = ?
-		`, g.Number, g.StartYear, g.EndYear, g.Specialty, g.ShortSpecialty, g.ID)
 	return err
 }

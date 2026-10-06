@@ -66,7 +66,7 @@ func (s *UserService) Create(ctx context.Context, in UserInput) (*domain.User, e
 	user.PasswordHash = passwordHash
 	user.Role = role
 
-	if err := s.repo.Users().Create(ctx, &user); err != nil {
+	if err := s.repo.Users().Save(ctx, &user); err != nil {
 		return nil, err
 	}
 
@@ -94,7 +94,7 @@ func (s *UserService) Deactivate(ctx context.Context, id int64) error {
 
 		user.IsActive = false
 
-		return r.Users().Update(ctx, user)
+		return r.Users().Save(ctx, user)
 	})
 }
 
@@ -107,7 +107,7 @@ func (s *UserService) Activate(ctx context.Context, id int64) error {
 
 		user.IsActive = true
 
-		return r.Users().Update(ctx, user)
+		return r.Users().Save(ctx, user)
 	})
 }
 
@@ -125,7 +125,7 @@ func (s *UserService) UpdatePassword(ctx context.Context, id int64, password str
 			}
 			user.PasswordHash = passwordHash
 
-			return r.Users().Update(ctx, user)
+			return r.Users().Save(ctx, user)
 		}
 
 		return ErrInvalidPassword
@@ -145,7 +145,7 @@ func (s *UserService) UpdateFullName(ctx context.Context, id int64, fullName str
 
 		user.FullName = fullName
 
-		return r.Users().Update(ctx, user)
+		return r.Users().Save(ctx, user)
 	})
 }
 

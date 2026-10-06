@@ -18,11 +18,10 @@ type Repository interface {
 }
 
 type UserRepo interface {
-	Create(ctx context.Context, u *domain.User) error
+	Save(ctx context.Context, u *domain.User) error
 	ByID(ctx context.Context, id int64) (*domain.User, error)
 	ByEmail(ctx context.Context, email string) (*domain.User, error)
 	List(ctx context.Context) ([]domain.User, error)
-	Update(ctx context.Context, u *domain.User) error
 }
 
 type SessionRepo interface {
@@ -33,14 +32,13 @@ type SessionRepo interface {
 }
 
 type GroupRepo interface {
-	Create(ctx context.Context, g *domain.Group) error
+	Save(ctx context.Context, g *domain.Group) error
 	ByID(ctx context.Context, id int64) (*domain.Group, error)
 	ByStudentID(ctx context.Context, id int64) (*domain.Group, error)
 	List(ctx context.Context) ([]domain.Group, error)
 	StudentIDs(ctx context.Context, id int64) ([]int64, error)
 	AddStudent(ctx context.Context, gid int64, sid int64) error
 	RemoveStudent(ctx context.Context, sid int64) error
-	Update(ctx context.Context, g *domain.Group) error
 }
 
 type DisciplineRepo interface {

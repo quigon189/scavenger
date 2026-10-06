@@ -8,6 +8,7 @@ CREATE TABLE groups (
 	specialty TEXT NOT NULL,
 	short_specialty TEXT NOT NULL,
 	created_at DATETIME NOT NULL,
+	updated_at DATETIME,
 
 	UNIQUE (number, start_year)
 );

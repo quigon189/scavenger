@@ -83,7 +83,7 @@ func (s *GroupService) Create(ctx context.Context, in GroupInput) (*domain.Group
 		ShortSpecialty: in.ShortSpecialty,
 	}
 
-	if err := s.repo.Groups().Create(ctx, &group); err != nil {
+	if err := s.repo.Groups().Save(ctx, &group); err != nil {
 		return nil, err
 	}
 	return &group, nil

@@ -11,35 +11,53 @@ import (
 
 type userRepo struct{ q queryer }
 
-func (r *userRepo) Create(ctx context.Context, u *domain.User) error {
-	u.CreatedAt = time.Now()
-	res, err := r.q.ExecContext(ctx,
-		`INSERT INTO users(email, password_hash, full_name, role, created_at)
-		 VALUES (?, ?, ?, ?, ?)`,
-		u.Email, u.PasswordHash, u.FullName, string(u.Role), u.CreatedAt.UTC())
+func (r *userRepo) Save(ctx context.Context, u *domain.User) error {
+	if u.ID == 0 {
+		createdAt := time.Now()
+		res, err := r.q.ExecContext(ctx,
+			`INSERT INTO users(email, password_hash, full_name, role, created_at)
+			 VALUES (?, ?, ?, ?, ?)`,
+			u.Email, u.PasswordHash, u.FullName, string(u.Role), createdAt.UTC())
+		if err != nil {
+			return err
+		}
+		u.ID, _ = res.LastInsertId()
+		u.IsActive = true
+		u.CreatedAt = createdAt
+		return nil
+	}
+	updatedAt := time.Now()
+	_, err := r.q.ExecContext(ctx,
+		`UPDATE users SET
+			email         = ?,
+			password_hash = ?,
+			full_name     = ?,
+			role          = ?,
+			is_active     = ?,
+			updated_at    = ?
+		WHERE id = ?`,
+		u.Email, u.PasswordHash, u.FullName, string(u.Role), u.IsActive, updatedAt.UTC())
 	if err != nil {
 		return err
 	}
-	u.ID, _ = res.LastInsertId()
-	u.IsActive = true
 	return nil
 }
 
 func (r *userRepo) ByID(ctx context.Context, id int64) (*domain.User, error) {
 	return r.scanOne(r.q.QueryRowContext(ctx,
-		`SELECT id, email, password_hash, full_name, role, is_active, created_at
+		`SELECT id, email, password_hash, full_name, role, is_active, created_at, updated_at
 			FROM users WHERE id = ?`, id))
 }
 
 func (r *userRepo) ByEmail(ctx context.Context, email string) (*domain.User, error) {
 	return r.scanOne(r.q.QueryRowContext(ctx,
-		`SELECT id, email, password_hash, full_name, role, is_active, created_at
+		`SELECT id, email, password_hash, full_name, role, is_active, created_at, updated_at
 			FROM users WHERE email = ?`, email))
 }
 
 func (r *userRepo) List(ctx context.Context) ([]domain.User, error) {
 	rows, err := r.q.QueryContext(ctx,
-		`SELECT id, email, password_hash, full_name, role, is_active, created_at
+		`SELECT id, email, password_hash, full_name, role, is_active, created_at, updated_at
 		FROM users ORDER BY id`)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, repository.ErrNotFound
@@ -64,19 +82,10 @@ func (r *userRepo) List(ctx context.Context) ([]domain.User, error) {
 	return users, nil
 }
 
-func (r *userRepo) Update(ctx context.Context, u *domain.User) error {
-	_, err := r.q.ExecContext(ctx, `
-	UPDATE users
-	SET password_hash = ?, full_name = ?, is_active = ?
-	WHERE id = ?
-	`, u.PasswordHash, u.FullName, u.IsActive, u.ID)
-	return err
-}
-
 func (r *userRepo) scanOne(row *sql.Row) (*domain.User, error) {
 	var u domain.User
 	var role string
-	err := row.Scan(&u.ID, &u.Email, &u.PasswordHash, &u.FullName, &role, &u.IsActive, &u.CreatedAt)
+	err := row.Scan(&u.ID, &u.Email, &u.PasswordHash, &u.FullName, &role, &u.IsActive, &u.CreatedAt, &u.UpdatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, repository.ErrNotFound
 	}
