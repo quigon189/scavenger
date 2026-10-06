@@ -61,6 +61,7 @@ func (d *DB) WithTx(ctx context.Context, fn func(repository.Repository) error) e
 	return tx.Commit()
 }
 
-func (d *DB) Users() repository.UserRepo       { return &userRepo{q: d.q} }
-func (d *DB) Sessions() repository.SessionRepo { return &sessionRepo{q: d.q} }
-func (d *DB) Groups() repository.GroupRepo     { return &groupRepo{q: d.q} }
+func (d *DB) Users() repository.UserRepo             { return &userRepo{q: d.q} }
+func (d *DB) Sessions() repository.SessionRepo       { return &sessionRepo{q: d.q} }
+func (d *DB) Groups() repository.GroupRepo           { return &groupRepo{q: d.q} }
+func (d *DB) Disciplines() repository.DisciplineRepo { return &disciplineRepo{q: d.q} }

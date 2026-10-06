@@ -72,5 +72,33 @@ func Seed(ctx context.Context, svc *service.Services) error {
 		slog.Debug("group info", "group_number", g.Number, "students", studs)
 	}
 
+	t, err := svc.User.ByEmail(ctx, "t@edu")
+	if err != nil {
+		return err
+	}
+
+	discInput := service.DisciplineInput{
+		Title: "Test",
+		GroupID: g.ID,
+		TeacherID: t.ID,
+		Archived: false,
+	}
+
+	d, err := svc.Discipline.Create(ctx, discInput)
+	if err != nil {
+		return err
+	}
+
+	d.Title = "Test 2"
+
+	svc.Discipline.Update(ctx, d)
+
+	discs, err := svc.Discipline.List(ctx)
+	if err != nil {
+		return err
+	}
+
+	slog.Info("disciplines", "discs", discs)
+	
 	return nil
 }

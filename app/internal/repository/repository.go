@@ -10,6 +10,7 @@ type Repository interface {
 	Sessions() SessionRepo
 
 	Groups() GroupRepo
+	Disciplines() DisciplineRepo
 
 	WithTx(ctx context.Context, fn func(Repository) error) error
 
@@ -40,4 +41,20 @@ type GroupRepo interface {
 	AddStudent(ctx context.Context, gid int64, sid int64) error
 	RemoveStudent(ctx context.Context, sid int64) error
 	Update(ctx context.Context, g *domain.Group) error
+}
+
+type DisciplineRepo interface {
+	Save(ctx context.Context, d *domain.Discipline) error
+	ByID(ctx context.Context, id int64) (*domain.Discipline, error)
+	ByTeacherID(ctx context.Context, id int64) ([]domain.Discipline, error)
+	ByGroupID(ctx context.Context, id int64) ([]domain.Discipline, error)
+	List(ctx context.Context) ([]domain.Discipline, error)
+	Delete(ctx context.Context, id int64) error
+}
+
+type MaterialRepo interface {
+	Save(ctx context.Context, m domain.Material) error
+	ByID(ctx context.Context, id string) (domain.Material, error)
+	ByDisciplineID(ctx context.Context, id int64) ([]domain.Material, error)
+	Delete(ctx context.Context, id string) error
 }

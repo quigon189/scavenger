@@ -1,6 +1,8 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
 
 type Discipline struct {
 	ID          int64
@@ -10,49 +12,56 @@ type Discipline struct {
 	GroupID     int64
 	Archived    bool
 	CreatedAt   time.Time
+	UpdatedAt   *time.Time
 }
 
 type MaterialKind string
 
 const (
-	MaterialTheory MaterialKind = "theory"
+	MaterialTheoryType MaterialKind = "theory"
+	MaterialPractical  MaterialKind = "practical"
+	MaterialNote       MaterialKind = "note"
 )
 
 type Material interface {
-	ID() int64
-	Title() string
-	Number() int
-	DisciplineID() int64
-	StartDate() time.Time
-	EndDate() time.Time
-	Visible() bool
-	Kind() MaterialKind
-	CreatedAt() time.Time
+	GetID() string
+	GetDisciplineID() int64
+	GetVisible() bool
+	GetDisplayOrder() int
 }
 
 type baseMaterial struct {
-	id           int64
-	disciplineID int64
-	title        string
-	number       int
-	startDate    time.Time
-	endDate      time.Time
-	visible      bool
-	createdAt    time.Time
+	ID           string
+	DisciplineID int64
+	Title        string
+	DisplayOrder int
+	Visible      bool
+	CreatedAt    time.Time
 }
 
-func (m baseMaterial) ID() int64            { return m.id }
-func (m baseMaterial) Title() string        { return m.title }
-func (m baseMaterial) Number() int          { return m.number }
-func (m baseMaterial) DisciplineID() int64  { return m.disciplineID }
-func (m baseMaterial) StartDate() time.Time { return m.startDate }
-func (m baseMaterial) EndDate() time.Time   { return m.endDate }
-func (m baseMaterial) Visible() bool        { return m.visible }
-func (m baseMaterial) CreatedAt() time.Time { return m.createdAt }
+func (m baseMaterial) GetID() string          { return m.ID }
+func (m baseMaterial) GetDisciplineID() int64 { return m.DisciplineID }
+func (m baseMaterial) GetVisible() bool       { return m.Visible }
+func (m baseMaterial) GetDisplayOrder() int   { return m.DisplayOrder }
+
+type baseAssignableMaterial struct {
+	baseMaterial
+	Deadline time.Time
+	Grade    int
+}
 
 type TheoryMaterial struct {
 	baseMaterial
 	Content string
 }
 
-func (m TheoryMaterial) Kind() MaterialKind { return MaterialTheory }
+type NoteMaterial struct {
+	baseMaterial
+	Description string
+}
+
+type PracticalMaterial struct {
+	baseAssignableMaterial
+	Content string
+	Number  int
+}
