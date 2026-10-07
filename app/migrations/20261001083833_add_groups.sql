@@ -25,5 +25,5 @@ CREATE TABLE group_students (
 -- +goose Down
 -- +goose StatementBegin
 DROP TABLE IF EXISTS groups;
-DROP TABLE IS EXISTS group_students;
+DROP TABLE IF EXISTS group_students;
 -- +goose StatementEnd

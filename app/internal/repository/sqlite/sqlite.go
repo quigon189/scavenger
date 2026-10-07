@@ -18,6 +18,10 @@ type queryer interface {
 	QueryRowContext(ctx context.Context, q string, args ...any) *sql.Row
 }
 
+type rowScanner interface {
+	Scan(dest ...any) error
+}
+
 type DB struct {
 	DB *sql.DB
 	q  queryer
@@ -65,3 +69,4 @@ func (d *DB) Users() repository.UserRepo             { return &userRepo{q: d.q} 
 func (d *DB) Sessions() repository.SessionRepo       { return &sessionRepo{q: d.q} }
 func (d *DB) Groups() repository.GroupRepo           { return &groupRepo{q: d.q} }
 func (d *DB) Disciplines() repository.DisciplineRepo { return &disciplineRepo{q: d.q} }
+func (d *DB) Materials() repository.MaterialRepo     { return &materialRepo{q: d.q} }

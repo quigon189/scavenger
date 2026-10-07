@@ -97,8 +97,27 @@ func Seed(ctx context.Context, svc *service.Services) error {
 	if err != nil {
 		return err
 	}
-
 	slog.Debug("list disciplines", "discs", discs)
+
+	material, err := svc.Material.CreateNote(ctx, service.MaterialNoteInput{
+		DisciplineID: d.ID,
+		Title: "Test Note",
+		Description: "This is test note",
+		Visible: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	slog.Debug("create note", "material", material)
+
+	materials, err := svc.Material.ListByDisciplineID(ctx, d.ID)
+	if err != nil {
+		return err
+	}
+
+	slog.Debug("List materials for discipline", "discipline", d, "materials", materials)
+
 	
 	return nil
 }

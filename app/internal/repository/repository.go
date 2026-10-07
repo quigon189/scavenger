@@ -11,6 +11,7 @@ type Repository interface {
 
 	Groups() GroupRepo
 	Disciplines() DisciplineRepo
+	Materials() MaterialRepo
 
 	WithTx(ctx context.Context, fn func(Repository) error) error
 

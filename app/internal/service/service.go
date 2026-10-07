@@ -12,6 +12,7 @@ type Services struct {
 	User       *UserService
 	Group      *GroupService
 	Discipline *DisciplineService
+	Material   *MaterialService
 }
 
 func New(d Deps) *Services {
@@ -20,5 +21,6 @@ func New(d Deps) *Services {
 		User:       NewUser(d.Repo),
 		Group:      NewGroup(d.Repo),
 		Discipline: NewDiscipline(d.Repo),
+		Material:   NewMaterial(d.Repo),
 	}
 }

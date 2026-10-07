@@ -108,10 +108,6 @@ func (r *disciplineRepo) Delete(ctx context.Context, id int64) error {
 	return err
 }
 
-type rowScanner interface {
-	Scan(dest ...any) error
-}
-
 func scanDiscipline(s rowScanner) (*domain.Discipline, error) {
 	var d domain.Discipline
 
