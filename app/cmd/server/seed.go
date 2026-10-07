@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"scavenger/internal/service"
+	"time"
 )
 
 func Seed(ctx context.Context, svc *service.Services) error {
@@ -99,17 +100,40 @@ func Seed(ctx context.Context, svc *service.Services) error {
 	}
 	slog.Debug("list disciplines", "discs", discs)
 
-	material, err := svc.Material.CreateNote(ctx, service.MaterialNoteInput{
+	note, err := svc.Material.CreateNote(ctx, service.MaterialNoteInput{
 		DisciplineID: d.ID,
 		Title: "Test Note",
 		Description: "This is test note",
+		DisplayOrder: 1,
 		Visible: true,
 	})
 	if err != nil {
 		return err
 	}
 
-	slog.Debug("create note", "material", material)
+	slog.Debug("create note", "material", note)
+
+	theory, err := svc.Material.CreateTheory(ctx, service.MaterialTheoryInput{
+		DisciplineID: d.ID,
+		Title: "Test Theory",
+		DisplayOrder: 2,
+		Visible: true,
+		Content: "This in md Theory material",
+	})
+
+	slog.Debug("create theory", "material", theory)
+
+	pract, err := svc.Material.CreatePractical(ctx, service.MaterialPracticalInput{
+		DisciplineID: d.ID,
+		Title: "Test Practical",
+		DisplayOrder: 2,
+		Visible: true,
+		Number: 1,
+		Content: "This in md Practical material",
+		Deadline: time.Now().Add(30 * time.Hour),	
+	})
+
+	slog.Debug("create practical", "material", pract)
 
 	materials, err := svc.Material.ListByDisciplineID(ctx, d.ID)
 	if err != nil {

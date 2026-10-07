@@ -5,8 +5,13 @@ import (
 	"errors"
 	"scavenger/internal/domain"
 	"scavenger/internal/repository"
+	"time"
 
 	"github.com/google/uuid"
+)
+
+var (
+	ErrInvalidInput = errors.New("invalid input")
 )
 
 type MaterialService struct {
@@ -31,22 +36,107 @@ func (s *MaterialService) CreateNote(ctx context.Context, in MaterialNoteInput) 
 		return nil, err
 	}
 	if in.Title == "" || in.Description == "" {
-		return nil, ErrInvalidTitle
+		return nil, ErrInvalidInput
 	}
 
 	id, err := s.generateID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	m := &domain.NoteMaterial{
+		BaseMaterial: domain.BaseMaterial{
+			ID:           id,
+			DisciplineID: disc.ID,
+			Title:        in.Title,
+			Visible:      in.Visible,
+			DisplayOrder: in.DisplayOrder,
+		},
+		Description: in.Description,
+	}
+
+	if err := s.repo.Materials().Save(ctx, m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+type MaterialTheoryInput struct {
+	DisciplineID int64
+	Title        string
+	Visible      bool
+	DisplayOrder int
+	Content      string
+}
+
+func (s *MaterialService) CreateTheory(ctx context.Context, in MaterialTheoryInput) (domain.Material, error) {
+	disc, err := s.repo.Disciplines().ByID(ctx, in.DisciplineID)
+	if err != nil {
+		return nil, err
+	}
+
+	if in.Title == "" || in.Content == "" {
+		return nil, ErrInvalidInput
+	}
+
+	id, err := s.generateID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	m := &domain.TheoryMaterial{
+		BaseMaterial: domain.BaseMaterial{
+			ID:           id,
+			DisciplineID: disc.ID,
+			Title:        in.Title,
+			Visible:      in.Visible,
+			DisplayOrder: in.DisplayOrder,
+		},
+		Content: in.Content,
+	}
+
+	if err := s.repo.Materials().Save(ctx, m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+type MaterialPracticalInput struct {
+	DisciplineID int64
+	Title        string
+	Visible      bool
+	DisplayOrder int
+	Number       int
+	Content      string
+	Deadline     time.Time
+}
+
+func (s *MaterialService) CreatePractical(ctx context.Context, in MaterialPracticalInput) (domain.Material, error) {
+	disc, err := s.repo.Disciplines().ByID(ctx, in.DisciplineID)
+	if err != nil {
+		return nil, err
+	}
+
+	if in.Title == "" || in.Number <= 0 || in.Content == "" || in.Deadline.Before(time.Now()) {
+		return nil, ErrInvalidInput
+	}
+
+	id, err := s.generateID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	m := &domain.PracticalMaterial{
 		BaseMaterial: domain.BaseMaterial{
 			ID: id,
 			DisciplineID: disc.ID,
 			Title: in.Title,
 			Visible: in.Visible,
+			DisplayOrder: in.DisplayOrder,
 		},
-		Description: in.Description,
+		Number: in.Number,
+		Content: in.Content,
+		Deadline: in.Deadline,
 	}
 
 	if err := s.repo.Materials().Save(ctx, m); err != nil {
@@ -59,7 +149,11 @@ func (s *MaterialService) ListByDisciplineID(ctx context.Context, id int64) ([]d
 	return s.repo.Materials().ByDisciplineID(ctx, id)
 }
 
-func (s *MaterialService) generateID(ctx context.Context) (string,error) {
+func (s *MaterialService) ByID(ctx context.Context, id string) (domain.Material, error) {
+	return s.repo.Materials().ByID(ctx, id)
+}
+
+func (s *MaterialService) generateID(ctx context.Context) (string, error) {
 	for range 10 {
 		id, err := uuid.NewV7()
 		if err != nil {

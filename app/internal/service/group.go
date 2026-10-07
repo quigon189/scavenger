@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	ErrInvalidInput   = errors.New("invalid group input")
 	ErrUnactiveGroup  = errors.New("unactive group")
 	ErrNotStudentRole = errors.New("user don't have student role")
 )
