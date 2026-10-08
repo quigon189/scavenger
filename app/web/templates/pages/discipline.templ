@@ -1,0 +1,29 @@
+package pages
+
+import (
+	"fmt"
+
+	"scavenger/internal/domain"
+	"scavenger/web/templates"
+	"scavenger/web/templates/components"
+)
+
+templ DisciplinePage(u *domain.User, dcv components.DisciplineCardView, materials []components.MaterialCardView) {
+	@templates.Layout(dcv.Discipline.Title, u, true) {
+		<div class="container py-4">
+			@components.DisciplineCard(dcv)
+
+			<div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+				<h2 class="h6 text-body-secondary mb-0">Материалы</h2>
+				if u != nil && u.Role == domain.RoleTeacher {
+					<a href={ templ.SafeURL(fmt.Sprintf("/discipline/%d/material/new", dcv.Discipline.ID)) }
+						class="btn btn-sm btn-primary">
+						+ Добавить материал
+					</a>
+				}
+			</div>
+
+			@components.MaterialList(materials)
+		</div>
+	}
+}

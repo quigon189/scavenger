@@ -1,0 +1,86 @@
+package components
+
+import (
+	"fmt"
+)
+
+templ DisciplineCard(v DisciplineCardView) {
+	<article class="card mb-3 shadow-sm position-relative card-hoverable">
+		<div class="card-body">
+			<div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+				<h5 class="card-title mb-1">
+					<a href={ templ.SafeURL(fmt.Sprintf("/discipline/%d", v.Discipline.ID)) }
+						class="stretched-link text-decoration-none text-reset">
+						{ v.Discipline.Title }
+					</a>
+				</h5>
+				if v.Discipline.Archived {
+					<span class="badge text-bg-secondary">В архиве</span>
+				}
+			</div>
+
+			if v.Discipline.Description != "" {
+				<p class="card-text text-body-secondary mb-2">{ v.Discipline.Description }</p>
+			}
+
+			if v.Group != nil || v.Teacher != nil {
+				<div class="d-flex flex-wrap gap-3 small text-body-secondary">
+					if v.Group != nil {
+						<span>Группа: { v.Group.Name() }</span>
+					}
+					if v.Teacher != nil {
+						<span>Преподаватель: { v.Teacher.FullName }</span>
+					}
+				</div>
+			}
+		</div>
+	</article>
+}
+
+// DisciplineList — вертикальный список карточек дисциплин.
+templ DisciplineList(items []DisciplineCardView) {
+	<div class="d-flex flex-column">
+		for _, i := range items {
+			@DisciplineCard(i)
+		}
+	</div>
+}
+
+templ DisciplineAccordion(groups []DisciplineGroupView) {
+	<div class="accordion" id="disciplines-accordion">
+		for _, g := range groups {
+			@DisciplineAccordionItem(g)
+		}
+	</div>
+}
+
+templ DisciplineAccordionItem(g DisciplineGroupView) {
+	<div class="accordion-item">
+		<h2 class="accordion-header" id={ "acc-head-" + g.ID }>
+			<button
+				class="accordion-button bg-success text-white collapsed"
+				type="button"
+				data-bs-toggle="collapse"
+				data-bs-target={ "#acc-body-" + g.ID }
+				aria-expanded="false"
+				aria-controls={ "acc-body-" + g.ID }
+			>
+				<span class="fw-semibold">{ g.Title }</span>
+				if g.Subtitle != "" {
+					<span class="ms-2 small">{ g.Subtitle }</span>
+				}
+			</button>
+		</h2>
+		<div
+			id={ "acc-body-" + g.ID }
+			class="accordion-collapse collapse"
+			data-bs-parent="#disciplines-accordion"
+		>
+			<div class="accordion-body d-flex flex-column gap-3">
+				for _, it := range g.Items {
+					@DisciplineCard(it)
+				}
+			</div>
+		</div>
+	</div>
+}

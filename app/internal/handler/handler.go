@@ -51,6 +51,7 @@ func (h *Handler) Router() http.Handler {
 		g.Use(csrf.Verify)
 		g.Use(RequireAuth)
 		g.Get("/", h.Home)
+		g.Get("/discipline/{id}", h.Discipline)
 	})
 
 	return r

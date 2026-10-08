@@ -54,6 +54,18 @@ func (s *DisciplineService) Create(ctx context.Context, in DisciplineInput) (*do
 	return &discipline, nil
 }
 
+func (s *DisciplineService) ByID(ctx context.Context, id int64) (*domain.Discipline, error) {
+	return s.repo.Disciplines().ByID(ctx, id)
+}
+
+func (s *DisciplineService) ByTeacherID(ctx context.Context, teacherID int64) ([]domain.Discipline, error) {
+	return s.repo.Disciplines().ByTeacherID(ctx, teacherID)
+}
+
+func (s *DisciplineService) ByGroupID(ctx context.Context, groupID int64) ([]domain.Discipline, error) {
+	return s.repo.Disciplines().ByGroupID(ctx, groupID)
+}
+
 func (s *DisciplineService) List(ctx context.Context) ([]domain.Discipline, error) {
 	return s.repo.Disciplines().List(ctx)
 }

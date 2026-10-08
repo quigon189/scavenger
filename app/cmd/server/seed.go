@@ -47,6 +47,21 @@ func Seed(ctx context.Context, svc *service.Services) error {
 	if err != nil {
 		return err
 	}
+	
+	slog.Debug("create group", "group", g)
+
+	groupInput = service.GroupInput{
+		Number: 502,
+		StartYear: 2024,
+		DurationOfStudy: 4,
+		Specialty: "Системное и сетевое администрирование",
+		ShortSpecialty: "СА",
+	}
+
+	g, err = svc.Group.Create(ctx, groupInput)
+	if err != nil {
+		return err
+	}
 
 	slog.Debug("create group", "group", g)
 
@@ -90,9 +105,30 @@ func Seed(ctx context.Context, svc *service.Services) error {
 		return err
 	}
 
-	d.Title = "Test 2"
+	discInput = service.DisciplineInput{
+		Title: "Test 2",
+		GroupID: g.ID,
+		TeacherID: t.ID,
+		Archived: false,
+	}
 
-	svc.Discipline.Update(ctx, d)
+	d, err = svc.Discipline.Create(ctx, discInput)
+	if err != nil {
+		return err
+	}
+
+	discInput = service.DisciplineInput{
+		Title: "Test 3",
+		GroupID: 1,
+		TeacherID: t.ID,
+		Archived: false,
+	}
+
+	d, err = svc.Discipline.Create(ctx, discInput)
+	if err != nil {
+		return err
+	}
+
 
 	discs, err := svc.Discipline.List(ctx)
 	if err != nil {

@@ -17,12 +17,13 @@ templ Layout(title string, user *domain.User, navbar bool) {
         <link rel="stylesheet" href="/static/app.css"/>
         <script src="/static/htmx.min.js" defer></script>
         <script src="/static/app.js" defer></script>
+		<script src="/static/bootstrap.bundle.min.js" defer></script>
     </head>
     <body hx-headers={ `{"X-CSRF-Token":"` + csrf.TokenFromCtx(ctx) + `"}` }>
 		if navbar {
        		@components.Navbar(user)
 		}
-        <main class="container py-4" id="main">
+        <main class="container py-2" id="main">
             { children... }
         </main>
         <div id="toasts" class="toast-container position-fixed top-0 end-0 p-3"></div>

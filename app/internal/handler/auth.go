@@ -39,12 +39,7 @@ func (h *Handler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 
 	auth.SetSessionCookie(w, sid, time.Now().Add(1*time.Hour), false)
 
-	if r.Header.Get("HX-Request") == "true" {
-		w.Header().Set("HX-Redirect", "/")
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	Redirect(w, r, "/")
 }
 
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {

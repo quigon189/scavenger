@@ -1,0 +1,18 @@
+package pages
+
+import (
+    "scavenger/internal/domain"
+    "scavenger/web/templates"
+	"scavenger/web/templates/components"
+)
+
+templ TeacherHome(user *domain.User, sections []components.DisciplineGroupView) {
+	@templates.Layout("Панель преподавателя", user, true) {
+		<h1 class="h3 mb-2">Мои дисциплины</h1>
+		if len(sections) > 0 {
+			@components.DisciplineAccordion(sections)
+		} else {
+			<p class="text-body-secondary">Пока нет дисциплин.</p>
+		}
+	}
+}

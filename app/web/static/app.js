@@ -17,3 +17,8 @@ document.body.addEventListener('toast', (e) => {
 document.body.addEventListener('htmx:responseError', (e) => {
     console.error('htmx error', e.detail);
 });
+
+document.body.addEventListener('htmx:configRequest', (e) => {
+    const m = document.cookie.match(/(?:^|;\s*)csrf=([^;]*)/);
+    if (m) e.detail.headers['X-CSRF-Token'] = decodeURIComponent(m[1]);
+});
