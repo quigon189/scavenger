@@ -137,7 +137,7 @@ func Seed(ctx context.Context, svc *service.Services) error {
 	slog.Debug("list disciplines", "discs", discs)
 
 	note, err := svc.Material.CreateNote(ctx, service.MaterialNoteInput{
-		DisciplineID: d.ID,
+		DisciplineID: 1,
 		Title: "Test Note",
 		Description: "This is test note",
 		DisplayOrder: 1,
@@ -150,7 +150,7 @@ func Seed(ctx context.Context, svc *service.Services) error {
 	slog.Debug("create note", "material", note)
 
 	theory, err := svc.Material.CreateTheory(ctx, service.MaterialTheoryInput{
-		DisciplineID: d.ID,
+		DisciplineID: 1,
 		Title: "Test Theory",
 		DisplayOrder: 2,
 		Visible: true,
@@ -160,7 +160,7 @@ func Seed(ctx context.Context, svc *service.Services) error {
 	slog.Debug("create theory", "material", theory)
 
 	pract, err := svc.Material.CreatePractical(ctx, service.MaterialPracticalInput{
-		DisciplineID: d.ID,
+		DisciplineID: 1,
 		Title: "Test Practical",
 		DisplayOrder: 2,
 		Visible: true,

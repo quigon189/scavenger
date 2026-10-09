@@ -49,7 +49,7 @@ func DisciplinePage(u *domain.User, dcv components.DisciplineCardView, materials
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container py-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h2 class=\"h4 text-body-secondary mb-2\">Дисциплина</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -57,7 +57,7 @@ func DisciplinePage(u *domain.User, dcv components.DisciplineCardView, materials
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"d-flex justify-content-between align-items-center mt-4 mb-2\"><h2 class=\"h6 text-body-secondary mb-0\">Материалы</h2>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <div class=\"d-flex justify-content-between align-items-center mt-4 mb-2\"><h2 class=\"h4 text-body-secondary mb-0\">Материалы</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -69,7 +69,7 @@ func DisciplinePage(u *domain.User, dcv components.DisciplineCardView, materials
 				var templ_7745c5c3_Var3 templ.SafeURL
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/discipline/%d/material/new", dcv.Discipline.ID)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/pages/discipline.templ`, Line: 19, Col: 91}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/pages/discipline.templ`, Line: 20, Col: 90}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -85,10 +85,6 @@ func DisciplinePage(u *domain.User, dcv components.DisciplineCardView, materials
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.MaterialList(materials).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

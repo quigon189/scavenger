@@ -11,7 +11,7 @@ templ NoteCard(v NoteCardView) {
 	<article class="card mb-3 border-warning-subtle bg-warning-subtle bg-opacity-10">
 		<div class="card-body">
 			<h6 class="card-title mb-2">
-				{ v.Material.Title }
+				<b>{ v.Material.Title }</b>
 			</h6>
 			<p class="card-text mb-0">{ v.Material.Description }</p>
 		</div>
@@ -26,7 +26,7 @@ templ TheoryCard(v TheoryCardView) {
 			<h5 class="card-title mb-1">
 				<a href={ templ.SafeURL("/material/" + v.Material.ID) }
 					class="stretched-link text-decoration-none text-reset">
-					{ v.Material.Title }
+					<b>{ v.Material.Title }</b>
 				</a>
 			</h5>
 		</div>
@@ -42,7 +42,7 @@ templ PracticalCard(v PracticalCardView) {
 				<h5 class="card-title mb-0">
 					<a href={ templ.SafeURL("/material/" + v.Material.ID) }
 						class="stretched-link text-decoration-none text-reset">
-						Работа №{ fmt.Sprintf("%d", v.Material.Number) }: { v.Material.Title }
+						<b>Практическое занятие №{ fmt.Sprintf("%d", v.Material.Number) }:</b> { v.Material.Title }
 					</a>
 				</h5>
 				if !v.Material.Deadline.IsZero() {
