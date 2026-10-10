@@ -55,20 +55,10 @@ type MaterialCardView struct {
 
 func NewMaterialCardView(m domain.Material, stats MaterialStats) MaterialCardView {
 	switch v := m.(type) {
-	case domain.NoteMaterial:
-		return MaterialCardView{Note: &NoteCardView{Material: v}}
 	case *domain.NoteMaterial:
 		return MaterialCardView{Note: &NoteCardView{Material: *v}}
-	case domain.TheoryMaterial:
-		return MaterialCardView{Theory: &TheoryCardView{Material: v}}
 	case *domain.TheoryMaterial:
 		return MaterialCardView{Theory: &TheoryCardView{Material: *v}}
-	case domain.PracticalMaterial:
-		return MaterialCardView{Practical: &PracticalCardView{
-			Material: v,
-			Progress: stats.Progress,
-			Grade: stats.Grade,
-		}}
 	case *domain.PracticalMaterial:
 		return MaterialCardView{Practical: &PracticalCardView{
 			Material: *v,

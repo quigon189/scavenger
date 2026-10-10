@@ -68,18 +68,18 @@ func (h *Handler) TeacherDiscipline(w http.ResponseWriter, r *http.Request, disc
 	materialCardsViews := make([]components.MaterialCardView, 0, len(materials))
 	for _, m := range materials {
 		switch v := m.(type) {
-		case domain.NoteMaterial:
+		case *domain.NoteMaterial:
 			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
-				Note: &components.NoteCardView{Material: v},
+				Note: &components.NoteCardView{Material: *v},
 			})
-		case domain.TheoryMaterial:
+		case *domain.TheoryMaterial:
 			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
-				Theory: &components.TheoryCardView{Material: v},
+				Theory: &components.TheoryCardView{Material: *v},
 			})
-		case domain.PracticalMaterial:
+		case *domain.PracticalMaterial:
 			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
 				Practical: &components.PracticalCardView{
-					Material: v,
+					Material: *v,
 					Progress: &components.Progress{
 						Done:  7,
 						Total: 10,
@@ -132,19 +132,19 @@ func (h *Handler) StudentDiscipline(w http.ResponseWriter, r *http.Request, disc
 	materialCardsViews := make([]components.MaterialCardView, 0, len(materials))
 	for _, m := range materials {
 		switch v := m.(type) {
-		case domain.NoteMaterial:
+		case *domain.NoteMaterial:
 			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
-				Note: &components.NoteCardView{Material: v},
+				Note: &components.NoteCardView{Material: *v},
 			})
-		case domain.TheoryMaterial:
+		case *domain.TheoryMaterial:
 			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
-				Theory: &components.TheoryCardView{Material: v},
+				Theory: &components.TheoryCardView{Material: *v},
 			})
-		case domain.PracticalMaterial:
+		case *domain.PracticalMaterial:
 			grade := 5
 			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
 				Practical: &components.PracticalCardView{
-					Material: v,
+					Material: *v,
 					Grade: &grade,
 				},
 			})

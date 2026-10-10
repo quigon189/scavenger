@@ -24,6 +24,11 @@ templ DisciplinePage(u *domain.User, dcv components.DisciplineCardView, material
 			}
 		</div>
 
-		@components.MaterialList(materials)
+		if u.Role == domain.RoleStudent {
+			@components.MaterialList(materials, false)
+		}
+		if u.Role == domain.RoleTeacher {
+			@components.MaterialList(materials, true)
+		}
 	}
 }

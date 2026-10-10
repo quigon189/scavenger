@@ -103,10 +103,17 @@ templ progressBar(p Progress) {
 
 // ---------- Список ----------
 
-templ MaterialList(items []MaterialCardView) {
+templ MaterialList(items []MaterialCardView, editable bool) {
 	<div class="d-flex flex-column gap-3">
-		for _, it := range items {
-			@MaterialCard(it)
+		for i, it := range items {
+			<div class="position-relative">
+				@MaterialCard(it)
+				if editable {
+					<div class="position-absolute top-0 end-0 m-2">
+						@MaterialActions(it, i == 0, i == len(items)-1)
+					</div>
+				}
+			</div>
 		}
 	</div>
 }
@@ -119,4 +126,33 @@ templ MaterialCard(v MaterialCardView) {
 	} else if v.Practical != nil {
 		@PracticalCard(*v.Practical)
 	}
+}
+
+templ MaterialActions(v MaterialCardView, isFirst, isLast bool) {
+	<div class="position-relative z-1 d-flex gap-1">
+		<button type="button" class="btn btn-sm btn-outline-secondary"
+			title="Выше"
+			disabled?={ isFirst }
+			hx-post={ "/material/" + materialID(v) + "/move?dir=up" }
+			hx-swap="none">
+			↑
+		</button>
+		<button type="button" class="btn btn-sm btn-outline-secondary"
+			title="Ниже"
+			disabled?={ isLast }
+			hx-post={ "/material/" + materialID(v) + "/move?dir=down" }
+			hx-swap="none">
+			↓
+		</button>
+		<a href={ templ.SafeURL("/material/" + materialID(v) + "/edit") }
+			class="btn btn-sm btn-outline-secondary">
+			Изменить
+		</a>
+		<button type="button" class="btn btn-sm btn-outline-danger"
+			hx-post={ "/material/" + materialID(v) + "/delete" }
+			hx-confirm="Удалить материал?"
+			hx-swap="none">
+			Удалить
+		</button>
+	</div>
 }

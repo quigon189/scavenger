@@ -30,8 +30,6 @@ func kindBadgeClass(k domain.MaterialKind) string {
 // принимая как значение, так и указатель.
 func asNote(m domain.Material) (domain.NoteMaterial, bool) {
 	switch v := m.(type) {
-	case domain.NoteMaterial:
-		return v, true
 	case *domain.NoteMaterial:
 		return *v, true
 	}
@@ -40,8 +38,6 @@ func asNote(m domain.Material) (domain.NoteMaterial, bool) {
 
 func asTheory(m domain.Material) (domain.TheoryMaterial, bool) {
 	switch v := m.(type) {
-	case domain.TheoryMaterial:
-		return v, true
 	case *domain.TheoryMaterial:
 		return *v, true
 	}
@@ -50,10 +46,20 @@ func asTheory(m domain.Material) (domain.TheoryMaterial, bool) {
 
 func asPractical(m domain.Material) (domain.PracticalMaterial, bool) {
 	switch v := m.(type) {
-	case domain.PracticalMaterial:
-		return v, true
 	case *domain.PracticalMaterial:
 		return *v, true
 	}
 	return domain.PracticalMaterial{}, false
+}
+
+func materialID(v MaterialCardView) string {
+	switch {
+	case v.Note != nil:
+		return v.Note.Material.ID
+	case v.Theory != nil:
+		return v.Theory.Material.ID
+	case v.Practical != nil:
+		return v.Practical.Material.ID
+	}
+	return ""
 }

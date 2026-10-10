@@ -5,6 +5,8 @@ import (
 	"errors"
 	"scavenger/internal/domain"
 	"scavenger/internal/repository"
+	"scavenger/internal/reqlog"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -128,14 +130,14 @@ func (s *MaterialService) CreatePractical(ctx context.Context, in MaterialPracti
 
 	m := &domain.PracticalMaterial{
 		BaseMaterial: domain.BaseMaterial{
-			ID: id,
+			ID:           id,
 			DisciplineID: disc.ID,
-			Title: in.Title,
-			Visible: in.Visible,
+			Title:        in.Title,
+			Visible:      in.Visible,
 			DisplayOrder: in.DisplayOrder,
 		},
-		Number: in.Number,
-		Content: in.Content,
+		Number:   in.Number,
+		Content:  in.Content,
 		Deadline: in.Deadline,
 	}
 
@@ -167,4 +169,72 @@ func (s *MaterialService) generateID(ctx context.Context) (string, error) {
 		}
 	}
 	return "", errors.New("failed to generate id")
+}
+
+func (s *MaterialService) Move(ctx context.Context, id string, shift int) error {
+	log := reqlog.From(ctx)
+	return s.repo.WithTx(ctx, func(r repository.Repository) error {
+		cur, err := r.Materials().ByID(ctx, id)
+		if err != nil {
+			return err
+		}
+		materials, err := r.Materials().ByDisciplineID(ctx, cur.GetDisciplineID())
+		if err != nil {
+			return err
+		}
+		slices.SortFunc(materials, func(a, b domain.Material) int {
+			return a.GetDisplayOrder() - b.GetDisplayOrder()
+		})
+
+		mIdx := []int{}
+		for _, m := range materials {
+			mIdx = append(mIdx, m.GetDisplayOrder())
+		}
+		log.Debug("materials", "materials_orders", mIdx)
+
+		curIdx := 0
+		for i, m := range materials {
+			if m.GetID() == cur.GetID() {
+				curIdx = i
+			}
+		}
+
+		newIdx := curIdx + shift
+		if newIdx < 0 {
+			newIdx = 0
+		}
+		if newIdx > len(materials)-1 {
+			newIdx = len(materials)-1
+		}
+		a := materials[0].GetDisplayOrder() - 100
+		b := materials[len(materials)-1].GetDisplayOrder() + 100
+		switch {
+		case newIdx == 0:
+			b = materials[0].GetDisplayOrder()
+		case newIdx == len(materials)-1:
+			a = materials[len(materials)-1].GetDisplayOrder()
+		case newIdx < curIdx:
+			a = materials[newIdx-1].GetDisplayOrder()
+			b = materials[newIdx].GetDisplayOrder()
+		default:
+			a = materials[newIdx].GetDisplayOrder()
+			b = materials[newIdx+1].GetDisplayOrder()
+		}
+		if b-a == 1 || b == a {
+			materials = slices.Delete(materials, curIdx, curIdx+1)
+			materials = slices.Insert(materials, newIdx, cur)
+			for i, m := range materials {
+				m.SetDisplayOrder(100*i + 100)
+				if err := r.Materials().Save(ctx, m); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+		cur.SetDisplayOrder(a + (b-a)/2)
+		if err := r.Materials().Save(ctx, cur); err != nil {
+			return err
+		}
+		return nil
+	})
 }

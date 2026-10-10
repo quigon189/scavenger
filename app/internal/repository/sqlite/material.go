@@ -137,7 +137,7 @@ func scanMaterial(s rowScanner) (domain.Material, error) {
 		if err := json.Unmarshal([]byte(payloadRaw), &p); err != nil {
 			return nil, err
 		}
-		return domain.NoteMaterial{
+		return &domain.NoteMaterial{
 			BaseMaterial: baseMaterial,
 			Description:  p.Description,
 		}, nil
@@ -146,7 +146,7 @@ func scanMaterial(s rowScanner) (domain.Material, error) {
 		if err := json.Unmarshal([]byte(payloadRaw), &p); err != nil {
 			return nil, err
 		}
-		return domain.TheoryMaterial{
+		return &domain.TheoryMaterial{
 			BaseMaterial: baseMaterial,
 			Content: p.Content,
 		}, nil
@@ -155,7 +155,7 @@ func scanMaterial(s rowScanner) (domain.Material, error) {
 		if err := json.Unmarshal([]byte(payloadRaw), &p); err != nil {
 			return nil, err
 		}
-		return domain.PracticalMaterial{
+		return &domain.PracticalMaterial{
 			BaseMaterial: baseMaterial,
 			Number: p.Number,
 			Content: p.Content,
