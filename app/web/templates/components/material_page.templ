@@ -1,0 +1,92 @@
+package components
+
+import (
+	"fmt"
+
+	"scavenger/internal/domain"
+)
+
+templ MaterialBreadcrumbs(v MaterialPageView) {
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb small">
+			<li class="breadcrumb-item"><a href="/">Главная</a></li>
+			<li class="breadcrumb-item">
+				<a href={ templ.SafeURL(fmt.Sprintf("/discipline/%d", v.Discipline.ID)) }>
+					{ v.Discipline.Title }
+				</a>
+			</li>
+			<li class="breadcrumb-item active" aria-current="page">{ MaterialTitle(v) }</li>
+		</ol>
+	</nav>
+}
+
+templ MaterialHeader(v MaterialPageView) {
+	<div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-3">
+		<div>
+			<h1 class="h4 mb-1">{ MaterialTitle(v) }</h1>
+			if v.Practical != nil && !v.Practical.Material.Deadline.IsZero() {
+				@deadlineBadge(v.Practical.Material.Deadline)
+			}
+		</div>
+		if v.User != nil && v.User.Role == domain.RoleTeacher {
+			<div class="d-flex gap-2">
+				<a href={ templ.SafeURL("/material/" + materialIDFromPage(v) + "/edit") }
+					class="btn btn-sm btn-outline-secondary">
+					Изменить
+				</a>
+				<button type="button" class="btn btn-sm btn-outline-danger"
+					hx-post={ "/material/" + materialIDFromPage(v) + "/delete" }
+					hx-confirm="Удалить материал?"
+					hx-swap="none">
+					Удалить
+				</button>
+			</div>
+		}
+	</div>
+}
+
+templ MaterialBody(v MaterialPageView) {
+	if v.Theory != nil {
+		<div class="markdown-body"> 
+			@templ.Raw(v.Theory.HTML)
+		</div>
+	} else if v.Practical != nil {
+		@practicalMeta(*v.Practical)
+		<hr/>
+		<div class="markdown-body">
+			@templ.Raw(v.Practical.HTML)
+		</div>
+	}
+}
+
+templ practicalMeta(p PracticalPageBody) {
+	<div class="d-flex flex-wrap gap-3 small mb-1">
+		if p.Grade != nil {
+			@gradeBadge(*p.Grade)
+		}
+		if p.Progress != nil {
+			@progressBar(*p.Progress)
+		}
+	</div>
+}
+
+templ MaterialNav(v MaterialPageView) {
+	if v.Prev != nil || v.Next != nil {
+		<div class="d-flex justify-content-between gap-2">
+			if v.Prev != nil {
+				<a href={ templ.SafeURL("/material/" + v.Prev.GetID()) }
+					class="btn btn-sm btn-outline-secondary text-truncate" style="max-width: 45%;">
+					← { v.Prev.GetTitle() }
+				</a>
+			} else {
+				<span></span>
+			}
+			if v.Next != nil {
+				<a href={ templ.SafeURL("/material/" + v.Next.GetID()) }
+					class="btn btn-sm btn-outline-secondary text-truncate" style="max-width: 45%;">
+					{ v.Next.GetTitle() } →
+				</a>
+			}
+		</div>
+	}
+}

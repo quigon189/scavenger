@@ -53,19 +53,32 @@ type MaterialCardView struct {
 	Practical *PracticalCardView
 }
 
-func NewMaterialCardView(m domain.Material, stats MaterialStats) MaterialCardView {
-	switch v := m.(type) {
-	case *domain.NoteMaterial:
-		return MaterialCardView{Note: &NoteCardView{Material: *v}}
-	case *domain.TheoryMaterial:
-		return MaterialCardView{Theory: &TheoryCardView{Material: *v}}
-	case *domain.PracticalMaterial:
-		return MaterialCardView{Practical: &PracticalCardView{
-			Material: *v,
-			Progress: stats.Progress,
-			Grade: stats.Grade,
-		}}
-	default:
-		return MaterialCardView{}
-	}
+type MaterialPageView struct {
+	Discipline domain.Discipline
+	Group      *domain.Group
+	Teacher    *domain.User
+	User       *domain.User // текущий пользователь
+
+	Prev domain.Material
+	Next domain.Material
+
+	// Тело. Заполнен ровно один из указателей.
+	Theory    *TheoryPageBody
+	Practical *PracticalPageBody
+}
+
+type TheoryPageBody struct {
+	Material domain.TheoryMaterial
+	HTML     string // уже отрендеренный markdown
+}
+
+type PracticalPageBody struct {
+	Material domain.PracticalMaterial
+	HTML     string
+
+	// Студенту — оценка (nil = не оценено).
+	Grade *int
+
+	// Преподавателю — статистика сдач.
+	Progress *Progress
 }

@@ -1,6 +1,9 @@
 package components
 
-import "scavenger/internal/domain"
+import (
+	"fmt"
+	"scavenger/internal/domain"
+)
 
 func kindLabel(k domain.MaterialKind) string {
 	switch k {
@@ -56,6 +59,26 @@ func materialID(v MaterialCardView) string {
 	switch {
 	case v.Note != nil:
 		return v.Note.Material.ID
+	case v.Theory != nil:
+		return v.Theory.Material.ID
+	case v.Practical != nil:
+		return v.Practical.Material.ID
+	}
+	return ""
+}
+
+func MaterialTitle(v MaterialPageView) string {
+	switch {
+	case v.Theory != nil:
+		return v.Theory.Material.Title
+	case v.Practical != nil:
+		return fmt.Sprintf("Работа №%d: %s", v.Practical.Material.Number, v.Practical.Material.Title)
+	}
+	return ""
+}
+
+func materialIDFromPage(v MaterialPageView) string {
+	switch {
 	case v.Theory != nil:
 		return v.Theory.Material.ID
 	case v.Practical != nil:

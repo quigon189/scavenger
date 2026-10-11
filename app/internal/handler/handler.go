@@ -52,6 +52,7 @@ func (h *Handler) Router() http.Handler {
 		g.Use(RequireAuth)
 		g.Get("/", h.Home)
 		g.Get("/discipline/{id}", h.Discipline)
+		g.Get("/material/{id}", h.MaterialView)
 		g.Post("/material/{id}/move", h.MaterialMove)
 	})
 

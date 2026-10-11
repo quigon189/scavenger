@@ -140,7 +140,6 @@ func Seed(ctx context.Context, svc *service.Services) error {
 		DisciplineID: 1,
 		Title: "Test Note",
 		Description: "This is test note",
-		DisplayOrder: 1,
 		Visible: true,
 	})
 	if err != nil {
@@ -152,9 +151,66 @@ func Seed(ctx context.Context, svc *service.Services) error {
 	theory, err := svc.Material.CreateTheory(ctx, service.MaterialTheoryInput{
 		DisciplineID: 1,
 		Title: "Test Theory",
-		DisplayOrder: 2,
 		Visible: true,
-		Content: "This in md Theory material",
+		Content: `# Заголовок первого уровня (H1)
+
+Это стандартный абзац текста. В Goldmark вы можете использовать **жирный текст**, *курсив* и ~~зачёркнутый текст~~.
+
+## Заголовок второго уровня (H2)
+
+### Цитата
+
+> «Goldmark — это быстрый и расширяемый парсер Markdown на языке Go».
+> — Документация Hugo
+
+### Списки
+
+Маркированный список:
+* Первый элемент
+* Второй элемент
+  * Вложенный элемент
+  * Еще один вложенный элемент
+* Третий элемент
+
+Нумерованный список:
+1. Шаг первый
+2. Шаг второй
+3. Шаг третий
+
+Чек-лист (задачи):
+- [x] Изучить синтаксис CommonMark
+- [x] Настроить парсер Goldmark
+- [ ] Написать документацию
+
+### Ссылки и изображения
+
+Пример ссылки: посетите [официальный сайт Go](https://go.dev).
+
+Пример изображения:
+![Логотип Markdown](https://example.com)
+
+### Таблица
+
+| Язык | Назначение | Парсер по умолчанию |
+| :--- | :--- | :--- |
+| **Go** | Веб и утилиты | Goldmark |
+| **Ruby** | Блоги | Kramdown |
+| **JavaScript** | Сборка и сайты | Remark |
+
+### Блок кода (подсветка синтаксиса)
+
+` + "```go\n" + `package main
+
+import "fmt"
+
+func main() {
+    p := "Goldmark"
+    fmt.Printf("Hello, %s!\\n", p)
+}
+` + "```\n" + `
+---
+
+*Горизонтальная линия выше разделяет секции документа.*`,
 	})
 
 	slog.Debug("create theory", "material", theory)
@@ -162,7 +218,6 @@ func Seed(ctx context.Context, svc *service.Services) error {
 	pract, err := svc.Material.CreatePractical(ctx, service.MaterialPracticalInput{
 		DisciplineID: 1,
 		Title: "Test Practical",
-		DisplayOrder: 2,
 		Visible: true,
 		Number: 1,
 		Content: "This in md Practical material",

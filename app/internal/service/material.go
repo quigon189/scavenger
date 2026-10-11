@@ -28,7 +28,6 @@ type MaterialNoteInput struct {
 	DisciplineID int64
 	Title        string
 	Visible      bool
-	DisplayOrder int
 	Description  string
 }
 
@@ -46,13 +45,26 @@ func (s *MaterialService) CreateNote(ctx context.Context, in MaterialNoteInput) 
 		return nil, err
 	}
 
+	materials, err := s.repo.Materials().ByDisciplineID(ctx, disc.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	displayOrder := 0
+	for _, m := range materials {
+		mdo := m.GetDisplayOrder()
+		if mdo > displayOrder {
+			displayOrder = mdo
+		}
+	}
+
 	m := &domain.NoteMaterial{
 		BaseMaterial: domain.BaseMaterial{
 			ID:           id,
 			DisciplineID: disc.ID,
 			Title:        in.Title,
 			Visible:      in.Visible,
-			DisplayOrder: in.DisplayOrder,
+			DisplayOrder: displayOrder + 100,
 		},
 		Description: in.Description,
 	}
@@ -67,7 +79,6 @@ type MaterialTheoryInput struct {
 	DisciplineID int64
 	Title        string
 	Visible      bool
-	DisplayOrder int
 	Content      string
 }
 
@@ -86,13 +97,26 @@ func (s *MaterialService) CreateTheory(ctx context.Context, in MaterialTheoryInp
 		return nil, err
 	}
 
+	materials, err := s.repo.Materials().ByDisciplineID(ctx, disc.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	displayOrder := 0
+	for _, m := range materials {
+		mdo := m.GetDisplayOrder()
+		if mdo > displayOrder {
+			displayOrder = mdo
+		}
+	}
+
 	m := &domain.TheoryMaterial{
 		BaseMaterial: domain.BaseMaterial{
 			ID:           id,
 			DisciplineID: disc.ID,
 			Title:        in.Title,
 			Visible:      in.Visible,
-			DisplayOrder: in.DisplayOrder,
+			DisplayOrder: displayOrder + 100,
 		},
 		Content: in.Content,
 	}
@@ -107,7 +131,6 @@ type MaterialPracticalInput struct {
 	DisciplineID int64
 	Title        string
 	Visible      bool
-	DisplayOrder int
 	Number       int
 	Content      string
 	Deadline     time.Time
@@ -128,13 +151,26 @@ func (s *MaterialService) CreatePractical(ctx context.Context, in MaterialPracti
 		return nil, err
 	}
 
+	materials, err := s.repo.Materials().ByDisciplineID(ctx, disc.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	displayOrder := 0
+	for _, m := range materials {
+		mdo := m.GetDisplayOrder()
+		if mdo > displayOrder {
+			displayOrder = mdo
+		}
+	}
+
 	m := &domain.PracticalMaterial{
 		BaseMaterial: domain.BaseMaterial{
 			ID:           id,
 			DisciplineID: disc.ID,
 			Title:        in.Title,
 			Visible:      in.Visible,
-			DisplayOrder: in.DisplayOrder,
+			DisplayOrder: displayOrder + 100,
 		},
 		Number:   in.Number,
 		Content:  in.Content,
@@ -204,7 +240,7 @@ func (s *MaterialService) Move(ctx context.Context, id string, shift int) error 
 			newIdx = 0
 		}
 		if newIdx > len(materials)-1 {
-			newIdx = len(materials)-1
+			newIdx = len(materials) - 1
 		}
 		a := materials[0].GetDisplayOrder() - 100
 		b := materials[len(materials)-1].GetDisplayOrder() + 100
@@ -237,4 +273,30 @@ func (s *MaterialService) Move(ctx context.Context, id string, shift int) error 
 		}
 		return nil
 	})
+}
+
+func (s MaterialService) GetNieghbours(ctx context.Context, cur domain.Material) (domain.Material, domain.Material, error) {
+	materials, err := s.repo.Materials().ByDisciplineID(ctx, cur.GetDisciplineID())
+	if err != nil {
+		return nil, nil, err
+	}
+	slices.SortFunc(materials, func(a, b domain.Material) int {
+		return a.GetDisplayOrder() - b.GetDisplayOrder()
+	})
+
+	curIdx := slices.IndexFunc(materials, func(m domain.Material) bool {
+		return m.GetID() == cur.GetID()
+	})
+
+	if curIdx == -1 {
+		return nil, nil, repository.ErrNotFound
+	}
+
+	if curIdx == 0 {
+		return nil, materials[1], nil
+	}
+	if curIdx == len(materials)-1 {
+		return materials[curIdx-1], nil, nil
+	}
+	return materials[curIdx-1], materials[curIdx+1], nil
 }

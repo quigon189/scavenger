@@ -1,0 +1,22 @@
+package pages
+
+import (
+	"scavenger/internal/domain"
+	"scavenger/web/templates"
+	"scavenger/web/templates/components"
+)
+
+templ MaterialPage(u *domain.User, v components.MaterialPageView) {
+	@templates.Layout(components.MaterialTitle(v), u, true) {
+		<div class="container py-4">
+			@components.MaterialBreadcrumbs(v)
+			@components.MaterialHeader(v)
+			<article class="card mb-3">
+				<div class="card-body">
+					@components.MaterialBody(v)
+				</div>
+			</article>
+			@components.MaterialNav(v)
+		</div>
+	}
+}
