@@ -58,7 +58,16 @@ func (h *Handler) MaterialView(w http.ResponseWriter, r *http.Request) {
 		User:       u,
 	}
 
-	view.Prev, view.Next, err = h.svc.Material.GetNieghbours(r.Context(), m)
+	if u.Role == domain.RoleStudent {
+		view.Prev, view.Next, err = h.svc.Material.GetNieghbours(r.Context(), m, false)
+	}
+	if u.Role == domain.RoleTeacher {
+		view.Prev, view.Next, err = h.svc.Material.GetNieghbours(r.Context(), m, true)
+	} else {
+		log.Error("invalid role")
+		http.Error(w, "internal", http.StatusInternalServerError)
+		return
+	}
 	if err != nil {
 		log.Error("material nieghbours", "err", err)
 		http.Error(w, "internal", http.StatusInternalServerError)
@@ -84,7 +93,7 @@ func (h *Handler) MaterialView(w http.ResponseWriter, r *http.Request) {
 		grade := 5
 		progress := components.Progress{
 			Total: 10,
-			Done: 7,
+			Done:  7,
 		}
 		view.Practical = &components.PracticalPageBody{
 			Material: *v,

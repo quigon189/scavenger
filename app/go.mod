@@ -13,6 +13,8 @@ require (
 )
 
 require (
+	github.com/FurqanSoftware/goldmark-katex v0.0.0-20260813161535-d0f6370693c2 // indirect
+	github.com/bluele/gcache v0.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
@@ -20,6 +22,8 @@ require (
 	github.com/yuin/goldmark v1.8.6 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	modernc.org/libc v1.75.7 // indirect
+	modernc.org/libquickjs v0.12.10 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.12.1 // indirect
+	modernc.org/quickjs v0.22.0 // indirect
 )

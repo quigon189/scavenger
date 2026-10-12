@@ -1,14 +1,32 @@
+/* .card-hoverable { */
+/* 	transition: transform .15s ease, box-shadow .15s ease; */
+/* } */
+/* .card-hoverable:hover { */
+/* 	transform: translateY(-2px); */
+/* 	box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15); */
+/* } */
+/* .card-hoverable:has(.stretched-link:focus-visible) { */
+/* 	transform: translateY(-2px); */
+/* 	box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15); */
+/* } */
+
 .card-hoverable {
-	transition: transform .15s ease, box-shadow .15s ease;
+	/* Добавляем background-color в список отслеживаемых переходов */
+	transition: background-color .2s ease-in-out, box-shadow .2s ease-in-out;
 }
+
 .card-hoverable:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+	/* Делаем фон слегка серым (подходит как для белых карточек, так и для светлых фонов) */
+	background-color: #e9ecef; 
+	/* Оставляем мягкое круговое свечение, чтобы карточка визуально выделялась */
+	box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
 }
+
 .card-hoverable:has(.stretched-link:focus-visible) {
-	transform: translateY(-2px);
-	box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+	background-color: #e9ecef;
+	box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
 }
+
 
 .markdown-body {
 	line-height: 1.6;

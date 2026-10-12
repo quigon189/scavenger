@@ -6,7 +6,6 @@ import (
 	"scavenger/internal/service"
 	"time"
 )
-
 func Seed(ctx context.Context, svc *service.Services) error {
 	users := []service.UserInput{
 		{
@@ -140,7 +139,7 @@ func Seed(ctx context.Context, svc *service.Services) error {
 		DisciplineID: 1,
 		Title: "Test Note",
 		Description: "This is test note",
-		Visible: true,
+		Visible: false,
 	})
 	if err != nil {
 		return err
@@ -197,6 +196,12 @@ func Seed(ctx context.Context, svc *service.Services) error {
 | **Ruby** | Блоги | Kramdown |
 | **JavaScript** | Сборка и сайты | Remark |
 
+### Формулы
+
+$$I_{1}=U_{1}/R_{2}$$
+
+Еще какая то формула: $i=\delta q/\delta t$
+
 ### Блок кода (подсветка синтаксиса)
 
 ` + "```go\n" + `package main
@@ -226,7 +231,7 @@ func main() {
 
 	slog.Debug("create practical", "material", pract)
 
-	materials, err := svc.Material.ListByDisciplineID(ctx, d.ID)
+	materials, err := svc.Material.ListByDisciplineID(ctx, d.ID, true)
 	if err != nil {
 		return err
 	}

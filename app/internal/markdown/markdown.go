@@ -7,6 +7,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
+	"github.com/FurqanSoftware/goldmark-katex"
 )
 
 var engine = goldmark.New(
@@ -17,6 +18,7 @@ var engine = goldmark.New(
 		extension.Linkify,
 		extension.TaskList,
 		extension.Footnote,
+		&katex.Extender{},
 	),
 	goldmark.WithParserOptions(
 		parser.WithAutoHeadingID(),

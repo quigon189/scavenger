@@ -82,3 +82,25 @@ type PracticalPageBody struct {
 	// Преподавателю — статистика сдач.
 	Progress *Progress
 }
+
+// MaterialFormData хранит введённые значения для повторного показа
+// формы при ошибке валидации.
+type MaterialFormData struct {
+	Type    string // "note" | "theory" | "practical"
+	Title   string
+	Visible bool
+
+	// Заметка
+	Description string
+
+	// Теория
+	TheoryContent string
+
+	// Практика
+	Number          int
+	PracticalContent string
+	Deadline        string // значение для <input type="datetime-local">, формат "2006-01-02T15:04"
+
+	// Общее
+	DisplayOrder int
+}

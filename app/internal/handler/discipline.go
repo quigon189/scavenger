@@ -37,6 +37,7 @@ func (h *Handler) Discipline(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) TeacherDiscipline(w http.ResponseWriter, r *http.Request, disciplineID int64) {
 	log := reqlog.From(r.Context())
 	u := auth.UserFromCtx(r.Context())
+	editable := r.URL.Query().Has("edit")
 	discipline, err := h.svc.Discipline.ByID(r.Context(), disciplineID)
 	if err != nil {
 		log.Error("failed to get discipline", "id", disciplineID, "err", err)
@@ -48,7 +49,7 @@ func (h *Handler) TeacherDiscipline(w http.ResponseWriter, r *http.Request, disc
 		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
-	materials, err := h.svc.Material.ListByDisciplineID(r.Context(), disciplineID)
+	materials, err := h.svc.Material.ListByDisciplineID(r.Context(), disciplineID, editable)
 	if err != nil {
 		log.Error("failed to get dicipline materials", "discipline_id", discipline.ID, "err", err)
 		http.Error(w, "internal", http.StatusInternalServerError)
@@ -89,7 +90,7 @@ func (h *Handler) TeacherDiscipline(w http.ResponseWriter, r *http.Request, disc
 		}
 	}
 
-	pages.DisciplinePage(u, dcv, materialCardsViews).Render(r.Context(), w)
+	pages.DisciplinePage(u, dcv, materialCardsViews, editable).Render(r.Context(), w)
 }
 
 func (h *Handler) StudentDiscipline(w http.ResponseWriter, r *http.Request, disciplineID int64) {
@@ -112,7 +113,7 @@ func (h *Handler) StudentDiscipline(w http.ResponseWriter, r *http.Request, disc
 		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
-	materials, err := h.svc.Material.ListByDisciplineID(r.Context(), disciplineID)
+	materials, err := h.svc.Material.ListByDisciplineID(r.Context(), disciplineID, false)
 	if err != nil {
 		log.Error("failed to get dicipline materials", "discipline_id", discipline.ID, "err", err)
 		http.Error(w, "internal", http.StatusInternalServerError)
@@ -151,6 +152,6 @@ func (h *Handler) StudentDiscipline(w http.ResponseWriter, r *http.Request, disc
 		}
 	}
 
-	pages.DisciplinePage(u, dcv, materialCardsViews).Render(r.Context(), w)
+	pages.DisciplinePage(u, dcv, materialCardsViews, false).Render(r.Context(), w)
 
 }

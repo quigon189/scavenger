@@ -183,8 +183,21 @@ func (s *MaterialService) CreatePractical(ctx context.Context, in MaterialPracti
 	return m, nil
 }
 
-func (s *MaterialService) ListByDisciplineID(ctx context.Context, id int64) ([]domain.Material, error) {
-	return s.repo.Materials().ByDisciplineID(ctx, id)
+func (s *MaterialService) ListByDisciplineID(ctx context.Context, id int64, viewInvisible bool) ([]domain.Material, error) {
+	materials, err := s.repo.Materials().ByDisciplineID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	slices.SortFunc(materials, func(m1, m2 domain.Material) int {
+		return m1.GetDisplayOrder() - m2.GetDisplayOrder()
+	})
+	if viewInvisible {
+		return materials, err
+	}
+	materials = slices.DeleteFunc(materials, func(m domain.Material) bool {
+		return m.GetVisible() == false
+	})
+	return materials, nil
 }
 
 func (s *MaterialService) ByID(ctx context.Context, id string) (domain.Material, error) {
@@ -275,13 +288,13 @@ func (s *MaterialService) Move(ctx context.Context, id string, shift int) error 
 	})
 }
 
-func (s MaterialService) GetNieghbours(ctx context.Context, cur domain.Material) (domain.Material, domain.Material, error) {
-	materials, err := s.repo.Materials().ByDisciplineID(ctx, cur.GetDisciplineID())
+func (s MaterialService) GetNieghbours(ctx context.Context, cur domain.Material, viewInvisible bool) (domain.Material, domain.Material, error) {
+	materials, err := s.ListByDisciplineID(ctx, cur.GetDisciplineID(), viewInvisible)
 	if err != nil {
 		return nil, nil, err
 	}
-	slices.SortFunc(materials, func(a, b domain.Material) int {
-		return a.GetDisplayOrder() - b.GetDisplayOrder()
+	materials = slices.DeleteFunc(materials, func(m domain.Material) bool {
+		return m.Kind() == domain.MaterialNoteType
 	})
 
 	curIdx := slices.IndexFunc(materials, func(m domain.Material) bool {
