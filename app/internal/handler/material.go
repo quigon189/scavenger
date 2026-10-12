@@ -58,15 +58,11 @@ func (h *Handler) MaterialView(w http.ResponseWriter, r *http.Request) {
 		User:       u,
 	}
 
-	if u.Role == domain.RoleStudent {
+	switch u.Role {
+	case domain.RoleStudent:
 		view.Prev, view.Next, err = h.svc.Material.GetNieghbours(r.Context(), m, false)
-	}
-	if u.Role == domain.RoleTeacher {
+	case domain.RoleTeacher:
 		view.Prev, view.Next, err = h.svc.Material.GetNieghbours(r.Context(), m, true)
-	} else {
-		log.Error("invalid role")
-		http.Error(w, "internal", http.StatusInternalServerError)
-		return
 	}
 	if err != nil {
 		log.Error("material nieghbours", "err", err)

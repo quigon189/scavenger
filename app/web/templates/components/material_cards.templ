@@ -190,3 +190,36 @@ templ MaterialActions(v MaterialCardView, isFirst, isLast bool) {
 		</div>
 	</div>
 }
+
+templ AddMaterialButton(disciplineID int64) {
+	<div class="dropdown">
+		<button class="btn btn-sm btn-primary dropdown-toggle"
+			type="button"
+			id={ "add-material-" + itoa64(disciplineID) }
+			data-bs-toggle="dropdown"
+			aria-expanded="false">
+			+ Добавить материал
+		</button>
+		<ul class="dropdown-menu dropdown-menu-end"
+			aria-labelledby={ "add-material-" + itoa64(disciplineID) }>
+			<li>
+				<a class="dropdown-item"
+					href={ templ.SafeURL("/discipline/" + itoa64(disciplineID) + "/material/new/note") }>
+					Заметка
+				</a>
+			</li>
+			<li>
+				<a class="dropdown-item"
+					href={ templ.SafeURL("/discipline/" + itoa64(disciplineID) + "/material/new/theory") }>
+					Теория
+				</a>
+			</li>
+			<li>
+				<a class="dropdown-item"
+					href={ templ.SafeURL("/discipline/" + itoa64(disciplineID) + "/material/new/practical") }>
+					Практика
+				</a>
+			</li>
+		</ul>
+	</div>
+}

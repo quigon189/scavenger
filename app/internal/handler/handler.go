@@ -6,6 +6,7 @@ import (
 
 	"scavenger/internal/config"
 	"scavenger/internal/csrf"
+	"scavenger/internal/domain"
 	"scavenger/internal/service"
 
 	"github.com/go-chi/chi/v5"
@@ -54,6 +55,18 @@ func (h *Handler) Router() http.Handler {
 		g.Get("/discipline/{id}", h.Discipline)
 		g.Get("/material/{id}", h.MaterialView)
 		g.Post("/material/{id}/move", h.MaterialMove)
+		g.Route("/discipline/{id}/material", func(r chi.Router) {
+			r.Use(RequireRole(domain.RoleTeacher))
+
+			r.Get("/new/note", h.MaterialNewNotePage)
+			r.Post("/new/note", h.MaterialNewNoteSubmit)
+
+			r.Get("/new/theory", h.MaterialNewTheoryPage)
+			r.Post("/new/theory", h.MaterialNewTheorySubmit)
+
+			r.Get("/new/practical", h.MaterialNewPracticalPage)
+			r.Post("/new/practical", h.MaterialNewPracticalSubmit)
+		})
 	})
 
 	return r

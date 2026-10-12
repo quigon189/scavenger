@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 	"scavenger/internal/domain"
+	"strconv"
 )
 
 func kindLabel(k domain.MaterialKind) string {
@@ -98,3 +99,5 @@ func materialVisible(v MaterialCardView) bool {
 	}
 	return true
 }
+
+func itoa64(v int64) string { return strconv.FormatInt(v, 10) }

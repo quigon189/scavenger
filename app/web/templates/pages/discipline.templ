@@ -11,9 +11,7 @@ import (
 templ DisciplinePage(u *domain.User, dcv components.DisciplineCardView, materials []components.MaterialCardView, editable bool) {
 	@templates.Layout(dcv.Discipline.Title, u, true) {
 		<h2 class="h4 text-body-secondary mb-2">Дисциплина</h2>
-
 		@components.DisciplineCard(dcv)
-
 		<div class="d-flex justify-content-between align-items-center mt-4 mb-2">
 			<h2 class="h4 text-body-secondary mb-0">Материалы</h2>
 			if u != nil && u.Role == domain.RoleTeacher {
@@ -21,26 +19,25 @@ templ DisciplinePage(u *domain.User, dcv components.DisciplineCardView, material
 					<!-- Переключатель режимов: Просмотр / Редактирование -->
 					<div class="btn-group btn-group-sm" role="group" aria-label="Режим просмотра">
 						<!-- Кнопка Просмотр: активна (btn-primary), если editable == false -->
-						<a href={ templ.SafeURL(fmt.Sprintf("/discipline/%d", dcv.Discipline.ID)) } 
-						   class={ "btn", templ.KV("btn-primary", !editable), templ.KV("btn-outline-primary", editable) }>
+						<a
+							href={ templ.SafeURL(fmt.Sprintf("/discipline/%d", dcv.Discipline.ID)) }
+							class={ "btn", templ.KV("btn-primary", !editable), templ.KV("btn-outline-primary", editable) }
+						>
 							Просмотр
 						</a>
-						
 						<!-- Кнопка Редактирование: активна (btn-primary), если editable == true -->
-						<a href={ templ.SafeURL(fmt.Sprintf("/discipline/%d?edit=true", dcv.Discipline.ID)) } 
-						   class={ "btn", templ.KV("btn-primary", editable), templ.KV("btn-outline-primary", !editable) }>
+						<a
+							href={ templ.SafeURL(fmt.Sprintf("/discipline/%d?edit=true", dcv.Discipline.ID)) }
+							class={ "btn", templ.KV("btn-primary", editable), templ.KV("btn-outline-primary", !editable) }
+						>
 							Редактирование
 						</a>
 					</div>
 
-					<a href={ templ.SafeURL(fmt.Sprintf("/discipline/%d/material/new", dcv.Discipline.ID)) }
-						class="btn btn-sm btn-success">
-						+ Добавить материал
-					</a>
+					@components.AddMaterialButton(dcv.Discipline.ID)
 				</div>
 			}
 		</div>
-
 		if u.Role == domain.RoleStudent {
 			@components.MaterialList(materials, false)
 		}
