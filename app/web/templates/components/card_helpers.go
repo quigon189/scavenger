@@ -86,3 +86,15 @@ func materialIDFromPage(v MaterialPageView) string {
 	}
 	return ""
 }
+
+func materialVisible(v MaterialCardView) bool {
+	switch {
+	case v.Note != nil:
+		return v.Note.Material.Visible
+	case v.Theory != nil:
+		return v.Theory.Material.Visible
+	case v.Practical != nil:
+		return v.Practical.Material.Visible
+	}
+	return true
+}

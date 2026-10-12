@@ -8,7 +8,7 @@ import (
 // ---------- Заметка ----------
 
 templ NoteCard(v NoteCardView) {
-	<article class="card mb-3 border-warning-subtle bg-warning-subtle bg-opacity-10">
+	<article class="card border-warning-subtle bg-warning-subtle bg-opacity-10">
 		<div class="card-body">
 			<h6 class="card-title mb-2">
 				<b>{ v.Material.Title }</b>
@@ -21,7 +21,7 @@ templ NoteCard(v NoteCardView) {
 // ---------- Теория ----------
 
 templ TheoryCard(v TheoryCardView) {
-	<article class="card mb-3 shadow-sm position-relative card-hoverable">
+	<article class="card shadow-sm position-relative card-hoverable">
 		<div class="card-body">
 			<h5 class="card-title mb-1">
 				<a href={ templ.SafeURL("/material/" + v.Material.ID) }
@@ -36,7 +36,7 @@ templ TheoryCard(v TheoryCardView) {
 // ---------- Практика ----------
 
 templ PracticalCard(v PracticalCardView) {
-	<article class="card mb-3 shadow-sm position-relative card-hoverable">
+	<article class="card shadow-sm position-relative card-hoverable">
 		<div class="card-body">
 			<div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-1">
 				<h5 class="card-title mb-0">
@@ -103,21 +103,6 @@ templ progressBar(p Progress) {
 
 // ---------- Список ----------
 
-templ MaterialList(items []MaterialCardView, editable bool) {
-	<div class="d-flex flex-column gap-3">
-		for i, it := range items {
-			<div class="position-relative">
-				@MaterialCard(it)
-				if editable {
-					<div class="position-absolute top-0 end-0 m-2">
-						@MaterialActions(it, i == 0, i == len(items)-1)
-					</div>
-				}
-			</div>
-		}
-	</div>
-}
-
 templ MaterialCard(v MaterialCardView) {
 	if v.Note != nil {
 		@NoteCard(*v.Note)
@@ -128,31 +113,80 @@ templ MaterialCard(v MaterialCardView) {
 	}
 }
 
+templ MaterialList(items []MaterialCardView, editable bool) {
+	<div class="d-flex flex-column gap-2">
+		for i, it := range items {
+			@MaterialListItem(it, editable, i == 0, i == len(items)-1)
+		}
+	</div>
+}
+
+templ MaterialListItem(it MaterialCardView, editable bool, isFirst bool, isLast bool) {
+	<div>
+		if editable {
+			<div class="d-flex justify-content-between align-items-center mb-1 gap-4">
+				if materialVisible(it) {
+					<span></span>
+				} else {
+					<span class="badge text-bg-secondary">Скрыто</span>
+				}
+				@MaterialActions(it, isFirst, isLast)
+			</div>
+		}
+
+		if materialVisible(it) {
+			@MaterialCard(it)
+		} else {
+			<div class="material-hidden-wrapper">
+				@MaterialCard(it)
+			</div>
+		}
+	</div>
+}
+
 templ MaterialActions(v MaterialCardView, isFirst, isLast bool) {
-	<div class="position-relative z-1 d-flex gap-1">
-		<button type="button" class="btn btn-sm btn-outline-secondary"
-			title="Выше"
-			disabled?={ isFirst }
-			hx-post={ "/material/" + materialID(v) + "/move?dir=up" }
-			hx-swap="none">
-			↑
-		</button>
-		<button type="button" class="btn btn-sm btn-outline-secondary"
-			title="Ниже"
-			disabled?={ isLast }
-			hx-post={ "/material/" + materialID(v) + "/move?dir=down" }
-			hx-swap="none">
-			↓
-		</button>
-		<a href={ templ.SafeURL("/material/" + materialID(v) + "/edit") }
-			class="btn btn-sm btn-outline-secondary">
-			Изменить
-		</a>
-		<button type="button" class="btn btn-sm btn-outline-danger"
-			hx-post={ "/material/" + materialID(v) + "/delete" }
-			hx-confirm="Удалить материал?"
-			hx-swap="none">
-			Удалить
-		</button>
+	<div class="d-flex gap-2">
+		<div class="btn-group btn-group-sm" role="group" aria-label="Порядок">
+			<button type="button" class="btn btn-outline-secondary"
+				title="Выше" disabled?={ isFirst }
+				hx-post={ "/material/" + materialID(v) + "/move?dir=up" }
+				hx-swap="none">
+				↑
+			</button>
+			<button type="button" class="btn btn-outline-secondary"
+				title="Ниже" disabled?={ isLast }
+				hx-post={ "/material/" + materialID(v) + "/move?dir=down" }
+				hx-swap="none">
+				↓
+			</button>
+		</div>
+
+		<div class="btn-group btn-group-sm" role="group" aria-label="Действия">
+			if materialVisible(v) {
+				<button type="button" class="btn btn-outline-secondary"
+					hx-post={ "/material/" + materialID(v) + "/hide" }
+					hx-swap="none">
+					Скрыть
+				</button>
+			} else {
+				<button type="button" class="btn btn-outline-secondary"
+					hx-post={ "/material/" + materialID(v) + "/show" }
+					hx-swap="none">
+					Показать
+				</button>
+			}
+
+			<a href={ templ.SafeURL("/material/" + materialID(v) + "/edit") }
+				class="btn btn-outline-secondary">
+				Изменить
+			</a>
+
+			<button type="button" class="btn btn-outline-danger"
+				hx-post={ "/material/" + materialID(v) + "/delete" }
+				hx-confirm="Удалить материал?"
+				hx-swap="none">
+				Удалить
+			</button>
+		</div>
 	</div>
 }
