@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -12,6 +13,8 @@ import (
 	"scavenger/internal/config"
 	"scavenger/internal/repository/sqlite"
 	"scavenger/internal/service"
+	"scavenger/internal/storage"
+	"scavenger/internal/storage/fs"
 
 	"github.com/lmittmann/tint"
 )
@@ -76,10 +79,28 @@ func getServices(ctx context.Context, cfg *config.Config) (*service.Services, er
 	}
 	slog.Debug("repository opened", "dsn", cfg.DBDSN)
 
+	st, err := newStorage(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	services := service.New(service.Deps{
 		Repo:          repo,
+		Storage:       st,
+		MaxUploadSize: cfg.MaxUploadSize,
 		SessionSecret: []byte("123"),
 	})
 
 	return services, nil
+}
+
+func newStorage(cfg *config.Config) (storage.Storage, error) {
+	switch cfg.StorageDriver {
+	case "fs":
+		return fs.New(cfg.StorageFSRoot)
+	case "s3":
+		return nil, errors.New("s3 storage not implemented yet")
+	default:
+		return nil, fmt.Errorf("unknown storage driver %s", cfg.StorageDriver)
+	}
 }

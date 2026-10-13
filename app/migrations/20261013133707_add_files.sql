@@ -9,7 +9,7 @@ CREATE TABLE files (
 	owner_id      INTEGER NOT NULL,
 	created_at    DATEIME NOT NULL,
 
-	FOREIGN KEY(owned_id) REFERENCES users(id) ON DELETE CASCADE
+	FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 -- +goose StatementEnd
 

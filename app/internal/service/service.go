@@ -1,10 +1,15 @@
 package service
 
-import "scavenger/internal/repository"
+import (
+	"scavenger/internal/repository"
+	"scavenger/internal/storage"
+)
 
 type Deps struct {
 	Repo          repository.Repository
+	Storage       storage.Storage
 	SessionSecret []byte
+	MaxUploadSize int64
 }
 
 type Services struct {
@@ -13,6 +18,7 @@ type Services struct {
 	Group      *GroupService
 	Discipline *DisciplineService
 	Material   *MaterialService
+	File       *FileService
 }
 
 func New(d Deps) *Services {
@@ -22,5 +28,6 @@ func New(d Deps) *Services {
 		Group:      NewGroup(d.Repo),
 		Discipline: NewDiscipline(d.Repo),
 		Material:   NewMaterial(d.Repo),
+		File:       NewFile(d.Repo, d.Storage, d.MaxUploadSize),
 	}
 }
