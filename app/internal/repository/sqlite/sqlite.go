@@ -70,3 +70,4 @@ func (d *DB) Sessions() repository.SessionRepo       { return &sessionRepo{q: d.
 func (d *DB) Groups() repository.GroupRepo           { return &groupRepo{q: d.q} }
 func (d *DB) Disciplines() repository.DisciplineRepo { return &disciplineRepo{q: d.q} }
 func (d *DB) Materials() repository.MaterialRepo     { return &materialRepo{q: d.q} }
+func (d *DB) Files() repository.FileRepo             { return &fileRepo{q: d.q} }

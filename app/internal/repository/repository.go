@@ -12,6 +12,7 @@ type Repository interface {
 	Groups() GroupRepo
 	Disciplines() DisciplineRepo
 	Materials() MaterialRepo
+	Files() FileRepo
 
 	WithTx(ctx context.Context, fn func(Repository) error) error
 
@@ -55,5 +56,12 @@ type MaterialRepo interface {
 	Save(ctx context.Context, m domain.Material) error
 	ByID(ctx context.Context, id string) (domain.Material, error)
 	ByDisciplineID(ctx context.Context, id int64) ([]domain.Material, error)
+	Delete(ctx context.Context, id string) error
+}
+
+type FileRepo interface {
+	Save(ctx context.Context, f *domain.File) error
+	ByID(ctx context.Context, id string) (*domain.File, error)
+	ByIDs(ctx context.Context, ids []string) (map[string]*domain.File, error)
 	Delete(ctx context.Context, id string) error
 }
