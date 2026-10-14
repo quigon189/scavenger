@@ -201,19 +201,19 @@ templ AddMaterialButton(disciplineID int64) {
 			aria-labelledby={ "add-material-" + itoa64(disciplineID) }>
 			<li>
 				<a class="dropdown-item"
-					href={ templ.SafeURL("/discipline/" + itoa64(disciplineID) + "/material/new/note") }>
+					href={ templ.SafeURL("/material/new/note?discipline_id=" + itoa64(disciplineID)) }>
 					Заметка
 				</a>
 			</li>
 			<li>
 				<a class="dropdown-item"
-					href={ templ.SafeURL("/discipline/" + itoa64(disciplineID) + "/material/new/theory") }>
+					href={ templ.SafeURL("/material/new/theory?discipline_id=" + itoa64(disciplineID)) }>
 					Теория
 				</a>
 			</li>
 			<li>
 				<a class="dropdown-item"
-					href={ templ.SafeURL("/discipline/" + itoa64(disciplineID) + "/material/new/practical") }>
+					href={ templ.SafeURL("/material/new/practical?discipline_id=" + itoa64(disciplineID)) }>
 					Практика
 				</a>
 			</li>

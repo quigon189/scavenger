@@ -31,6 +31,7 @@ templ MaterialForm(u *domain.User, d domain.Discipline, v viewmodels.MaterialFor
 				action={ templ.SafeURL(v.FormAction()) }
 				enctype="multipart/form-data">
 
+				<input type="hidden" name="_csrf" value={ v.CSRF }/>
 				<input type="hidden" name="id" value={ v.ID }/>
 				<input type="hidden" name="type" value={ v.Type }/>
 				<input type="hidden" name="discipline_id" value={ itoa(v.DisciplineID) }/>
@@ -110,7 +111,7 @@ templ attachmentSection(files []domain.File) {
 
 		<input type="file" name="attachment_files" multiple
 			class="form-control form-control-sm"
-			hx-post="/materials/attachment"
+			hx-post="/material/attachment"
 			hx-trigger="change"
 			hx-encoding="multipart/form-data"
 			hx-target="#attachments-list"

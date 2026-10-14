@@ -3,10 +3,12 @@ package viewmodels
 import "scavenger/internal/domain"
 
 type MaterialFormData struct {
+	CSRF string
+
 	ID           string
 	DisciplineID int64
 	Type         string // "note" | "theory" | "practical"
-	IsEdit      bool
+	IsEdit       bool
 
 	Title   string
 	Visible bool
@@ -27,9 +29,9 @@ type MaterialFormData struct {
 
 func (f *MaterialFormData) FormAction() string {
 	if f.IsEdit {
-		return "/materials/edit"
+		return "/material/edit"
 	}
-	return "/materials/new/"+f.Type
+	return "/material/new/" + f.Type
 }
 
 type AttachmentItemView struct {

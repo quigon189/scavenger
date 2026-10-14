@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"scavenger/internal/auth"
+	"scavenger/internal/csrf"
 	"scavenger/internal/domain"
 	"scavenger/internal/markdown"
 	"scavenger/internal/repository"
@@ -14,6 +15,7 @@ import (
 	"scavenger/web/templates/pages"
 	"scavenger/web/templates/viewmodels"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -164,15 +166,108 @@ func (h *Handler) MaterialFormNew(w http.ResponseWriter, r *http.Request) {
 
 	form := viewmodels.MaterialFormData{
 		DisciplineID: discipline.ID,
-		Type: string(typ),
-		Visible: true,
+		Type:         string(typ),
+		Visible:      true,
+		CSRF: csrf.TokenFromCtx(r.Context()),
 	}
 
 	pages.MaterialForm(u, *discipline, form).Render(r.Context(), w)
 }
 
-// POST /materials/attachment
-// multipart/form-data: поле attachment_files (можно несколько).
+func (h *Handler) MaterialFormNewSubmit(w http.ResponseWriter, r *http.Request) {
+	log := reqlog.From(r.Context())
+	u := auth.UserFromCtx(r.Context())
+
+	typ, ok := parseMaterialType(chi.URLParam(r, "type"))
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		log.Warn("parse form", "err", err)
+		http.Error(w, "bad form", http.StatusBadRequest)
+		return
+	}
+
+	var form viewmodels.MaterialFormData
+	form.DisciplineID, _ = strconv.ParseInt(r.FormValue("discipline_id"), 10, 64)
+	form.Type = string(typ)
+	form.Title = r.FormValue("title")
+	form.Visible = r.FormValue("visible") != ""
+	form.Description = r.FormValue("description")
+	form.Content = r.FormValue("content")
+	form.Deadline = r.FormValue("deadline")
+	form.Number, _ = strconv.Atoi(r.FormValue("number"))
+
+	attachmentFileIDs := r.MultipartForm.Value["attachment_file_ids"]
+
+	discipline, err := h.svc.Discipline.ByID(r.Context(), form.DisciplineID) 
+	if err != nil {
+		log.Error("get discipline", "id", form.DisciplineID, "err", err)
+		http.Error(w, "internal", http.StatusInternalServerError)
+		return
+	}
+
+	if discipline.TeacherID != u.ID {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
+	files, err := h.svc.File.ByIDs(r.Context(), attachmentFileIDs)
+	if err != nil {
+		log.Error("get files", "ids", attachmentFileIDs, "err", err)
+		http.Error(w, "internal", http.StatusInternalServerError)
+		return
+	}
+
+	for _, f := range files {
+		form.Attachments = append(form.Attachments, *f)
+	}
+
+	var createErr error
+	switch typ {
+	case domain.MaterialNoteType:
+		_, createErr = h.svc.Material.CreateNote(r.Context(), service.MaterialNoteInput{
+			DisciplineID: discipline.ID,
+			Title: form.Title,
+			Description: form.Description,
+			Visible: form.Visible,
+		})
+	case domain.MaterialTheoryType:
+		_, createErr = h.svc.Material.CreateTheory(r.Context(), service.MaterialTheoryInput{
+			DisciplineID: discipline.ID,
+			Title: form.Title,
+			Content: form.Content,
+			Visible: form.Visible,
+			AttachmentFileIDs: attachmentFileIDs,	
+		})
+	case domain.MaterialPracticalType:
+		deadline, perr := time.ParseInLocation("2006-01-02T15:04", form.Deadline, time.Local)
+		if perr != nil {
+			createErr = errors.New("некорректный дедлайн")
+			break
+		}
+		_, createErr = h.svc.Material.CreatePractical(r.Context(), service.MaterialPracticalInput{
+			DisciplineID: discipline.ID,
+			Title: form.Title,
+			Content: form.Content,
+			Visible: form.Visible,
+			Number: form.Number,
+			Deadline: deadline,
+			AttachmentFileIDs: attachmentFileIDs,
+		})
+	}
+
+	if createErr != nil {
+		form.ErrMsg = humanizeMaterialError(createErr)
+		form.CSRF = csrf.TokenFromCtx(r.Context())
+		pages.MaterialForm(u, *discipline, form)
+		return
+	}
+	Redirect(w, r, fmt.Sprintf("/discipline/%d", discipline.ID))
+}
+
 func (h *Handler) MaterialAttachmentUpload(w http.ResponseWriter, r *http.Request) {
 	log := reqlog.From(r.Context())
 	u := auth.UserFromCtx(r.Context())
@@ -234,4 +329,14 @@ func (h *Handler) MaterialAttachmentDelete(w http.ResponseWriter, r *http.Reques
 	}
 	// Пустой ответ — htmx удалит элемент через outerHTML-swap.
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func humanizeMaterialError(err error) string {
+	switch {
+	case errors.Is(err, service.ErrInvalidInput):
+		return "Проверьте заполнение полей."
+	case errors.Is(err, repository.ErrNotFound):
+		return "Связанная запись не найдена."
+	}
+	return err.Error()
 }

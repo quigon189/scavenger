@@ -102,6 +102,10 @@ func (s *FileService) ByID(ctx context.Context, id string) (*domain.File, error)
 	return s.repo.Files().ByID(ctx, id)
 }
 
+func (s *FileService) ByIDs(ctx context.Context, ids []string) (map[string]*domain.File, error) {
+	return s.repo.Files().ByIDs(ctx, ids)
+}
+
 func (s *FileService) Delete(ctx context.Context, id string) error {
 	f, err := s.repo.Files().ByID(ctx, id)
 	if err != nil {

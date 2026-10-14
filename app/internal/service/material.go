@@ -76,10 +76,11 @@ func (s *MaterialService) CreateNote(ctx context.Context, in MaterialNoteInput) 
 }
 
 type MaterialTheoryInput struct {
-	DisciplineID int64
-	Title        string
-	Visible      bool
-	Content      string
+	DisciplineID      int64
+	Title             string
+	Visible           bool
+	Content           string
+	AttachmentFileIDs []string
 }
 
 func (s *MaterialService) CreateTheory(ctx context.Context, in MaterialTheoryInput) (domain.Material, error) {
@@ -118,7 +119,8 @@ func (s *MaterialService) CreateTheory(ctx context.Context, in MaterialTheoryInp
 			Visible:      in.Visible,
 			DisplayOrder: displayOrder + 100,
 		},
-		Content: in.Content,
+		AttachmetFileIDs: in.AttachmentFileIDs,
+		Content:          in.Content,
 	}
 
 	if err := s.repo.Materials().Save(ctx, m); err != nil {
@@ -128,12 +130,13 @@ func (s *MaterialService) CreateTheory(ctx context.Context, in MaterialTheoryInp
 }
 
 type MaterialPracticalInput struct {
-	DisciplineID int64
-	Title        string
-	Visible      bool
-	Number       int
-	Content      string
-	Deadline     time.Time
+	DisciplineID      int64
+	Title             string
+	Visible           bool
+	Number            int
+	Content           string
+	Deadline          time.Time
+	AttachmentFileIDs []string
 }
 
 func (s *MaterialService) CreatePractical(ctx context.Context, in MaterialPracticalInput) (domain.Material, error) {
@@ -172,6 +175,7 @@ func (s *MaterialService) CreatePractical(ctx context.Context, in MaterialPracti
 			Visible:      in.Visible,
 			DisplayOrder: displayOrder + 100,
 		},
+		AttachmetFileIDs: in.AttachmentFileIDs,
 		Number:   in.Number,
 		Content:  in.Content,
 		Deadline: in.Deadline,

@@ -53,11 +53,11 @@ func (h *Handler) Router() http.Handler {
 		g.Use(RequireAuth)
 		g.Get("/", h.Home)
 		g.Get("/discipline/{id}", h.Discipline)
-		g.Route("/materials", func(r chi.Router) {
+		g.Route("/material", func(r chi.Router) {
 			r.Use(RequireRole(domain.RoleTeacher))
 
 			r.Get("/new/{type}", h.MaterialFormNew)
-			//r.Post("/new/{type}", h.MaterialFormNewSubmit)
+			r.Post("/new/{type}", h.MaterialFormNewSubmit)
 
 			//r.Get("/edit/{id}", h.MaterialFormEdit)
 			//r.Post("/edit/{id}", h.MaterialFormEditSubmit)

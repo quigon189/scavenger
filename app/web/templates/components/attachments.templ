@@ -18,7 +18,7 @@ templ AttachmentItem(v viewmodels.AttachmentItemView) {
 		</span>
 		<button type="button"
 			class="btn btn-sm btn-outline-danger ms-auto"
-			hx-post={ "/materials/attachment/" + v.File.ID + "/delete" }
+			hx-post={ "/material/attachment/" + v.File.ID + "/delete" }
 			hx-target="closest .attachment-item"
 			hx-swap="outerHTML">
 			Удалить
