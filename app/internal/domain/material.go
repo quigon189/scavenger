@@ -39,7 +39,8 @@ func (m *BaseMaterial) SetDisplayOrder(i int) { m.DisplayOrder = i }
 
 type TheoryMaterial struct {
 	BaseMaterial
-	Content string
+	Content          string
+	AttachmetFileIDs []string
 }
 
 func (m TheoryMaterial) Kind() MaterialKind { return MaterialTheoryType }
@@ -53,9 +54,10 @@ func (m NoteMaterial) Kind() MaterialKind { return MaterialNoteType }
 
 type PracticalMaterial struct {
 	BaseMaterial
-	Deadline time.Time
-	Content  string
-	Number   int
+	Deadline         time.Time
+	Content          string
+	Number           int
+	AttachmetFileIDs []string
 }
 
 func (m PracticalMaterial) Kind() MaterialKind { return MaterialPracticalType }

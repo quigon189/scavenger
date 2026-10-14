@@ -17,13 +17,15 @@ type payloadNote struct {
 }
 
 type payloadTheory struct {
-	Content string `json:"content"`
+	Content          string   `json:"content"`
+	AttachmetFileIDs []string `json:"attachment_file_ids,omitempty"`
 }
 
 type payloadPractical struct {
-	Number   int       `json:"number"`
-	Content  string    `json:"content"`
-	Deadline time.Time `json:"deadline"`
+	Number           int       `json:"number"`
+	Content          string    `json:"content"`
+	AttachmetFileIDs []string  `json:"attachment_file_ids,omitempty"`
+	Deadline         time.Time `json:"deadline"`
 }
 
 func (r *materialRepo) Save(ctx context.Context, m domain.Material) error {
@@ -32,12 +34,16 @@ func (r *materialRepo) Save(ctx context.Context, m domain.Material) error {
 	case *domain.NoteMaterial:
 		payload = payloadNote{Description: v.Description}
 	case *domain.TheoryMaterial:
-		payload = payloadTheory{Content: v.Content}
+		payload = payloadTheory{
+			Content:          v.Content,
+			AttachmetFileIDs: v.AttachmetFileIDs,
+		}
 	case *domain.PracticalMaterial:
 		payload = payloadPractical{
-			Number:   v.Number,
-			Content:  v.Content,
-			Deadline: v.Deadline,
+			Number:           v.Number,
+			Content:          v.Content,
+			AttachmetFileIDs: v.AttachmetFileIDs,
+			Deadline:         v.Deadline,
 		}
 	default:
 		return repository.ErrUnknownMaterialType
@@ -147,8 +153,9 @@ func scanMaterial(s rowScanner) (domain.Material, error) {
 			return nil, err
 		}
 		return &domain.TheoryMaterial{
-			BaseMaterial: baseMaterial,
-			Content: p.Content,
+			BaseMaterial:     baseMaterial,
+			Content:          p.Content,
+			AttachmetFileIDs: p.AttachmetFileIDs,
 		}, nil
 	case domain.MaterialPracticalType:
 		var p payloadPractical
@@ -156,10 +163,11 @@ func scanMaterial(s rowScanner) (domain.Material, error) {
 			return nil, err
 		}
 		return &domain.PracticalMaterial{
-			BaseMaterial: baseMaterial,
-			Number: p.Number,
-			Content: p.Content,
-			Deadline: p.Deadline,
+			BaseMaterial:     baseMaterial,
+			Number:           p.Number,
+			Content:          p.Content,
+			AttachmetFileIDs: p.AttachmetFileIDs,
+			Deadline:         p.Deadline,
 		}, nil
 	}
 
