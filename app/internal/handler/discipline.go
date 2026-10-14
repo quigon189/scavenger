@@ -6,8 +6,8 @@ import (
 	"scavenger/internal/auth"
 	"scavenger/internal/domain"
 	"scavenger/internal/reqlog"
-	"scavenger/web/templates/components"
 	"scavenger/web/templates/pages"
+	"scavenger/web/templates/viewmodels"
 	"slices"
 	"strconv"
 
@@ -57,7 +57,7 @@ func (h *Handler) TeacherDiscipline(w http.ResponseWriter, r *http.Request, disc
 	}
 	group, _ := h.svc.Group.ByID(r.Context(), discipline.GroupID)
 
-	dcv := components.DisciplineCardView{
+	dcv := viewmodels.DisciplineCardView{
 		Discipline: *discipline,
 		Group:      group,
 	}
@@ -66,22 +66,22 @@ func (h *Handler) TeacherDiscipline(w http.ResponseWriter, r *http.Request, disc
 		return cmp.Compare(a.GetDisplayOrder(), b.GetDisplayOrder())
 	})
 
-	materialCardsViews := make([]components.MaterialCardView, 0, len(materials))
+	materialCardsViews := make([]viewmodels.MaterialCardView, 0, len(materials))
 	for _, m := range materials {
 		switch v := m.(type) {
 		case *domain.NoteMaterial:
-			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
-				Note: &components.NoteCardView{Material: *v},
+			materialCardsViews = append(materialCardsViews, viewmodels.MaterialCardView{
+				Note: &viewmodels.NoteCardView{Material: *v},
 			})
 		case *domain.TheoryMaterial:
-			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
-				Theory: &components.TheoryCardView{Material: *v},
+			materialCardsViews = append(materialCardsViews, viewmodels.MaterialCardView{
+				Theory: &viewmodels.TheoryCardView{Material: *v},
 			})
 		case *domain.PracticalMaterial:
-			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
-				Practical: &components.PracticalCardView{
+			materialCardsViews = append(materialCardsViews, viewmodels.MaterialCardView{
+				Practical: &viewmodels.PracticalCardView{
 					Material: *v,
-					Progress: &components.Progress{
+					Progress: &viewmodels.Progress{
 						Done:  7,
 						Total: 10,
 					},
@@ -121,7 +121,7 @@ func (h *Handler) StudentDiscipline(w http.ResponseWriter, r *http.Request, disc
 	}
 	teacher, _ := h.svc.User.ByID(r.Context(), discipline.TeacherID)
 
-	dcv := components.DisciplineCardView{
+	dcv := viewmodels.DisciplineCardView{
 		Discipline: *discipline,
 		Teacher:    teacher,
 	}
@@ -130,21 +130,21 @@ func (h *Handler) StudentDiscipline(w http.ResponseWriter, r *http.Request, disc
 		return cmp.Compare(a.GetDisplayOrder(), b.GetDisplayOrder())
 	})
 
-	materialCardsViews := make([]components.MaterialCardView, 0, len(materials))
+	materialCardsViews := make([]viewmodels.MaterialCardView, 0, len(materials))
 	for _, m := range materials {
 		switch v := m.(type) {
 		case *domain.NoteMaterial:
-			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
-				Note: &components.NoteCardView{Material: *v},
+			materialCardsViews = append(materialCardsViews, viewmodels.MaterialCardView{
+				Note: &viewmodels.NoteCardView{Material: *v},
 			})
 		case *domain.TheoryMaterial:
-			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
-				Theory: &components.TheoryCardView{Material: *v},
+			materialCardsViews = append(materialCardsViews, viewmodels.MaterialCardView{
+				Theory: &viewmodels.TheoryCardView{Material: *v},
 			})
 		case *domain.PracticalMaterial:
 			grade := 5
-			materialCardsViews = append(materialCardsViews, components.MaterialCardView{
-				Practical: &components.PracticalCardView{
+			materialCardsViews = append(materialCardsViews, viewmodels.MaterialCardView{
+				Practical: &viewmodels.PracticalCardView{
 					Material: *v,
 					Grade: &grade,
 				},

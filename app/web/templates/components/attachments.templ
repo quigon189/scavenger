@@ -1,0 +1,27 @@
+package components
+
+import (
+	"scavenger/web/templates/viewmodels"
+)
+
+templ AttachmentItem(v viemodels.AttachmentItemView) {
+	<div class="d-flex align-items-center gap-2 attachment-item">
+		<input type="hidden" name="attachment_file_ids" value={ v.File.ID }/>
+		<a href={ templ.SafeURL("/file/" + v.File.ID) }
+			target="_blank"
+			class="text-decoration-none text-truncate"
+			style="max-width: 60%;">
+			{ v.File.OriginalName }
+		</a>
+		<span class="small text-body-secondary">
+			{ humanSize(v.File.Size) }
+		</span>
+		<button type="button"
+			class="btn btn-sm btn-outline-danger ms-auto"
+			hx-post={ "/materials/attachment/" + v.File.ID + "/delete" }
+			hx-target="closest .attachment-item"
+			hx-swap="outerHTML">
+			Удалить
+		</button>
+	</div>
+}

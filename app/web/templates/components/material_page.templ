@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"scavenger/internal/domain"
+	"scavenger/web/templates/viewmodels"
 )
 
-templ MaterialBreadcrumbs(v MaterialPageView) {
+templ MaterialBreadcrumbs(v viewmodels.MaterialPageView) {
 	<nav aria-label="breadcrumb">
 		<ol class="breadcrumb small">
 			<li class="breadcrumb-item"><a href="/">Главная</a></li>
@@ -20,7 +21,7 @@ templ MaterialBreadcrumbs(v MaterialPageView) {
 	</nav>
 }
 
-templ MaterialHeader(v MaterialPageView) {
+templ MaterialHeader(v viewmodels.MaterialPageView) {
 	<div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-3">
 		<div>
 			<h1 class="h4 mb-1">{ MaterialTitle(v) }</h1>
@@ -45,7 +46,7 @@ templ MaterialHeader(v MaterialPageView) {
 	</div>
 }
 
-templ MaterialBody(v MaterialPageView) {
+templ MaterialBody(v viewmodels.MaterialPageView) {
 	if v.Theory != nil {
 		<div class="markdown-body"> 
 			@templ.Raw(v.Theory.HTML)
@@ -59,7 +60,7 @@ templ MaterialBody(v MaterialPageView) {
 	}
 }
 
-templ practicalMeta(p PracticalPageBody) {
+templ practicalMeta(p viewmodels.PracticalPageBody) {
 	<div class="d-flex flex-wrap gap-3 small mb-1">
 		if p.Grade != nil {
 			@gradeBadge(*p.Grade)
@@ -70,7 +71,7 @@ templ practicalMeta(p PracticalPageBody) {
 	</div>
 }
 
-templ MaterialNav(v MaterialPageView) {
+templ MaterialNav(v viewmodels.MaterialPageView) {
 	if v.Prev != nil || v.Next != nil {
 		<div class="d-flex justify-content-between gap-2">
 			if v.Prev != nil {

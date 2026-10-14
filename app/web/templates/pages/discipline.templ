@@ -6,9 +6,10 @@ import (
 	"scavenger/internal/domain"
 	"scavenger/web/templates"
 	"scavenger/web/templates/components"
+	"scavenger/web/templates/viewmodels"
 )
 
-templ DisciplinePage(u *domain.User, dcv components.DisciplineCardView, materials []components.MaterialCardView, editable bool) {
+templ DisciplinePage(u *domain.User, dcv viewmodels.DisciplineCardView, materials []viewmodels.MaterialCardView, editable bool) {
 	@templates.Layout(dcv.Discipline.Title, u, true) {
 		<h2 class="h4 text-body-secondary mb-2">Дисциплина</h2>
 		@components.DisciplineCard(dcv)

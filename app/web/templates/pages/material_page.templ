@@ -4,9 +4,10 @@ import (
 	"scavenger/internal/domain"
 	"scavenger/web/templates"
 	"scavenger/web/templates/components"
+	"scavenger/web/templates/viewmodels"
 )
 
-templ MaterialPage(u *domain.User, v components.MaterialPageView) {
+templ MaterialPage(u *domain.User, v viewmodels.MaterialPageView) {
 	@templates.Layout(components.MaterialTitle(v), u, true) {
 		<div class="container py-4">
 			@components.MaterialBreadcrumbs(v)

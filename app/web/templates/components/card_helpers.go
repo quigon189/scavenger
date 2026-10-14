@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 	"scavenger/internal/domain"
+	"scavenger/web/templates/viewmodels"
 	"strconv"
 )
 
@@ -56,7 +57,7 @@ func asPractical(m domain.Material) (domain.PracticalMaterial, bool) {
 	return domain.PracticalMaterial{}, false
 }
 
-func materialID(v MaterialCardView) string {
+func materialID(v viewmodels.MaterialCardView) string {
 	switch {
 	case v.Note != nil:
 		return v.Note.Material.ID
@@ -68,7 +69,7 @@ func materialID(v MaterialCardView) string {
 	return ""
 }
 
-func MaterialTitle(v MaterialPageView) string {
+func MaterialTitle(v viewmodels.MaterialPageView) string {
 	switch {
 	case v.Theory != nil:
 		return v.Theory.Material.Title
@@ -78,7 +79,7 @@ func MaterialTitle(v MaterialPageView) string {
 	return ""
 }
 
-func materialIDFromPage(v MaterialPageView) string {
+func materialIDFromPage(v viewmodels.MaterialPageView) string {
 	switch {
 	case v.Theory != nil:
 		return v.Theory.Material.ID
@@ -88,7 +89,7 @@ func materialIDFromPage(v MaterialPageView) string {
 	return ""
 }
 
-func materialVisible(v MaterialCardView) bool {
+func materialVisible(v viewmodels.MaterialCardView) bool {
 	switch {
 	case v.Note != nil:
 		return v.Note.Material.Visible

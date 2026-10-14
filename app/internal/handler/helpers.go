@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"scavenger/internal/domain"
 )
 
 func Redirect(w http.ResponseWriter, r *http.Request, path string) {
@@ -37,4 +38,12 @@ func plural(n int, one, few, many string) string {
 		word = few
 	}
 	return fmt.Sprintf("%d %s", n, word)
+}
+
+func parseMaterialType(s string) (domain.MaterialKind, bool) {
+	switch domain.MaterialKind(s) {
+	case domain.MaterialNoteType, domain.MaterialPracticalType, domain.MaterialTheoryType:
+		return domain.MaterialKind(s), true
+	}
+	return "", false
 }

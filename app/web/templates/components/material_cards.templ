@@ -3,11 +3,12 @@ package components
 import (
 	"fmt"
 	"time"
+
+	"scavenger/web/templates/viewmodels"
 )
 
 // ---------- Заметка ----------
-
-templ NoteCard(v NoteCardView) {
+templ NoteCard(v viewmodels.NoteCardView) {
 	<article class="card border-warning-subtle bg-warning-subtle bg-opacity-10">
 		<div class="card-body">
 			<h6 class="card-title mb-2">
@@ -19,8 +20,7 @@ templ NoteCard(v NoteCardView) {
 }
 
 // ---------- Теория ----------
-
-templ TheoryCard(v TheoryCardView) {
+templ TheoryCard(v viewmodels.TheoryCardView) {
 	<article class="card shadow-sm position-relative card-hoverable">
 		<div class="card-body">
 			<h5 class="card-title mb-1">
@@ -34,8 +34,7 @@ templ TheoryCard(v TheoryCardView) {
 }
 
 // ---------- Практика ----------
-
-templ PracticalCard(v PracticalCardView) {
+templ PracticalCard(v viewmodels.PracticalCardView) {
 	<article class="card shadow-sm position-relative card-hoverable">
 		<div class="card-body">
 			<div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-1">
@@ -65,7 +64,6 @@ templ PracticalCard(v PracticalCardView) {
 }
 
 // ---------- Общие бейджи/виджеты ----------
-
 templ deadlineBadge(deadline time.Time) {
 	if time.Now().After(deadline) {
 		<span class="badge text-bg-danger">Просрочено</span>
@@ -87,7 +85,7 @@ templ gradeBadge(grade int) {
 	<span class={ class }>Оценка: { fmt.Sprintf("%d", grade) }</span>
 }
 
-templ progressBar(p Progress) {
+templ progressBar(p viewmodels.Progress) {
 	<div class="progress flex-grow-1" style="max-width: 220px; height: 8px;"
 		role="progressbar"
 		aria-valuenow={ fmt.Sprintf("%d", p.Percent()) }
@@ -102,8 +100,7 @@ templ progressBar(p Progress) {
 }
 
 // ---------- Список ----------
-
-templ MaterialCard(v MaterialCardView) {
+templ MaterialCard(v viewmodels.MaterialCardView) {
 	if v.Note != nil {
 		@NoteCard(*v.Note)
 	} else if v.Theory != nil {
@@ -113,7 +110,7 @@ templ MaterialCard(v MaterialCardView) {
 	}
 }
 
-templ MaterialList(items []MaterialCardView, editable bool) {
+templ MaterialList(items []viewmodels.MaterialCardView, editable bool) {
 	<div class="d-flex flex-column gap-2">
 		for i, it := range items {
 			@MaterialListItem(it, editable, i == 0, i == len(items)-1)
@@ -121,7 +118,7 @@ templ MaterialList(items []MaterialCardView, editable bool) {
 	</div>
 }
 
-templ MaterialListItem(it MaterialCardView, editable bool, isFirst bool, isLast bool) {
+templ MaterialListItem(it viewmodels.MaterialCardView, editable bool, isFirst bool, isLast bool) {
 	<div>
 		if editable {
 			<div class="d-flex justify-content-between align-items-center mb-1 gap-4">
@@ -144,7 +141,7 @@ templ MaterialListItem(it MaterialCardView, editable bool, isFirst bool, isLast 
 	</div>
 }
 
-templ MaterialActions(v MaterialCardView, isFirst, isLast bool) {
+templ MaterialActions(v viewmodels.MaterialCardView, isFirst, isLast bool) {
 	<div class="d-flex gap-2">
 		<div class="btn-group btn-group-sm" role="group" aria-label="Порядок">
 			<button type="button" class="btn btn-outline-secondary"

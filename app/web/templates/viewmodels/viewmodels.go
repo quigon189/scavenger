@@ -1,12 +1,6 @@
-package components
+package viewmodels
 
 import "scavenger/internal/domain"
-
-type DisciplineCardView struct {
-	Discipline domain.Discipline
-	Group      *domain.Group // может быть nil, если группу не удалось/не нужно подгружать
-	Teacher    *domain.User
-}
 
 // DisciplineGroupView — секция аккордеона с несколькими дисциплинами.
 type DisciplineGroupView struct {
@@ -14,20 +8,6 @@ type DisciplineGroupView struct {
 	Title    string // заголовок секции
 	Subtitle string // опционально: "3 дисциплины"
 	Items    []DisciplineCardView
-}
-
-type NoteCardView struct {
-	Material domain.NoteMaterial
-}
-
-type TheoryCardView struct {
-	Material domain.TheoryMaterial
-}
-
-type PracticalCardView struct {
-	Material domain.PracticalMaterial
-	Grade    *int
-	Progress  *Progress
 }
 
 type Progress struct {
@@ -45,12 +25,6 @@ func (p *Progress) Percent() int {
 type MaterialStats struct {
 	Progress *Progress
 	Grade   *int
-}
-
-type MaterialCardView struct {
-	Note      *NoteCardView
-	Theory    *TheoryCardView
-	Practical *PracticalCardView
 }
 
 type MaterialPageView struct {
@@ -81,26 +55,4 @@ type PracticalPageBody struct {
 
 	// Преподавателю — статистика сдач.
 	Progress *Progress
-}
-
-// MaterialFormData хранит введённые значения для повторного показа
-// формы при ошибке валидации.
-type MaterialFormData struct {
-	Type    string // "note" | "theory" | "practical"
-	Title   string
-	Visible bool
-
-	// Заметка
-	Description string
-
-	// Теория
-	TheoryContent string
-
-	// Практика
-	Number          int
-	PracticalContent string
-	Deadline        string // значение для <input type="datetime-local">, формат "2006-01-02T15:04"
-
-	// Общее
-	DisplayOrder int
 }

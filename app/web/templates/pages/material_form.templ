@@ -1,0 +1,149 @@
+package pages
+
+import (
+	"scavenger/internal/domain"
+	"scavenger/web/templates/components"
+	"scavenger/web/templates/layout"
+)
+
+templ MaterialForm(u *domain.User, d domain.Discipline, v viewmodels.MaterialFormData) {
+	@layout.Base(materialFormTitle(v), u) {
+		<div class="container py-4" style="max-width: 860px;">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb small">
+					<li class="breadcrumb-item"><a href="/">Главная</a></li>
+					<li class="breadcrumb-item">
+						<a href={ templ.SafeURL("/discipline/" + itoa(d.ID)) }>{ d.Title }</a>
+					</li>
+					<li class="breadcrumb-item active">{ materialFormTitle(v) }</li>
+				</ol>
+			</nav>
+
+			<h1 class="h4 mb-3">{ materialFormTitle(v) }</h1>
+
+			if v.ErrorMsg != "" {
+				<div class="alert alert-danger" role="alert">{ v.ErrorMsg }</div>
+			}
+
+			<form method="post"
+				action={ templ.SafeURL(v.FormAction()) }
+				enctype="multipart/form-data">
+
+				<input type="hidden" name="id" value={ v.ID }/>
+				<input type="hidden" name="type" value={ v.Type }/>
+				<input type="hidden" name="discipline_id" value={ itoa(v.DisciplineID) }/>
+
+				<div class="mb-3">
+					<label class="form-label" for="title">Название</label>
+					<input type="text" id="title" name="title"
+						class="form-control" required value={ v.Title }/>
+				</div>
+
+				switch v.Type {
+					case "note":
+						<div class="mb-3">
+							<label class="form-label" for="description">Текст заметки</label>
+							<textarea id="description" name="description" rows="4"
+								class="form-control" required>{ v.Description }</textarea>
+						</div>
+					case "theory":
+						@markdownEditor(v.Content, "content")
+						@attachmentSection(v.Attachments)
+					case "practical":
+						<div class="row g-3 mb-3">
+							<div class="col-md-3">
+								<label class="form-label" for="number">Номер</label>
+								<input type="number" id="number" name="number" min="1"
+									class="form-control" required
+									value={ itoaInt(v.Number) }/>
+							</div>
+							<div class="col-md-9">
+								<label class="form-label" for="deadline">Дедлайн</label>
+								<input type="datetime-local" id="deadline" name="deadline"
+									class="form-control" required value={ v.Deadline }/>
+							</div>
+						</div>
+						@markdownEditor(v.Content, "content")
+						@attachmentSection(v.Attachments)
+				}
+
+				<div class="form-check mb-3">
+					<input type="checkbox" id="visible" name="visible"
+						class="form-check-input" checked?={ v.Visible }/>
+					<label class="form-check-label" for="visible">Показывать студентам</label>
+				</div>
+
+				<div class="d-flex gap-2">
+					<button type="submit" class="btn btn-primary">
+						{ submitLabel(v) }
+					</button>
+					<a href={ templ.SafeURL("/discipline/" + itoa(d.ID)) }
+						class="btn btn-outline-secondary">Отмена</a>
+				</div>
+			</form>
+		</div>
+	}
+}
+
+templ markdownEditor(content, name string) {
+	<div class="mb-3">
+		<label class="form-label" for={ name }>Содержимое (Markdown)</label>
+		<div class="mb-2">
+			<input type="file" class="form-control form-control-sm"
+				accept=".md,.markdown,text/markdown"
+				data-md-target={ name }/>
+			<div class="form-text">
+				Можно загрузить готовый .md — текст подставится в поле ниже.
+				Поддерживаются формулы ($...$, $$...$$) и таблицы.
+			</div>
+		</div>
+		<textarea id={ name } name={ name } rows="15"
+			class="form-control font-monospace" required>{ content }</textarea>
+	</div>
+}
+
+templ attachmentSection(files []domain.File) {
+	<div class="mb-3">
+		<label class="form-label">Приложения</label>
+
+		<input type="file" name="attachment_files" multiple
+			class="form-control form-control-sm"
+			hx-post="/materials/attachment"
+			hx-trigger="change"
+			hx-encoding="multipart/form-data"
+			hx-target="#attachments-list"
+			hx-swap="beforeend"
+			hx-include="[name='discipline_id']"/>
+
+		<div id="attachments-list" class="mt-2 d-flex flex-column gap-1">
+			for _, f := range files {
+				@components.AttachmentItem(components.AttachmentItemView{File: f})
+			}
+		</div>
+	</div>
+}
+
+func materialFormTitle(v viewmodels.MaterialFormData) string {
+	prefix := "Новый материал"
+	if v.IsEdit {
+		prefix = "Редактирование"
+	}
+	switch v.Type {
+	case "note":
+		return prefix + ": заметка"
+	case "theory":
+		return prefix + ": теория"
+	case "practical":
+		return prefix + ": практика"
+	}
+	return prefix
+}
+
+func submitLabel(v viewmodels.MaterialFormData) string {
+	if v.IsEdit {
+		return "Сохранить"
+	}
+	return "Создать"
+}
+
+func itoaInt(v int) string { return strconv.Itoa(v) }

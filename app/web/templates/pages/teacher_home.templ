@@ -4,9 +4,10 @@ import (
     "scavenger/internal/domain"
     "scavenger/web/templates"
 	"scavenger/web/templates/components"
+	"scavenger/web/templates/viewmodels"
 )
 
-templ TeacherHome(user *domain.User, sections []components.DisciplineGroupView) {
+templ TeacherHome(user *domain.User, sections []viewmodels.DisciplineGroupView) {
 	@templates.Layout("Панель преподавателя", user, true) {
 		<h1 class="h3 mb-2">Мои дисциплины</h1>
 		if len(sections) > 0 {

@@ -7,7 +7,7 @@ import (
 	"scavenger/internal/auth"
 	"scavenger/internal/domain"
 	"scavenger/internal/reqlog"
-	"scavenger/web/templates/components"
+	"scavenger/web/templates/viewmodels"
 	"scavenger/web/templates/pages"
 	"slices"
 )
@@ -29,10 +29,10 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 		slices.SortFunc(disciplines, func(a, b domain.Discipline) int {
 			return cmp.Compare(a.Title, b.Title)
 		})
-		items := make([]components.DisciplineCardView, 0, len(disciplines))
+		items := make([]viewmodels.DisciplineCardView, 0, len(disciplines))
 		for _, d := range disciplines {
 			teacher, _ := h.svc.User.ByID(r.Context(), d.TeacherID)
-			items = append(items, components.DisciplineCardView{
+			items = append(items, viewmodels.DisciplineCardView{
 				Discipline: d,
 				Teacher: teacher,
 			})
@@ -69,16 +69,16 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 			byGroup[d.GroupID] = append(byGroup[d.GroupID], d)
 		}
 
-		sections := make([]components.DisciplineGroupView, 0, len(groups))
+		sections := make([]viewmodels.DisciplineGroupView, 0, len(groups))
 		for _, g := range groups {
-			items := make([]components.DisciplineCardView, 0, len(byGroup[g.ID]))
+			items := make([]viewmodels.DisciplineCardView, 0, len(byGroup[g.ID]))
 			for _, d := range byGroup[g.ID] {
-				items = append(items, components.DisciplineCardView{
+				items = append(items, viewmodels.DisciplineCardView{
 					Discipline: d,
 					Group:      &g,
 				})
 			}
-			sections = append(sections, components.DisciplineGroupView{
+			sections = append(sections, viewmodels.DisciplineGroupView{
 				ID:       fmt.Sprintf("group-%d", g.Number),
 				Title:    g.Name(),
 				Subtitle: plural(len(items), "дисциплина", "дисциплины", "дисциплин"),

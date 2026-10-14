@@ -4,9 +4,10 @@ import (
 	"scavenger/internal/domain"
 	"scavenger/web/templates"
 	"scavenger/web/templates/components"
+	"scavenger/web/templates/viewmodels"
 )
 
-templ StudentHome(user *domain.User, group *domain.Group, items []components.DisciplineCardView) {
+templ StudentHome(user *domain.User, group *domain.Group, items []viewmodels.DisciplineCardView) {
 
 	@templates.Layout("Панель студента", user, true) {
 		if group != nil {

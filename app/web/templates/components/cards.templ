@@ -2,9 +2,11 @@ package components
 
 import (
 	"fmt"
+
+	"scavenger/web/templates/viewmodels"
 )
 
-templ DisciplineCard(v DisciplineCardView) {
+templ DisciplineCard(v viewmodels.DisciplineCardView) {
 	<article class="card mb-3 shadow-sm position-relative card-hoverable">
 		<div class="card-body">
 			<div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
@@ -38,7 +40,7 @@ templ DisciplineCard(v DisciplineCardView) {
 }
 
 // DisciplineList — вертикальный список карточек дисциплин.
-templ DisciplineList(items []DisciplineCardView) {
+templ DisciplineList(items []viewmodels.DisciplineCardView) {
 	<div class="d-flex flex-column">
 		for _, i := range items {
 			@DisciplineCard(i)
@@ -46,7 +48,7 @@ templ DisciplineList(items []DisciplineCardView) {
 	</div>
 }
 
-templ DisciplineAccordion(groups []DisciplineGroupView) {
+templ DisciplineAccordion(groups []viewmodels.DisciplineGroupView) {
 	<div class="accordion" id="disciplines-accordion">
 		for _, g := range groups {
 			@DisciplineAccordionItem(g)
@@ -54,7 +56,7 @@ templ DisciplineAccordion(groups []DisciplineGroupView) {
 	</div>
 }
 
-templ DisciplineAccordionItem(g DisciplineGroupView) {
+templ DisciplineAccordionItem(g viewmodels.DisciplineGroupView) {
 	<div class="accordion-item">
 		<h2 class="accordion-header" id={ "acc-head-" + g.ID }>
 			<button
