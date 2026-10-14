@@ -1,9 +1,8 @@
 package pages
 
 import (
-	"fmt"
-
 	"scavenger/internal/domain"
+	"scavenger/internal/routes"
 	"scavenger/web/templates"
 	"scavenger/web/templates/components"
 	"scavenger/web/templates/viewmodels"
@@ -21,20 +20,19 @@ templ DisciplinePage(u *domain.User, dcv viewmodels.DisciplineCardView, material
 					<div class="btn-group btn-group-sm" role="group" aria-label="Режим просмотра">
 						<!-- Кнопка Просмотр: активна (btn-primary), если editable == false -->
 						<a
-							href={ templ.SafeURL(fmt.Sprintf("/discipline/%d", dcv.Discipline.ID)) }
+							href={ templ.SafeURL(routes.DisciplineID.Link(dcv.Discipline.ID)) }
 							class={ "btn", templ.KV("btn-primary", !editable), templ.KV("btn-outline-primary", editable) }
 						>
 							Просмотр
 						</a>
 						<!-- Кнопка Редактирование: активна (btn-primary), если editable == true -->
 						<a
-							href={ templ.SafeURL(fmt.Sprintf("/discipline/%d?edit=true", dcv.Discipline.ID)) }
+							href={ templ.SafeURL(routes.DisciplineID.Link(dcv.Discipline.ID) + "?edit") }
 							class={ "btn", templ.KV("btn-primary", editable), templ.KV("btn-outline-primary", !editable) }
 						>
 							Редактирование
 						</a>
 					</div>
-
 					@components.AddMaterialButton(dcv.Discipline.ID)
 				</div>
 			}

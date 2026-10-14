@@ -1,8 +1,7 @@
 package components
 
 import (
-	"fmt"
-
+	"scavenger/internal/routes"
 	"scavenger/web/templates/viewmodels"
 )
 
@@ -11,8 +10,10 @@ templ DisciplineCard(v viewmodels.DisciplineCardView) {
 		<div class="card-body">
 			<div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
 				<h5 class="card-title mb-1">
-					<a href={ templ.SafeURL(fmt.Sprintf("/discipline/%d", v.Discipline.ID)) }
-						class="stretched-link text-decoration-none text-reset">
+					<a
+						href={ templ.SafeURL(routes.DisciplineID.Link(v.Discipline.ID)) }
+						class="stretched-link text-decoration-none text-reset"
+					>
 						{ v.Discipline.Title }
 					</a>
 				</h5>
@@ -20,11 +21,9 @@ templ DisciplineCard(v viewmodels.DisciplineCardView) {
 					<span class="badge text-bg-secondary">В архиве</span>
 				}
 			</div>
-
 			if v.Discipline.Description != "" {
 				<p class="card-text text-body-secondary mb-2">{ v.Discipline.Description }</p>
 			}
-
 			if v.Group != nil || v.Teacher != nil {
 				<div class="d-flex flex-wrap gap-3 small text-body-secondary">
 					if v.Group != nil {

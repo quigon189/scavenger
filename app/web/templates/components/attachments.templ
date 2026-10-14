@@ -2,6 +2,7 @@ package components
 
 import (
 	"scavenger/web/templates/viewmodels"
+	"scavenger/internal/routes"
 )
 
 templ AttachmentItem(v viewmodels.AttachmentItemView) {
@@ -18,7 +19,7 @@ templ AttachmentItem(v viewmodels.AttachmentItemView) {
 		</span>
 		<button type="button"
 			class="btn btn-sm btn-outline-danger ms-auto"
-			hx-post={ "/material/attachment/" + v.File.ID + "/delete" }
+			hx-post={ routes.MaterialAttachmentDelete.Link(v.File.ID) }
 			hx-target="closest .attachment-item"
 			hx-swap="outerHTML">
 			Удалить

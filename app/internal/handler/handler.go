@@ -7,6 +7,7 @@ import (
 	"scavenger/internal/config"
 	"scavenger/internal/csrf"
 	"scavenger/internal/domain"
+	"scavenger/internal/routes"
 	"scavenger/internal/service"
 
 	"github.com/go-chi/chi/v5"
@@ -43,42 +44,31 @@ func (h *Handler) Router() http.Handler {
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
 	r.Group(func(pub chi.Router) {
-		pub.Get("/login", h.LoginPage)
-		pub.Post("/login", h.LoginSubmit)
-		pub.Post("/logout", h.Logout)
+		pub.Get(routes.Login, h.LoginPage)
+		pub.Post(routes.Login, h.LoginSubmit)
+		pub.Post(routes.Logout, h.Logout)
 	})
 
 	r.Group(func(g chi.Router) {
 		g.Use(csrf.Verify)
 		g.Use(RequireAuth)
-		g.Get("/", h.Home)
-		g.Get("/discipline/{id}", h.Discipline)
-		g.Route("/material", func(r chi.Router) {
+		g.Get(routes.Home, h.Home)
+		g.Get(routes.DisciplineID.Pattern, h.Discipline)
+		g.Group(func(r chi.Router) {
 			r.Use(RequireRole(domain.RoleTeacher))
+			r.Get(routes.MaterialNew.Pattern, h.MaterialFormNew)
+			r.Post(routes.MaterialNew.Pattern, h.MaterialFormNewSubmit)
 
-			r.Get("/new/{type}", h.MaterialFormNew)
-			r.Post("/new/{type}", h.MaterialFormNewSubmit)
+			//r.Get(routes.MaterialEdit.Pattern, h.MaterialFormEdit)
+			//r.Post(routes.MaterialEdit.Pattern, h.MaterialFormEditSubmit)
 
-			//r.Get("/edit/{id}", h.MaterialFormEdit)
-			//r.Post("/edit/{id}", h.MaterialFormEditSubmit)
+			r.Post(routes.MaterialAttachment, h.MaterialAttachmentUpload)
+			r.Post(routes.MaterialAttachmentDelete.Pattern, h.MaterialAttachmentDelete)
 
-			r.Post("/attachment", h.MaterialAttachmentUpload)
-			r.Post("/attachment/{id}/delete", h.MaterialAttachmentDelete)
+
 		})
-		g.Get("/material/{id}", h.MaterialView)
-		g.Post("/material/{id}/move", h.MaterialMove)
-		g.Route("/discipline/{id}/material", func(r chi.Router) {
-			r.Use(RequireRole(domain.RoleTeacher))
-
-			r.Get("/new/note", h.MaterialNewNotePage)
-			r.Post("/new/note", h.MaterialNewNoteSubmit)
-
-			r.Get("/new/theory", h.MaterialNewTheoryPage)
-			r.Post("/new/theory", h.MaterialNewTheorySubmit)
-
-			r.Get("/new/practical", h.MaterialNewPracticalPage)
-			r.Post("/new/practical", h.MaterialNewPracticalSubmit)
-		})
+		g.Get(routes.MaterialID.Pattern, h.MaterialView)
+		g.Post(routes.MaterialMove.Pattern, h.MaterialMove)
 	})
 
 	return r

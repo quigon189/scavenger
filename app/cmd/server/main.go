@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"scavenger/internal/config"
+	"scavenger/internal/repository"
 	"scavenger/internal/repository/sqlite"
 	"scavenger/internal/service"
 	"scavenger/internal/storage"
@@ -37,7 +38,18 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	services, err := getServices(ctx, cfg)
+	repo, err := sqlite.Open(ctx, cfg.DBDSN)
+	if err != nil {
+		return err
+	}
+	slog.Debug("repository opened", "dsn", cfg.DBDSN)
+
+	st, err := newStorage(cfg)
+	if err != nil {
+		return err
+	}
+
+	services, err := getServices(cfg, repo, st)
 	if err != nil {
 		return err
 	}
@@ -51,6 +63,8 @@ func run() error {
 		return RunServer(ctx, cfg, services)
 	case "seed":
 		return Seed(ctx, services)
+	case "migrate":
+		return Migrate(ctx, "sqlite3", repo.DB)
 	case "help", "-h", "--help":
 		fmt.Println("usage: scavenger [serve|seed]")
 	default:
@@ -71,19 +85,7 @@ func setupLogger(level string) {
 	slog.SetDefault(logger)
 }
 
-func getServices(ctx context.Context, cfg *config.Config) (*service.Services, error) {
-
-	repo, err := sqlite.Open(ctx, cfg.DBDSN)
-	if err != nil {
-		return nil, err
-	}
-	slog.Debug("repository opened", "dsn", cfg.DBDSN)
-
-	st, err := newStorage(cfg)
-	if err != nil {
-		return nil, err
-	}
-
+func getServices(cfg *config.Config, repo repository.Repository, st storage.Storage) (*service.Services, error) {
 	services := service.New(service.Deps{
 		Repo:          repo,
 		Storage:       st,

@@ -1,8 +1,9 @@
 package pages
 
 import (
-    "scavenger/internal/domain"
-    "scavenger/web/templates"
+	"scavenger/internal/domain"
+	"scavenger/internal/routes"
+	"scavenger/web/templates"
 )
 
 templ Home(user *domain.User) {
@@ -12,7 +13,7 @@ templ Home(user *domain.User) {
 		}
 	} else {
 		@templates.Layout("Главная", user, false) {
-			<a class="btn btn-primary" href="/login">Войти</a>
+			<a class="btn btn-primary" href={ routes.Login }>Войти</a>
 		}
 	}
 }

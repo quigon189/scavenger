@@ -1,18 +1,17 @@
 package components
 
 import (
-	"fmt"
-
 	"scavenger/internal/domain"
+	"scavenger/internal/routes"
 	"scavenger/web/templates/viewmodels"
 )
 
 templ MaterialBreadcrumbs(v viewmodels.MaterialPageView) {
 	<nav aria-label="breadcrumb">
 		<ol class="breadcrumb small">
-			<li class="breadcrumb-item"><a href="/">Главная</a></li>
+			<li class="breadcrumb-item"><a href={ routes.Home }>Главная</a></li>
 			<li class="breadcrumb-item">
-				<a href={ templ.SafeURL(fmt.Sprintf("/discipline/%d", v.Discipline.ID)) }>
+				<a href={ templ.SafeURL(routes.DisciplineID.Link(v.Discipline.ID)) }>
 					{ v.Discipline.Title }
 				</a>
 			</li>
@@ -31,14 +30,19 @@ templ MaterialHeader(v viewmodels.MaterialPageView) {
 		</div>
 		if v.User != nil && v.User.Role == domain.RoleTeacher {
 			<div class="d-flex gap-2">
-				<a href={ templ.SafeURL("/material/" + materialIDFromPage(v) + "/edit") }
-					class="btn btn-sm btn-outline-secondary">
+				<a
+					href={ templ.SafeURL(routes.MaterialEdit.Link(materialIDFromPage(v))) }
+					class="btn btn-sm btn-outline-secondary"
+				>
 					Изменить
 				</a>
-				<button type="button" class="btn btn-sm btn-outline-danger"
-					hx-post={ "/material/" + materialIDFromPage(v) + "/delete" }
+				<button
+					type="button"
+					class="btn btn-sm btn-outline-danger"
+					hx-post={ routes.MaterialEdit.Link(materialIDFromPage(v)) }
 					hx-confirm="Удалить материал?"
-					hx-swap="none">
+					hx-swap="none"
+				>
 					Удалить
 				</button>
 			</div>
@@ -48,7 +52,7 @@ templ MaterialHeader(v viewmodels.MaterialPageView) {
 
 templ MaterialBody(v viewmodels.MaterialPageView) {
 	if v.Theory != nil {
-		<div class="markdown-body"> 
+		<div class="markdown-body">
 			@templ.Raw(v.Theory.HTML)
 		</div>
 	} else if v.Practical != nil {
@@ -75,16 +79,22 @@ templ MaterialNav(v viewmodels.MaterialPageView) {
 	if v.Prev != nil || v.Next != nil {
 		<div class="d-flex justify-content-between gap-2">
 			if v.Prev != nil {
-				<a href={ templ.SafeURL("/material/" + v.Prev.GetID()) }
-					class="btn btn-sm btn-outline-secondary text-truncate" style="max-width: 45%;">
+				<a
+					href={ templ.SafeURL(routes.MaterialID.Link(v.Prev.GetID())) }
+					class="btn btn-sm btn-outline-secondary text-truncate"
+					style="max-width: 45%;"
+				>
 					← { v.Prev.GetTitle() }
 				</a>
 			} else {
 				<span></span>
 			}
 			if v.Next != nil {
-				<a href={ templ.SafeURL("/material/" + v.Next.GetID()) }
-					class="btn btn-sm btn-outline-secondary text-truncate" style="max-width: 45%;">
+				<a
+					href={ templ.SafeURL(routes.MaterialID.Link(v.Next.GetID())) }
+					class="btn btn-sm btn-outline-secondary text-truncate"
+					style="max-width: 45%;"
+				>
 					{ v.Next.GetTitle() } →
 				</a>
 			}
