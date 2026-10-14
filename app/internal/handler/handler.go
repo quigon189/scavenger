@@ -53,6 +53,18 @@ func (h *Handler) Router() http.Handler {
 		g.Use(RequireAuth)
 		g.Get("/", h.Home)
 		g.Get("/discipline/{id}", h.Discipline)
+		g.Route("/materials", func(r chi.Router) {
+			r.Use(RequireRole(domain.RoleTeacher))
+
+			r.Get("/new/{type}", h.MaterialFormNew)
+			//r.Post("/new/{type}", h.MaterialFormNewSubmit)
+
+			//r.Get("/edit/{id}", h.MaterialFormEdit)
+			//r.Post("/edit/{id}", h.MaterialFormEditSubmit)
+
+			r.Post("/attachment", h.MaterialAttachmentUpload)
+			r.Post("/attachment/{id}/delete", h.MaterialAttachmentDelete)
+		})
 		g.Get("/material/{id}", h.MaterialView)
 		g.Post("/material/{id}/move", h.MaterialMove)
 		g.Route("/discipline/{id}/material", func(r chi.Router) {

@@ -1,13 +1,15 @@
 package pages
 
 import (
+	"strconv"
 	"scavenger/internal/domain"
 	"scavenger/web/templates/components"
-	"scavenger/web/templates/layout"
+	"scavenger/web/templates/viewmodels"
+	"scavenger/web/templates"
 )
 
 templ MaterialForm(u *domain.User, d domain.Discipline, v viewmodels.MaterialFormData) {
-	@layout.Base(materialFormTitle(v), u) {
+	@templates.Layout(materialFormTitle(v), u, true) {
 		<div class="container py-4" style="max-width: 860px;">
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb small">
@@ -21,8 +23,8 @@ templ MaterialForm(u *domain.User, d domain.Discipline, v viewmodels.MaterialFor
 
 			<h1 class="h4 mb-3">{ materialFormTitle(v) }</h1>
 
-			if v.ErrorMsg != "" {
-				<div class="alert alert-danger" role="alert">{ v.ErrorMsg }</div>
+			if v.ErrMsg != "" {
+				<div class="alert alert-danger" role="alert">{ v.ErrMsg }</div>
 			}
 
 			<form method="post"
@@ -117,7 +119,7 @@ templ attachmentSection(files []domain.File) {
 
 		<div id="attachments-list" class="mt-2 d-flex flex-column gap-1">
 			for _, f := range files {
-				@components.AttachmentItem(components.AttachmentItemView{File: f})
+				@components.AttachmentItem(viewmodels.AttachmentItemView{File: f})
 			}
 		</div>
 	</div>

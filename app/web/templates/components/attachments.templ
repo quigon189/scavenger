@@ -4,7 +4,7 @@ import (
 	"scavenger/web/templates/viewmodels"
 )
 
-templ AttachmentItem(v viemodels.AttachmentItemView) {
+templ AttachmentItem(v viewmodels.AttachmentItemView) {
 	<div class="d-flex align-items-center gap-2 attachment-item">
 		<input type="hidden" name="attachment_file_ids" value={ v.File.ID }/>
 		<a href={ templ.SafeURL("/file/" + v.File.ID) }

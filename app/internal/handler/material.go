@@ -9,6 +9,8 @@ import (
 	"scavenger/internal/markdown"
 	"scavenger/internal/repository"
 	"scavenger/internal/reqlog"
+	"scavenger/internal/service"
+	"scavenger/web/templates/components"
 	"scavenger/web/templates/pages"
 	"scavenger/web/templates/viewmodels"
 	"strconv"
@@ -166,7 +168,7 @@ func (h *Handler) MaterialFormNew(w http.ResponseWriter, r *http.Request) {
 		Visible: true,
 	}
 
-	pages.MaterialForm(u, *d, form).Render(r.Context(), w)
+	pages.MaterialForm(u, *discipline, form).Render(r.Context(), w)
 }
 
 // POST /materials/attachment
@@ -205,7 +207,7 @@ func (h *Handler) MaterialAttachmentUpload(w http.ResponseWriter, r *http.Reques
 			log.Error("upload file", "err", err)
 			continue
 		}
-		_ = components.AttachmentItem(components.AttachmentItemView{File: *f}).
+		components.AttachmentItem(viewmodels.AttachmentItemView{File: *f}).
 			Render(r.Context(), w)
 	}
 }
