@@ -1,28 +1,47 @@
 package components
 
-import (
-	"scavenger/web/templates/viewmodels"
-	"scavenger/internal/routes"
-)
+import "scavenger/web/templates/viewmodels"
+import "scavenger/internal/routes"
 
 templ AttachmentItem(v viewmodels.AttachmentItemView) {
-	<div class="d-flex align-items-center gap-2 attachment-item">
-		<input type="hidden" name="attachment_file_ids" value={ v.File.ID }/>
-		<a href={ templ.SafeURL("/file/" + v.File.ID) }
-			target="_blank"
-			class="text-decoration-none text-truncate"
-			style="max-width: 60%;">
-			{ v.File.OriginalName }
-		</a>
+	<div class={ "d-flex align-items-center gap-2 attachment-item", templ.KV("attachment-item-deleted", v.Deleted) }>
+		if !v.Deleted {
+			<input type="hidden" name="attachment_file_ids" value={ v.File.ID }/>
+		}
+		if v.Deleted {
+			<span
+				class="text-decoration-line-through text-body-secondary text-truncate"
+				style="max-width: 60%;"
+				aria-disabled="true"
+				title="Файл будет откреплён при сохранении"
+			>
+				{ v.File.OriginalName }
+			</span>
+		} else {
+			<a
+				href={ templ.SafeURL(routes.FilesID.Link(v.File.ID)) }
+				target="_blank"
+				class="text-decoration-none text-truncate"
+				style="max-width: 60%;"
+			>
+				{ v.File.OriginalName }
+			</a>
+		}
 		<span class="small text-body-secondary">
 			{ humanSize(v.File.Size) }
 		</span>
-		<button type="button"
-			class="btn btn-sm btn-outline-danger ms-auto"
-			hx-post={ routes.MaterialAttachmentDelete.Link(v.File.ID) }
-			hx-target="closest .attachment-item"
-			hx-swap="outerHTML">
-			Удалить
-		</button>
+		if !v.Deleted {
+			<button
+				type="button"
+				class="btn btn-sm btn-outline-danger ms-auto"
+				hx-post={ routes.MaterialAttachmentDelete.Link(v.File.ID) }
+				hx-target="closest .attachment-item"
+				hx-swap="outerHTML"
+			>
+				Удалить
+			</button>
+		} else {
+			<span class="badge text-bg-secondary ms-auto">Удалён</span>
+		}
 	</div>
 }

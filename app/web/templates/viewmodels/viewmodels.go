@@ -24,7 +24,7 @@ func (p *Progress) Percent() int {
 
 type MaterialStats struct {
 	Progress *Progress
-	Grade   *int
+	Grade    *int
 }
 
 type MaterialPageView struct {
@@ -39,6 +39,8 @@ type MaterialPageView struct {
 	// Тело. Заполнен ровно один из указателей.
 	Theory    *TheoryPageBody
 	Practical *PracticalPageBody
+
+	Attachments []domain.File
 }
 
 type TheoryPageBody struct {

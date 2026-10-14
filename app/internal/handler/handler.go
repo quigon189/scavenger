@@ -56,19 +56,24 @@ func (h *Handler) Router() http.Handler {
 		g.Get(routes.DisciplineID.Pattern, h.Discipline)
 		g.Group(func(r chi.Router) {
 			r.Use(RequireRole(domain.RoleTeacher))
+
 			r.Get(routes.MaterialNew.Pattern, h.MaterialFormNew)
 			r.Post(routes.MaterialNew.Pattern, h.MaterialFormNewSubmit)
 
-			//r.Get(routes.MaterialEdit.Pattern, h.MaterialFormEdit)
-			//r.Post(routes.MaterialEdit.Pattern, h.MaterialFormEditSubmit)
+			r.Post(routes.MaterialDelete.Pattern, h.MaterialDelete)
+			r.Post(routes.MaterialMove.Pattern, h.MaterialMove)
+			r.Post(routes.MaterialShow.Pattern, h.MaterialShow)
+			r.Post(routes.MaterialHide.Pattern, h.MaterialHide)
+
+			r.Get(routes.MaterialEdit.Pattern, h.MaterialFormEdit)
+			r.Post(routes.MaterialEdit.Pattern, h.MaterialFormEditSubmit)
 
 			r.Post(routes.MaterialAttachment, h.MaterialAttachmentUpload)
 			r.Post(routes.MaterialAttachmentDelete.Pattern, h.MaterialAttachmentDelete)
-
-
 		})
 		g.Get(routes.MaterialID.Pattern, h.MaterialView)
-		g.Post(routes.MaterialMove.Pattern, h.MaterialMove)
+
+		g.Get(routes.FilesID.Pattern, h.FileDownload)
 	})
 
 	return r

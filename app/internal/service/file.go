@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"scavenger/internal/domain"
 	"scavenger/internal/repository"
@@ -59,13 +62,40 @@ func (s *FileService) Upload(ctx context.Context, in FileUploadInput) (*domain.F
 		ct = "application/octet-stream"
 	}
 
+	tmp, err := os.CreateTemp("", "upload-*")
+	if err != nil {
+		return nil, err
+	}
+	defer func(){
+		tmp.Close()
+		os.Remove(tmp.Name())
+	}()
+
+	hasher := sha256.New()
+	body := io.Reader(in.Reader)
+	_, err = io.Copy(io.MultiWriter(tmp, hasher), body)
+	if err != nil {
+		return nil, err
+	}
+	sum := hex.EncodeToString(hasher.Sum(nil))
+
+	if existing, err := s.repo.Files().BySHA256(ctx, sum); err == nil {
+		reqlog.From(ctx).Debug("file exists", "file", existing)
+		return existing, nil
+	} else if !errors.Is(err, repository.ErrNotFound) {
+		return nil, err
+	}
+
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, err
 	}
 	key := shardKey(id.String())
 
-	if err := s.storage.Put(ctx, key, in.Reader, in.Size, ct); err != nil {
+ 	if _, err := tmp.Seek(0, io.SeekStart); err != nil {
+		return nil, err
+	}
+	if err := s.storage.Put(ctx, key, tmp, in.Size, ct); err != nil {
 		return nil, err
 	}
 
@@ -74,6 +104,7 @@ func (s *FileService) Upload(ctx context.Context, in FileUploadInput) (*domain.F
 		StorageKey: key,
 		OriginalName: name,
 		ContentType: ct,
+		SHA256: sum,
 		Size: in.Size,
 		OwnerID: in.OwnerID,
 	}

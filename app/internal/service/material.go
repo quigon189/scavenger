@@ -176,9 +176,9 @@ func (s *MaterialService) CreatePractical(ctx context.Context, in MaterialPracti
 			DisplayOrder: displayOrder + 100,
 		},
 		AttachmetFileIDs: in.AttachmentFileIDs,
-		Number:   in.Number,
-		Content:  in.Content,
-		Deadline: in.Deadline,
+		Number:           in.Number,
+		Content:          in.Content,
+		Deadline:         in.Deadline,
 	}
 
 	if err := s.repo.Materials().Save(ctx, m); err != nil {
@@ -297,9 +297,14 @@ func (s MaterialService) GetNieghbours(ctx context.Context, cur domain.Material,
 	if err != nil {
 		return nil, nil, err
 	}
+
 	materials = slices.DeleteFunc(materials, func(m domain.Material) bool {
 		return m.Kind() == domain.MaterialNoteType
 	})
+
+	if len(materials) == 1 {
+		return nil, nil, nil
+	}
 
 	curIdx := slices.IndexFunc(materials, func(m domain.Material) bool {
 		return m.GetID() == cur.GetID()
@@ -316,4 +321,12 @@ func (s MaterialService) GetNieghbours(ctx context.Context, cur domain.Material,
 		return materials[curIdx-1], nil, nil
 	}
 	return materials[curIdx-1], materials[curIdx+1], nil
+}
+
+func (s *MaterialService) Update(ctx context.Context, m domain.Material) error {
+	return s.repo.Materials().Save(ctx, m)
+}
+
+func (s *MaterialService) Delete(ctx context.Context, id string) error {
+	return s.repo.Materials().Delete(ctx, id)
 }

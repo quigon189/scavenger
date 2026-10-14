@@ -5,9 +5,10 @@ CREATE TABLE files (
 	storage_key   TEXT NOT NULL,
 	original_name TEXT NOT NULL,
 	content_type  TEXT NOT NULL,
+	sha256        TEXT NOT NULL UNIQUE,
 	size          INTEGER NOT NULL,
 	owner_id      INTEGER NOT NULL,
-	created_at    DATEIME NOT NULL,
+	created_at    DATETIME NOT NULL,
 
 	FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE
 );

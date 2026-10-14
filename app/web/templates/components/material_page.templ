@@ -4,6 +4,7 @@ import (
 	"scavenger/internal/domain"
 	"scavenger/internal/routes"
 	"scavenger/web/templates/viewmodels"
+	"strconv"
 )
 
 templ MaterialBreadcrumbs(v viewmodels.MaterialPageView) {
@@ -39,7 +40,7 @@ templ MaterialHeader(v viewmodels.MaterialPageView) {
 				<button
 					type="button"
 					class="btn btn-sm btn-outline-danger"
-					hx-post={ routes.MaterialEdit.Link(materialIDFromPage(v)) }
+					hx-post={ routes.MaterialDelete.Link(materialIDFromPage(v)) }
 					hx-confirm="Удалить материал?"
 					hx-swap="none"
 				>
@@ -100,4 +101,39 @@ templ MaterialNav(v viewmodels.MaterialPageView) {
 			}
 		</div>
 	}
+}
+
+templ MaterialAttachmentsCard(files []domain.File) {
+	if len(files) > 0 {
+		<article class="card mb-3">
+			<div class="card-header bg-transparent">
+				<h6 class="mb-0">
+					Приложения
+					<span class="text-body-secondary fw-normal">
+						({ strconv.Itoa(len(files)) })
+					</span>
+				</h6>
+			</div>
+			<ul class="list-group list-group-flush">
+				for _, f := range files {
+					@MaterialAttachmentRow(f)
+				}
+			</ul>
+		</article>
+	}
+}
+
+templ MaterialAttachmentRow(f domain.File) {
+	<li class="list-group-item d-flex align-items-center gap-2">
+		<a href={ templ.SafeURL(routes.FilesID.Link(f.ID)) }
+			target="_blank"
+			class="text-decoration-none text-truncate"
+			style="max-width: 60%;"
+			download?={ true }>
+			{ f.OriginalName }
+		</a>
+		<span class="small text-body-secondary ms-auto">
+			{ humanSize(f.Size) }
+		</span>
+	</li>
 }

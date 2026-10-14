@@ -7,6 +7,7 @@ type File struct {
 	StorageKey   string
 	OriginalName string
 	ContentType  string
+	SHA256       string
 	Size         int64
 	OwnerID      int64
 	CreatedAt    time.Time

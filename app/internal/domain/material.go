@@ -15,6 +15,7 @@ type Material interface {
 	GetDisciplineID() int64
 	GetTitle() string
 	GetVisible() bool
+	SetVisible(bool)
 	GetDisplayOrder() int
 	SetDisplayOrder(i int)
 	Kind() MaterialKind
@@ -34,6 +35,7 @@ func (m BaseMaterial) GetID() string          { return m.ID }
 func (m BaseMaterial) GetDisciplineID() int64 { return m.DisciplineID }
 func (m BaseMaterial) GetTitle() string       { return m.Title }
 func (m BaseMaterial) GetVisible() bool       { return m.Visible }
+func (m *BaseMaterial) SetVisible(v bool)     { m.Visible = v }
 func (m BaseMaterial) GetDisplayOrder() int   { return m.DisplayOrder }
 func (m *BaseMaterial) SetDisplayOrder(i int) { m.DisplayOrder = i }
 

@@ -27,7 +27,7 @@ templ MaterialForm(u *domain.User, d domain.Discipline, v viewmodels.MaterialFor
 			}
 			<form
 				method="post"
-				action={ templ.SafeURL(v.FormAction()) }
+				action={ templ.SafeURL(v.FormAction(v.ID)) }
 				enctype="multipart/form-data"
 			>
 				<input type="hidden" name="_csrf" value={ v.CSRF }/>

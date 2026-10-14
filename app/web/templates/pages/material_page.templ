@@ -12,6 +12,7 @@ templ MaterialPage(u *domain.User, v viewmodels.MaterialPageView) {
 		<div class="container py-4">
 			@components.MaterialBreadcrumbs(v)
 			@components.MaterialHeader(v)
+			@components.MaterialAttachmentsCard(v.Attachments)
 			<article class="card mb-3">
 				<div class="card-body">
 					@components.MaterialBody(v)

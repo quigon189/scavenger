@@ -27,13 +27,14 @@ type MaterialFormData struct {
 	ErrMsg string
 }
 
-func (f *MaterialFormData) FormAction() string {
+func (f *MaterialFormData) FormAction(id string) string {
 	if f.IsEdit {
-		return "/material/edit"
+		return "/material/edit/" + id
 	}
 	return "/material/new/" + f.Type
 }
 
 type AttachmentItemView struct {
-	File domain.File
+	File    domain.File
+	Deleted bool
 }

@@ -8,6 +8,7 @@ const (
 	Home               = "/"
 	Login              = "/login"
 	Logout             = "/logout"
+	File               = "/files"
 	Discipline         = "/discipline"
 	Material           = "/material"
 	MaterialAttachment = Material + "/attachment"
@@ -78,5 +79,12 @@ var MaterialDelete = Route[string]{
 	Pattern: Material + "/delete/{id}",
 	Link: func(s string) string {
 		return fmt.Sprintf("%s/delete/%s", Material, s)
+	},
+}
+
+var FilesID = Route[string]{
+	Pattern: File + "/{id}",
+	Link: func(s string) string {
+		return fmt.Sprintf("%s/%s", File, s)
 	},
 }

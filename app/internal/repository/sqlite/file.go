@@ -14,12 +14,12 @@ type fileRepo struct{ q queryer }
 func (r *fileRepo) Save(ctx context.Context, f *domain.File) error {
 	creatdAt := time.Now()
 	_, err := r.q.ExecContext(ctx,
-		`INSERT INTO files (id, storage_key, original_name, content_type, size, owner_id, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
+		`INSERT INTO files (id, storage_key, original_name, content_type, sha256, size, owner_id, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT (id) DO UPDATE SET
 			original_name = excluded.original_name,
 			owner_id = excluded.owner_id`,
-		f.ID, f.StorageKey, f.OriginalName, f.ContentType, f.Size, f.OwnerID, creatdAt,
+		f.ID, f.StorageKey, f.OriginalName, f.ContentType, f.SHA256, f.Size, f.OwnerID, creatdAt,
 	)
 	if err != nil {
 		return err
@@ -28,9 +28,17 @@ func (r *fileRepo) Save(ctx context.Context, f *domain.File) error {
 	return nil
 }
 
+func (r *fileRepo) BySHA256(ctx context.Context, sha256 string) (*domain.File, error) {
+	return scanFile(r.q.QueryRowContext(ctx,
+		`SELECT id, storage_key, original_name, content_type, sha256, size, owner_id, created_at
+		FROM files
+		WHERE sha256 = ?`, sha256,
+	))
+}
+
 func (r *fileRepo) ByID(ctx context.Context, id string) (*domain.File, error) {
 	return scanFile(r.q.QueryRowContext(ctx,
-		`SELECT id, storage_key, original_name, content_type, size, owner_id, created_at
+		`SELECT id, storage_key, original_name, content_type, sha256, size, owner_id, created_at
 		FROM files
 		WHERE id = ?`, id,
 	))
@@ -41,7 +49,7 @@ func (r *fileRepo) ByIDs(ctx context.Context, ids []string) (map[string]*domain.
 		return map[string]*domain.File{}, nil
 	}
 	q, args := inQuery(
-		`SELECT id, storage_key, original_name, content_type, size, owner_id, created_at
+		`SELECT id, storage_key, original_name, content_type, size, size, owner_id, created_at
 		FROM files WHERE id IN (%s)`, ids,
 	)
 
@@ -71,7 +79,7 @@ func (r *fileRepo) Delete(ctx context.Context, id string) error {
 
 func scanFile(row rowScanner) (*domain.File, error) {
 	var f domain.File
-	err := row.Scan(&f.ID, &f.StorageKey, &f.OriginalName, &f.ContentType, &f.Size, &f.OwnerID, &f.CreatedAt)
+	err := row.Scan(&f.ID, &f.StorageKey, &f.OriginalName, &f.ContentType, &f.SHA256, &f.Size, &f.OwnerID, &f.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.ErrNotFound

@@ -63,5 +63,6 @@ type FileRepo interface {
 	Save(ctx context.Context, f *domain.File) error
 	ByID(ctx context.Context, id string) (*domain.File, error)
 	ByIDs(ctx context.Context, ids []string) (map[string]*domain.File, error)
+	BySHA256(ctx context.Context, sha256 string) (*domain.File, error)
 	Delete(ctx context.Context, id string) error
 }
