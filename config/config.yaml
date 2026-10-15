@@ -11,8 +11,8 @@ backup:
   max_backups: 10
 
 database:
-  data_source: "scavanger.db"
-  migrations_path: "./migrations"
+  data_source: "grpc://localhost:2136/Root/test"
+  migrations_path: "./migrations/ydb"
 
 filestorage:
   base_path: "storage"

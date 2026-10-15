@@ -1,30 +1,26 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"scavenger/internal/models"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pressly/goose/v3"
+	"github.com/ydb-platform/ydb-go-sdk/v3"
 )
 
 type Database struct {
-	db *sql.DB
+	db  *sql.DB
 	cfg models.DatebaseConfig
 }
 
 func NewDB(cfg *models.Config) (*Database, error) {
-	db, err := sql.Open("sqlite3", cfg.DB.DataSource)
-	if err != nil {
-		return nil, err
-	}
+	driver := ydb.MustOpen(context.TODO(), cfg.DB.DataSource) //TODO: разобраться что за контекст вообще
+	connector := ydb.MustConnector(driver, ydb.WithPositionalArgs())
+	db := sql.OpenDB(connector)
 
-	_, err = db.Exec("PRAGMA foreign_keys = ON")
-	if err != nil {
-		return nil, err
-	}
-
-	if err = db.Ping(); err != nil {
+	if err := db.Ping(); err != nil {
 		return nil, err
 	}
 
@@ -32,11 +28,21 @@ func NewDB(cfg *models.Config) (*Database, error) {
 }
 
 func (d *Database) Migrate() error {
-	if err := goose.SetDialect("sqlite3"); err != nil {
+	gooseDB, err := sql.Open("ydb", d.cfg.DataSource+
+		"?go_query_mode=scripting&"+
+		"go_fake_tx=scripting&"+
+		"go_query_bind=declare,numeric",
+	)
+	if err != nil {
+		return err
+	}
+	defer gooseDB.Close()
+
+	if err := goose.SetDialect("ydb"); err != nil {
 		return err
 	}
 
-	if err := goose.Up(d.db, d.cfg.MigrationsPath); err != nil {
+	if err := goose.Up(gooseDB, d.cfg.MigrationsPath); err != nil {
 		return err
 	}
 
