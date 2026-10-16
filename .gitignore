@@ -10,6 +10,9 @@
 *.db-wal
 *.db-shm
 
+#файлы и бд
+/app/data
+
 #хранилище файлов
 #storage/
 
