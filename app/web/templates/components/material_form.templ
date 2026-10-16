@@ -1,0 +1,39 @@
+package components
+
+import (
+	"scavenger/internal/routes"
+)
+
+templ MarkdownEditor(content string) {
+	<div class="mb-3">
+		<label class="form-label" for="markdown-content">Содержимое (Markdown)</label>
+		<div class="mb-2">
+			<input
+				type="file"
+				name="mdfile"
+				class="form-control form-control-sm"
+				accept=".md,.markdown,text/markdown"
+				hx-post={ routes.MaterialMarkdownUpload }
+				hx-trigger="change"
+				hx-encoding="multipart/form-data"
+				hx-target="#markdown-content"
+				hx-swap="outerHTML"
+			/>
+			<div class="form-text">
+				Можно загрузить готовый .md — текст подставится в поле ниже.
+				Поддерживаются формулы ($...$, $$...$$) и таблицы.
+			</div>
+		</div>
+		@MaterialMarkdownTextarea(content)
+	</div>
+}
+
+templ MaterialMarkdownTextarea(content string) {
+	<textarea
+		id="markdown-content"
+		name="markdown-content"
+		rows="15"
+		class="form-control font-monospace"
+		required
+	>{ content }</textarea>
+}

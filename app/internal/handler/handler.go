@@ -70,6 +70,8 @@ func (h *Handler) Router() http.Handler {
 
 			r.Post(routes.MaterialAttachment, h.MaterialAttachmentUpload)
 			r.Post(routes.MaterialAttachmentDelete.Pattern, h.MaterialAttachmentDelete)
+
+			r.Post(routes.MaterialMarkdownUpload, h.MaterialMarkdownUpload)
 		})
 		g.Get(routes.MaterialID.Pattern, h.MaterialView)
 

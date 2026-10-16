@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"scavenger/internal/auth"
 	"scavenger/internal/csrf"
@@ -288,7 +290,7 @@ func (h *Handler) MaterialFormNewSubmit(w http.ResponseWriter, r *http.Request) 
 	form.Title = r.FormValue("title")
 	form.Visible = r.FormValue("visible") != ""
 	form.Description = r.FormValue("description")
-	form.Content = r.FormValue("content")
+	form.Content = r.FormValue("markdown-content")
 	form.Deadline = r.FormValue("deadline")
 	form.Number, _ = strconv.Atoi(r.FormValue("number"))
 
@@ -354,7 +356,7 @@ func (h *Handler) MaterialFormNewSubmit(w http.ResponseWriter, r *http.Request) 
 	if createErr != nil {
 		form.ErrMsg = humanizeMaterialError(createErr)
 		form.CSRF = csrf.TokenFromCtx(r.Context())
-		pages.MaterialForm(u, *discipline, form)
+		pages.MaterialForm(u, *discipline, form).Render(r.Context(), w)
 		return
 	}
 	Redirect(w, r, fmt.Sprintf("/discipline/%d", discipline.ID))
@@ -455,7 +457,7 @@ func (h *Handler) MaterialFormEditSubmit(w http.ResponseWriter, r *http.Request)
 	form.Title = r.FormValue("title")
 	form.Visible = r.FormValue("visible") != ""
 	form.Description = r.FormValue("description")
-	form.Content = r.FormValue("content")
+	form.Content = r.FormValue("markdown-content")
 	form.Deadline = r.FormValue("deadline")
 	form.Number, _ = strconv.Atoi(r.FormValue("number"))
 	form.CSRF = csrf.TokenFromCtx(r.Context())
@@ -509,6 +511,37 @@ func (h *Handler) MaterialFormEditSubmit(w http.ResponseWriter, r *http.Request)
 	}
 
 	Redirect(w, r, routes.DisciplineID.Link(discipline.ID))
+}
+
+func (h *Handler) MaterialMarkdownUpload(w http.ResponseWriter, r *http.Request) {
+	if r.Header.Get("HX-Request") != "true" {
+		http.NotFound(w, r)
+	}
+	log := reqlog.From(r.Context())
+
+	if err := r.ParseMultipartForm(h.cfg.MaxUploadSize); err != nil {
+		log.Warn("parse multipart", "err", err)
+		http.Error(w, "bad form", http.StatusBadRequest)
+		return
+	}
+
+	file, _, err := r.FormFile("mdfile")	
+	if err != nil {
+		log.Warn("bad mdfile", "err", err)
+		http.Error(w, "bad file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	var mdContent bytes.Buffer
+	_, err = io.Copy(&mdContent, file)
+	if err != nil {
+		log.Error("read mdfile", "err", err)
+		http.Error(w, "internal", http.StatusInternalServerError)
+		return
+	}
+
+	components.MaterialMarkdownTextarea(mdContent.String()).Render(r.Context(), w)
 }
 
 func (h *Handler) MaterialAttachmentUpload(w http.ResponseWriter, r *http.Request) {

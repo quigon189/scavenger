@@ -11,7 +11,9 @@ const (
 	File               = "/files"
 	Discipline         = "/discipline"
 	Material           = "/material"
+
 	MaterialAttachment = Material + "/attachment"
+	MaterialMarkdownUpload = Material + "/markdown"
 )
 
 type Route[T any] struct {

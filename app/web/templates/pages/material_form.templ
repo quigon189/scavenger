@@ -58,7 +58,7 @@ templ MaterialForm(u *domain.User, d domain.Discipline, v viewmodels.MaterialFor
 							>{ v.Description }</textarea>
 						</div>
 					case "theory":
-						@markdownEditor(v.Content, "content")
+						@components.MarkdownEditor(v.Content)
 						@attachmentSection(v.Attachments)
 					case "practical":
 						<div class="row g-3 mb-3">
@@ -86,7 +86,7 @@ templ MaterialForm(u *domain.User, d domain.Discipline, v viewmodels.MaterialFor
 								/>
 							</div>
 						</div>
-						@markdownEditor(v.Content, "content")
+						@components.MarkdownEditor(v.Content)
 						@attachmentSection(v.Attachments)
 				}
 				<div class="form-check mb-3">
@@ -111,31 +111,6 @@ templ MaterialForm(u *domain.User, d domain.Discipline, v viewmodels.MaterialFor
 			</form>
 		</div>
 	}
-}
-
-templ markdownEditor(content, name string) {
-	<div class="mb-3">
-		<label class="form-label" for={ name }>Содержимое (Markdown)</label>
-		<div class="mb-2">
-			<input
-				type="file"
-				class="form-control form-control-sm"
-				accept=".md,.markdown,text/markdown"
-				data-md-target={ name }
-			/>
-			<div class="form-text">
-				Можно загрузить готовый .md — текст подставится в поле ниже.
-				Поддерживаются формулы ($...$, $$...$$) и таблицы.
-			</div>
-		</div>
-		<textarea
-			id={ name }
-			name={ name }
-			rows="15"
-			class="form-control font-monospace"
-			required
-		>{ content }</textarea>
-	</div>
 }
 
 templ attachmentSection(files []domain.File) {
