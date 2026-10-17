@@ -8,12 +8,8 @@ import (
 )
 
 func (d *Database) CreateDiscipline(disc *models.Discipline) error {
-	result, err := d.db.Exec(CreateDisciplineQuery, disc.Name, disc.GroupID)
-	if err != nil {
-		return err
-	}
-
-	dID, err := result.LastInsertId()
+	var dID int32
+	err := d.db.QueryRow(CreateDisciplineQuery, disc.Name, disc.GroupID).Scan(&dID)
 	if err != nil {
 		return err
 	}
@@ -133,23 +129,19 @@ func (d *Database) DeleteDiscipline(disc *models.Discipline) error {
 }
 
 func (d *Database) AddDisciplineLab(lab *models.Lab) error {
-	result, err := d.db.Exec(
+	var id int32
+	err := d.db.QueryRow(
 		CreateDisciplineLabQuery,
 		lab.Name,
 		lab.Description,
 		lab.MDFileID,
 		lab.Deadline.Unix(),
 		lab.DisciplineID,
-	)
+	).Scan(&id)
 	if err != nil {
 		return err
 	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return err
-	}
-
+	
 	lab.ID = strconv.Itoa(int(id))
 
 	err = d.AddLabFiles(int(id), lab.StoredFiles)

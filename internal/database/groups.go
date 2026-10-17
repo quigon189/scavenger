@@ -5,12 +5,8 @@ import (
 )
 
 func (d *Database) CreateGroup(group *models.Group) error {
-	result, err := d.db.Exec(CreateGroupQuery, 0, group.Name)
-	if err != nil {
-		return err
-	}
-
-	id, err := result.LastInsertId()
+	var id int32
+	err := d.db.QueryRow(CreateGroupQuery, 0, group.Name).Scan(&id)
 	if err != nil {
 		return err
 	}

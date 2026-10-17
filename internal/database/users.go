@@ -31,12 +31,8 @@ func (d *Database) CreateUser(user *models.User) error {
 
 	user.RoleID = role.ID
 
-	result, err := d.db.Exec(CreateUserQuery, user.Username, user.Name, user.PasswordHash, user.RoleID)
-	if err != nil {
-		return err
-	}
-
-	id, err := result.LastInsertId()
+	var id int32
+	err = d.db.QueryRow(CreateUserQuery, user.Username, user.Name, user.PasswordHash, user.RoleID).Scan(&id)
 	if err != nil {
 		return err
 	}

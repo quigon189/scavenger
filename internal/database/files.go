@@ -3,20 +3,16 @@ package database
 import "scavenger/internal/models"
 
 func (d *Database) AddStoredFile(file *models.StoredFile) error {
-	result, err := d.db.Exec(
+	var id int32
+	err := d.db.QueryRow(
 		CreateStoredFileQuery,
 		file.Path,
 		file.URL,
 		file.Filename,
 		file.Size,
-	)
+	).Scan(&id)
 	if err != nil {
 		return err
-	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return nil
 	}
 
 	file.ID = int(id)

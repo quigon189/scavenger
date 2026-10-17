@@ -16,12 +16,12 @@ const (
 		LEFT JOIN groups g ON s.group_id = g.id
 		WHERE s.user_id = ?
 	`
-	CreateGroupQuery = `INSERT INTO groups (number, name) VALUES (?, ?)`
+	CreateGroupQuery = `INSERT INTO groups (number, name) VALUES (?, ?) RETURNING id`
 	DeleteGroupByIDQuery = `DELETE FROM groups WHERE id = ?`
 	UpdateGroupQuery = `UPDATE groups SET name = ? WHERE id = ?`
 
 	// Users
-	CreateUserQuery = `INSERT INTO users (username, name, password_hash, role_id) VALUES (?, ?, ?, ?)`
+	CreateUserQuery = `INSERT INTO users (username, name, password_hash, role_id) VALUES (?, ?, ?, ?) RETURNING id`
 	GetUserByUsernameQuery = `
 		SELECT u.id, u.username, u.name, u.password_hash, r.name, u.theme AS role_name
 		FROM users u
@@ -64,7 +64,7 @@ const (
 	DeleteStudentQuery = `DELETE FROM students WHERE user_id = ?`
 
 	// Disciplines
-	CreateDisciplineQuery = `INSERT INTO disciplines (name, group_id) VALUES (?, ?)`
+	CreateDisciplineQuery = `INSERT INTO disciplines (name, group_id) VALUES (?, ?) RETURNING id`
 	GetAllDisciplinesQuery = `SELECT id, name, group_id FROM disciplines`
 	GetAllDisciplinesByGroupIDQuery = `SELECT id, name, group_id FROM disciplines WHERE group_id = ?`
 	GetDisciplinesWithoutGroupQuery = `SELECT id, name, group_id FROM disciplines WHERE group_id IS NULL`
@@ -73,7 +73,7 @@ const (
 	DeleteDisciplineQuery = `DELETE FROM disciplines WHERE id = ?`
 
 	// Lab
-	CreateDisciplineLabQuery = `INSERT INTO labs (name, description, md_id, deadline, discipline_id) VALUES (?, ?, ?, ?, ?)`
+	CreateDisciplineLabQuery = `INSERT INTO labs (name, description, md_id, deadline, discipline_id) VALUES (?, ?, ?, ?, ?) RETURNING id`
 	GetDisciplineLabsQuery = `
 		SELECT id, name, description, md_id, deadline
 		FROM labs
@@ -95,14 +95,14 @@ const (
 	DeleteLabFileQuery = `DELETE FROM labs_files WHERE file_id = ? AND lab_id = ?`
 
 	// Files
-	CreateStoredFileQuery = `INSERT INTO stored_files (path, url, filename, size) VALUES (?, ?, ?, ?)`
+	CreateStoredFileQuery = `INSERT INTO stored_files (path, url, filename, size) VALUES (?, ?, ?, ?) RETURNING id`
 	GetStoredFileQuery = `SELECT id, path, url, filename, size FROM stored_files WHERE id = ?`
 	GetStoredFileByURLQuery = `SELECT id, path, url, filename, size FROM stored_files WHERE url = ?`
 
 	// LabReports
 	CreateLabReportQuery = `
 		INSERT INTO lab_reports (student_id, discipline_id, lab_id, comment, teacher_note, uploaded_at, updated_at, status, grade)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id
 	`
 	CreateReportFileQuery = `INSERT INTO report_files (report_id, file_id) VALUES (?, ?)`
 	GetLabReportByIDQuery = `

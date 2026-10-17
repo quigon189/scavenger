@@ -9,7 +9,8 @@ import (
 )
 
 func (d *Database) AddLabReport(report *models.LabReport) error {
-	result, err := d.db.Exec(
+	var id int32
+	err := d.db.QueryRow(
 		CreateLabReportQuery,
 		report.StudentID,
 		report.DisciplineID,
@@ -20,12 +21,7 @@ func (d *Database) AddLabReport(report *models.LabReport) error {
 		report.UpdatedAt.Unix(),
 		report.Status,
 		report.Grade,
-	)
-	if err != nil {
-		return err
-	}
-
-	id, err := result.LastInsertId()
+	).Scan(&id)
 	if err != nil {
 		return err
 	}
