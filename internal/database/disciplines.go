@@ -221,7 +221,9 @@ func (d *Database) GetDisciplineLabs(id int) ([]models.Lab, error) {
 func (d *Database) GetLabFiles(id string) ([]models.StoredFile, error) {
 	var files []models.StoredFile
 
-	row, err := d.db.Query(GetLabFilesQuery, id)
+	iid, err := strconv.Atoi(id)
+
+	row, err := d.db.Query(GetLabFilesQuery, int32(iid))
 	if err != nil {
 		return files, err
 	}

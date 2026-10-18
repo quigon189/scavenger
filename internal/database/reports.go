@@ -12,15 +12,15 @@ func (d *Database) AddLabReport(report *models.LabReport) error {
 	var id int32
 	err := d.db.QueryRow(
 		CreateLabReportQuery,
-		report.StudentID,
-		report.DisciplineID,
-		report.LabID,
+		int32(report.StudentID),
+		int32(report.DisciplineID),
+		int32(report.LabID),
 		report.Comment,
 		report.TeacherNote,
 		report.UploadedAt.Unix(),
 		report.UpdatedAt.Unix(),
 		report.Status,
-		report.Grade,
+		int32(report.Grade),
 	).Scan(&id)
 	if err != nil {
 		return err

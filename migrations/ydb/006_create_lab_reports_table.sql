@@ -6,10 +6,10 @@ CREATE TABLE lab_reports (
     lab_id        Int32 NOT NULL,
     comment       Text,
     teacher_note  Text,
-    uploaded_at   Int32,
-    updated_at    Int32,
+    uploaded_at   Int64 NOT NULL,
+    updated_at    Int64 NOT NULL,
     status        Text DEFAULT "submitted",
-    grade         Int32,
+    grade         Int32 NOT NULL,
     PRIMARY KEY (id),
 );
 
