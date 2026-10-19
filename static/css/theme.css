@@ -7,3 +7,7 @@
 	--bs-btn-padding-x: 0.5rem;
 	--bs-btn-font-size: 0.875rem;
 }
+
+.katex-html {
+	display: none;
+}

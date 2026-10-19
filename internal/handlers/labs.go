@@ -13,6 +13,7 @@ import (
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting"
 	"github.com/yuin/goldmark/extension"
+	"github.com/FurqanSoftware/goldmark-katex"
 )
 
 func (h *Handler) LabMarkdownPage(w http.ResponseWriter, r *http.Request) {
@@ -67,6 +68,7 @@ func (h *Handler) LabMarkdownPage(w http.ResponseWriter, r *http.Request) {
 				highlighting.NewHighlighting(
 					highlighting.WithStyle(style),
 				),
+				&katex.Extender{},
 			),
 		)
 		if err != nil {
